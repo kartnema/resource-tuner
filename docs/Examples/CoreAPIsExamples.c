@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <ResourceTuner/UrmAPIs.h>
+#include <Urm/UrmAPIs.h>
 
 #define UCLAMP_MIN_RES 0x00030000
 #define UCLAMP_BOOST_VAL 750
@@ -43,7 +43,7 @@ static void tune_uclamp_min() {
     }
 }
 
-// Similary other ResourceTuner APIs can be used as well by C-based programs.
+// Similary other Urm APIs can be used as well by C-based programs.
 
 int32_t main(int32_t argc, char* argv[]) {
     tune_uclamp_min();
@@ -52,7 +52,7 @@ int32_t main(int32_t argc, char* argv[]) {
 // Compilation Notes:
 // The executable needs to be linked to the RestuneClient lib, where these APIs
 // are defined. This can be done, as follows:
-// GCC: gcc ResourceTunerCoreAPIs.c -o ResourceTunerCoreAPIs -lClientAPIs
+// GCC: gcc UrmCoreAPIs.c -o UrmCoreAPIs -lClientAPIs
 // CMake: This can be done as part of the C/C++ project by adding the Library
 // to the target link libraries. For example, if the executalbe is called clientExec,
 // it can be linked as follows:

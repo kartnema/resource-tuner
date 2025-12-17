@@ -19,9 +19,9 @@ static void TestClientDataManagerClientEntryCreation1() {
     int32_t testClientPID = 252;
     int32_t testClientTID = 252;
 
-    C_ASSERT(clientDataManager->clientExists(testClientPID, testClientTID) == false);
+    C_ASSERT((clientDataManager->clientExists(testClientPID, testClientTID) == false));
     clientDataManager->createNewClient(testClientPID, testClientTID);
-    C_ASSERT(clientDataManager->clientExists(testClientPID, testClientTID) == true);
+    C_ASSERT((clientDataManager->clientExists(testClientPID, testClientTID) == true));
 
     clientDataManager->deleteClientPID(testClientPID);
     clientDataManager->deleteClientTID(testClientTID);
@@ -246,7 +246,7 @@ static void TestClientDataManagerClientThreadTracking2() {
 
     for(int32_t i = 0; i < 20; i++) {
         std::unordered_set<int64_t>* clientRequests =
-                    clientDataManager->getRequestsByClientID(i + 1);
+            clientDataManager->getRequestsByClientID(i + 1);
 
         C_ASSERT(clientRequests != nullptr);
         C_ASSERT(clientRequests->size() == 1);
