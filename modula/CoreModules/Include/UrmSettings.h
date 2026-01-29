@@ -25,6 +25,7 @@ typedef struct {
     uint32_t mCleanupBatchSize;
     double mPenaltyFactor;
     double mRewardFactor;
+    uint32_t mPluginCount;
 } MetaConfigs;
 
 typedef struct {
