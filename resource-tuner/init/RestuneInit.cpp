@@ -164,7 +164,7 @@ static ErrCode fetchMetaConfigs() {
         UrmSettings::metaConfigs.mRewardFactor = std::stod(resultBuffer);
 
         submitPropGetRequest(URM_MAX_PLUGIN_COUNT, resultBuffer, "3");
-        UrmSettings::metaConfigs.mPluginCount = std::stod(resultBuffer);
+        UrmSettings::metaConfigs.mPluginCount = (uint32_t)std::stol(resultBuffer);
 
     } catch(const std::invalid_argument& e) {
         TYPELOGV(META_CONFIG_PARSE_FAILURE, e.what());
