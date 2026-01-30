@@ -627,7 +627,7 @@ static ErrCode tear(void* arg) {
             }
         }
 
-        delete(extensionLibHandles);
+        free(extensionLibHandles);
     }
 
     return RC_SUCCESS;
