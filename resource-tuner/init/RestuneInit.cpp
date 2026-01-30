@@ -180,15 +180,14 @@ static ErrCode fetchMetaConfigs() {
 
 static ErrCode parseUtil(const std::string& filePath,
                          const std::string& desc,
-                         ConfigType configType,
-                         int8_t isCustom=false) {
+                         ConfigType configType) {
 
     if(filePath.length() == 0) return RC_FILE_NOT_FOUND;
     ErrCode opStatus = RC_SUCCESS;
     RestuneParser configProcessor;
 
     TYPELOGV(NOTIFY_PARSING_START, desc.c_str());
-    opStatus = configProcessor.parse(configType, filePath, isCustom);
+    opStatus = configProcessor.parse(configType, filePath);
 
     if(RC_IS_NOTOK(opStatus)) {
         TYPELOGV(NOTIFY_PARSING_FAILURE, desc.c_str());
@@ -263,7 +262,7 @@ static ErrCode fetchResources() {
     filePath = Extensions::getResourceConfigFilePath();
     if(filePath.length() > 0) {
         TYPELOGV(NOTIFY_CUSTOM_CONFIG_FILE, CUSTOM_RESOURCE, filePath.c_str());
-        opStatus = parseUtil(filePath, CUSTOM_RESOURCE, ConfigType::RESOURCE_CONFIG, true);
+        opStatus = parseUtil(filePath, CUSTOM_RESOURCE, ConfigType::RESOURCE_CONFIG);
         if(RC_IS_NOTOK(opStatus)) {
             return opStatus;
         }
@@ -272,7 +271,7 @@ static ErrCode fetchResources() {
     // Parse Custom Resource Configs provided in /etc/urm/custom (if any)
     filePath = UrmSettings::mCustomResourceFilePath;
     if(AuxRoutines::fileExists(filePath)) {
-        opStatus = parseUtil(filePath, CUSTOM_RESOURCE, ConfigType::RESOURCE_CONFIG, true);
+        opStatus = parseUtil(filePath, CUSTOM_RESOURCE, ConfigType::RESOURCE_CONFIG);
         if(RC_IS_NOTOK(opStatus)) {
             return opStatus;
         }
@@ -294,7 +293,7 @@ static ErrCode fetchTargetInfo() {
     if(filePath.length() > 0) {
         // Custom Target Config file has been provided by BU
         TYPELOGV(NOTIFY_CUSTOM_CONFIG_FILE, CUSTOM_TARGET, filePath.c_str());
-        opStatus = parseUtil(filePath, CUSTOM_TARGET, ConfigType::TARGET_CONFIG, true);
+        opStatus = parseUtil(filePath, CUSTOM_TARGET, ConfigType::TARGET_CONFIG);
         if(RC_IS_NOTOK(opStatus)) {
             return opStatus;
         }
@@ -315,7 +314,7 @@ static ErrCode fetchTargetInfo() {
 
     filePath = UrmSettings::mCustomTargetFilePath;
     if(AuxRoutines::fileExists(filePath)) {
-        opStatus = parseUtil(filePath, CUSTOM_TARGET, ConfigType::TARGET_CONFIG, true);
+        opStatus = parseUtil(filePath, CUSTOM_TARGET, ConfigType::TARGET_CONFIG);
         if(RC_IS_NOTOK(opStatus)) {
             return opStatus;
         }
@@ -389,7 +388,7 @@ static ErrCode fetchSignals() {
     filePath = Extensions::getSignalsConfigFilePath();
     if(filePath.length() > 0) {
         TYPELOGV(NOTIFY_CUSTOM_CONFIG_FILE, "Signal", filePath.c_str());
-        opStatus = parseUtil(filePath, CUSTOM_SIGNAL, ConfigType::SIGNALS_CONFIG, true);
+        opStatus = parseUtil(filePath, CUSTOM_SIGNAL, ConfigType::SIGNALS_CONFIG);
         if(RC_IS_NOTOK(opStatus)) {
             return opStatus;
         }
@@ -398,7 +397,7 @@ static ErrCode fetchSignals() {
     // Parse Custom Signal Configs provided in /etc/urm/custom (if any)
     filePath = UrmSettings::mCustomSignalFilePath;
     if(AuxRoutines::fileExists(filePath)) {
-        opStatus = parseUtil(filePath, CUSTOM_SIGNAL, ConfigType::SIGNALS_CONFIG, true);
+        opStatus = parseUtil(filePath, CUSTOM_SIGNAL, ConfigType::SIGNALS_CONFIG);
         if(RC_IS_NOTOK(opStatus)) {
             return opStatus;
         }
@@ -418,7 +417,7 @@ static ErrCode fetchExtFeatureConfigs() {
     if(filePath.length() > 0) {
         // Custom Ext-Features Config file has been provided by BU
         TYPELOGV(NOTIFY_CUSTOM_CONFIG_FILE, CUSTOM_EXT_FEATURE, filePath.c_str());
-        opStatus = parseUtil(filePath, CUSTOM_EXT_FEATURE, ConfigType::EXT_FEATURES_CONFIG, true);
+        opStatus = parseUtil(filePath, CUSTOM_EXT_FEATURE, ConfigType::EXT_FEATURES_CONFIG);
         if(RC_IS_NOTOK(opStatus)) {
             return opStatus;
         }
@@ -426,7 +425,7 @@ static ErrCode fetchExtFeatureConfigs() {
 
     filePath = UrmSettings::mCustomExtFeaturesFilePath;
     if(AuxRoutines::fileExists(filePath)) {
-        opStatus = parseUtil(filePath, CUSTOM_EXT_FEATURE, ConfigType::EXT_FEATURES_CONFIG, true);
+        opStatus = parseUtil(filePath, CUSTOM_EXT_FEATURE, ConfigType::EXT_FEATURES_CONFIG);
         if(RC_IS_NOTOK(opStatus)) {
             return opStatus;
         }
@@ -444,7 +443,7 @@ static ErrCode fetchPerAppConfigs() {
     if(filePath.length() > 0) {
         // Custom App Config file has been provided by BU
         TYPELOGV(NOTIFY_CUSTOM_CONFIG_FILE, CUSTOM_APP_CONF, filePath.c_str());
-        opStatus = parseUtil(filePath, CUSTOM_APP_CONF, ConfigType::APP_CONFIG, true);
+        opStatus = parseUtil(filePath, CUSTOM_APP_CONF, ConfigType::APP_CONFIG);
         if(RC_IS_NOTOK(opStatus)) {
             return opStatus;
         }
@@ -452,7 +451,7 @@ static ErrCode fetchPerAppConfigs() {
 
     filePath = UrmSettings::mCustomAppConfigFilePath;
     if(AuxRoutines::fileExists(filePath)) {
-        opStatus = parseUtil(filePath, CUSTOM_APP_CONF, ConfigType::APP_CONFIG, true);
+        opStatus = parseUtil(filePath, CUSTOM_APP_CONF, ConfigType::APP_CONFIG);
         if(RC_IS_NOTOK(opStatus)) {
             return opStatus;
         }
