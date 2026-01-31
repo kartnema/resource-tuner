@@ -216,11 +216,7 @@ static ErrCode fetchCustomProperties() {
     ErrCode opStatus = RC_SUCCESS;
 
     // Parse target-specific Properties Configs
-    std::string filePath = "";
-    filePath.append(UrmSettings::mTargetConfDir);
-    filePath.append(UrmSettings::targetConfigs.targetName);
-    filePath.append("/PropertiesConfig.yaml");
-
+    std::string filePath = getTargetBasedConfPath("PropertiesConfig.yaml");
     if(AuxRoutines::fileExists(filePath)) {
         opStatus = parseUtil(filePath, "prop-custom", ConfigType::PROPERTIES_CONFIG);
         if(RC_IS_NOTOK(opStatus)) {
@@ -228,20 +224,21 @@ static ErrCode fetchCustomProperties() {
         }
     }
 
+    // Parse Custom Properties Configs
     filePath = Extensions::getPropertiesConfigFilePath();
-    // Parse Custom Properties Configs provided via Extension Interface (if any)
     if(filePath.length() > 0) {
-        TYPELOGV(NOTIFY_CUSTOM_CONFIG_FILE, "Property", filePath.c_str());
-        return parseUtil(filePath, "prop-custom", ConfigType::PROPERTIES_CONFIG);
+        filePath = UrmSettings::mCustomPropertiesFilePath;
     }
 
-    // Parse Custom Properties Configs provided in /etc/urm/custom (if any)
-    filePath = UrmSettings::mCustomPropertiesFilePath;
     if(AuxRoutines::fileExists(filePath)) {
-        return parseUtil(filePath, "prop-custom", ConfigType::PROPERTIES_CONFIG);
+        TYPELOGV(NOTIFY_CUSTOM_CONFIG_FILE, "Property", filePath.c_str());
+        opStatus = parseUtil(filePath, "prop-custom", ConfigType::PROPERTIES_CONFIG);
+        if(RC_IS_NOTOK(opStatus)) {
+            return opStatus;
+        }
     }
 
-    return RC_SUCCESS;
+    return opStatus;
 }
 
 static ErrCode fetchResources() {
@@ -499,12 +496,12 @@ static ErrCode setCgroupParam(const char *slice, const char *name, const char *v
 
 static void configureFocusedSlice() {
     // 2D array of const char* pairs: {key, value}
-    const char *cgroupParam[][2] = {
-        { "cgroup.max.depth",       "3"  },
-        { "cgroup.max.descendants", "10" },
+    const char* cgroupParam[][2] = {
+        {"cgroup.max.depth", "3"},
+        {"cgroup.max.descendants", "10"},
     };
 
-    for (size_t i = 0; i < sizeof(cgroupParam)/sizeof(cgroupParam[0]); i++) {
+    for(size_t i = 0; i < sizeof(cgroupParam) / sizeof(cgroupParam[0]); i++) {
         setCgroupParam(UrmSettings::focusedCgroup.c_str(), cgroupParam[i][0], cgroupParam[i][1]);
     }
 }
