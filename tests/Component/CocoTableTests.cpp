@@ -5,7 +5,7 @@
 #include "TestUtils.h"
 #include "CocoTable.h"
 #include "Request.h"        // Added: required for Request*
-#include "TestAggregator.h"
+#include "URMTests.h"
 
 #include <iostream>
 #include <cstdint>

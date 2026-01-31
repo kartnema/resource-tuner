@@ -18,7 +18,7 @@
 #include "PropertiesRegistry.h"
 #include "TargetRegistry.h"
 #include "AppConfigs.h"
-#include "TestAggregator.h"
+#include "URMTests.h"
 
 #include <string>
 #include <vector>

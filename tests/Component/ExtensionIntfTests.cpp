@@ -7,7 +7,7 @@
 #include "ResourceRegistry.h"
 #include "RestuneParser.h"
 #include "Extensions.h"
-#include "TestAggregator.h"
+#include "URMTests.h"
 
 #include <string>
 #include <cstdint>

@@ -9,7 +9,7 @@
 #include "TargetRegistry.h"
 #include "Extensions.h"
 #include "Utils.h"
-#include "TestAggregator.h"
+#include "URMTests.h"
 
 #include <cstdint>
 #include <iostream>

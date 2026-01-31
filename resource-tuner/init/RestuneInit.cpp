@@ -6,7 +6,7 @@
 #include <string>
 #include <thread>
 #include <memory>
-
+#include <iostream>
 #include "ErrCodes.h"
 #include "Extensions.h"
 #include "AuxRoutines.h"
@@ -46,8 +46,8 @@ static ErrCode loadExtensionsLib() {
             return RC_MODULE_INIT_FAILURE;
         }
     }
-    std::string libDirPath = UrmSettings::mExtensionPluginsLibPath;
 
+    std::string libDirPath = UrmSettings::mExtensionPluginsLibPath;
     DIR* dir = opendir(libDirPath.c_str());
     if(dir == nullptr) {
         return RC_SUCCESS; // Return success regardless, since this is an extension.
@@ -58,7 +58,11 @@ static ErrCode loadExtensionsLib() {
     struct dirent* entry;
     while(((entry = readdir(dir)) != nullptr) &&
           (extLibHandleIndex < UrmSettings::metaConfigs.mPluginCount)) {
-        std::string libPath = libDirPath + "/" + entry->d_name;
+        std::string fileName = std::string(entry->d_name);
+        if(fileName == "." || fileName == "..") {
+            continue;
+        }
+        std::string libPath = libDirPath + "/" + fileName;
 
         // Check if the library file exists
         extensionLibHandles[extLibHandleIndex] = dlopen(libPath.c_str(), RTLD_NOW);
@@ -226,7 +230,7 @@ static ErrCode fetchCustomProperties() {
 
     // Parse Custom Properties Configs
     filePath = Extensions::getPropertiesConfigFilePath();
-    if(filePath.length() > 0) {
+    if(filePath.length() == 0) {
         filePath = UrmSettings::mCustomPropertiesFilePath;
     }
 
@@ -296,7 +300,7 @@ static ErrCode fetchTargetInfo() {
 
     // Check if a Custom Target Config is provided, if so process it.
     filePath = Extensions::getTargetConfigFilePath();
-    if(filePath.length() > 0) {
+    if(filePath.length() == 0) {
         filePath = UrmSettings::mCustomTargetFilePath;
     }
 
@@ -330,7 +334,7 @@ static ErrCode fetchInitInfo() {
     }
 
     filePath = Extensions::getInitConfigFilePath();
-    if(filePath.length() > 0) {
+    if(filePath.length() == 0) {
         filePath = UrmSettings::mCustomInitConfigFilePath;
     }
 
@@ -350,7 +354,7 @@ static ErrCode fetchSignals() {
 
     // Parse Common Signal Configs
     std::string filePath = UrmSettings::mCommonSignalFilePath;
-    opStatus = parseUtil(filePath, "signal-custom", ConfigType::SIGNALS_CONFIG);
+    opStatus = parseUtil(filePath, "signal-common", ConfigType::SIGNALS_CONFIG);
     if(RC_IS_NOTOK(opStatus)) {
         return opStatus;
     }
@@ -366,7 +370,7 @@ static ErrCode fetchSignals() {
 
     // Parse Custom Signal Configs
     filePath = Extensions::getSignalsConfigFilePath();
-    if(filePath.length() > 0) {
+    if(filePath.length() == 0) {
         filePath = UrmSettings::mCustomSignalFilePath;
     }
 
@@ -397,7 +401,7 @@ static ErrCode fetchExtFeatureConfigs() {
 
     // Check if a Ext-Features Config is provided, if so process it.
     filePath = Extensions::getExtFeaturesConfigFilePath();
-    if(filePath.length() > 0) {
+    if(filePath.length() == 0) {
         filePath = UrmSettings::mCustomExtFeaturesFilePath;
     }
 
@@ -426,7 +430,7 @@ static ErrCode fetchPerAppConfigs() {
 
     // Check if a Custom App Config is provided, if so process it.
     filePath = Extensions::getAppConfigFilePath();
-    if(filePath.length() > 0) {
+    if(filePath.length() == 0) {
         filePath = UrmSettings::mCustomAppConfigFilePath;
     }
 
@@ -474,14 +478,16 @@ static void* restuneThreadStart() {
     return nullptr;
 }
 
-static ErrCode setCgroupParam(const char *slice, const char *name, const char *value) {
+static ErrCode setCgroupParam(const std::string& slice,
+                              const std::string& name,
+                              const std::string& value) {
     // 1) Build the absolute cGroupPath: /sys/fs/cgroup/<slice>/<name>
     std::string cGroupPath = UrmSettings::mBaseCGroupPath;
     cGroupPath += slice;
     cGroupPath += "/";
     cGroupPath += name;
 
-    // 2) Quick existence/permission check for diagnostics
+    // 2) existence/permission check
     if (!AuxRoutines::fileExists(cGroupPath)) {
         // Compose a detailed log line with cGroupPath + strerror
         std::string detail = "cGroupPath=" + cGroupPath + ", err=" + std::string(strerror(errno));
@@ -489,7 +495,7 @@ static ErrCode setCgroupParam(const char *slice, const char *name, const char *v
         return RC_SOCKET_FD_READ_FAILURE;
     }
 
-    // 3) Write the value with newline (echo-style)
+    // 3) Write the value with newline
     AuxRoutines::writeToFile(cGroupPath, value);
     return RC_SUCCESS;
 }
@@ -524,6 +530,11 @@ static ErrCode init(void* arg) {
         return RC_MODULE_INIT_FAILURE;
     }
 
+    if(RC_IS_NOTOK(fetchMetaConfigs())) {
+        TYPELOGD(META_CONF_FETCH_FAILED);
+        return RC_MODULE_INIT_FAILURE;
+    }
+
     uint32_t pluginCount = UrmSettings::metaConfigs.mPluginCount;
     if(pluginCount > MAX_EXTENSION_LIB_HANDLES) {
         extensionLibHandles = (void**) realloc(extensionLibHandles, pluginCount * sizeof(void*));
@@ -543,7 +554,8 @@ static ErrCode init(void* arg) {
         return RC_MODULE_INIT_FAILURE;
     }
 
-    if(RC_IS_OK(fetchMetaConfigs())) {
+    if(RC_IS_NOTOK(fetchMetaConfigs())) {
+        TYPELOGD(META_CONF_FETCH_FAILED);
         return RC_MODULE_INIT_FAILURE;
     }
 

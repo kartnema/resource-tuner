@@ -5,7 +5,7 @@
 #include "TestUtils.h"
 #include "AuxRoutines.h"
 #include "ClientDataManager.h"
-#include "TestAggregator.h"
+#include "URMTests.h"
 #include "MemoryPool.h"   
 #include <vector>
 #include <thread>

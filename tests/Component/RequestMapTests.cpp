@@ -17,7 +17,7 @@
 #include "RequestManager.h"
 #include "RateLimiter.h"
 #include "MemoryPool.h"
-#include "TestAggregator.h"
+#include "URMTests.h"
 
 #include "TestInitReset.h"
 

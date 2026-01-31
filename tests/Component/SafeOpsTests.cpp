@@ -12,7 +12,7 @@
 #include "ErrCodes.h"
 #include "TestUtils.h"
 #include "SafeOps.h"
-#include "TestAggregator.h"
+#include "URMTests.h"
 
 // ---------- Tests for Add ----------
 

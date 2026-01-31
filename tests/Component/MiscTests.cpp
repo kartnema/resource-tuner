@@ -8,7 +8,7 @@
 #include "MemoryPool.h"
 #include "Request.h"
 #include "Signal.h"
-#include "TestAggregator.h"
+#include "URMTests.h"
 #include "TestUtils.h" // where MakeAlloc<T>() lives
 
 #define MTEST_NO_MAIN

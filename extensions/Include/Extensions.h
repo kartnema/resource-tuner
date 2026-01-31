@@ -13,6 +13,8 @@
 #include <vector>
 #include <unordered_map>
 
+#include "Utils.h"
+
 typedef void (*ResourceLifecycleCallback)(void*);
 typedef void (*PostProcessingCallback)(void*);
 
@@ -70,9 +72,6 @@ public:
 
     static PostProcessingCallback getPostProcessingCallback(const std::string& identifier);
 };
-
-#define CONCAT_IMPL(a, b) a##b
-#define CONCAT(a, b) CONCAT_IMPL(a, b)
 
 /**
  * \def URM_REGISTER_RES_APPLIER_CB(resCode, resourceApplierCallback)

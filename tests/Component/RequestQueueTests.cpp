@@ -17,7 +17,7 @@
 
 #include "RequestQueue.h"
 #include "TestUtils.h"
-#include "TestAggregator.h"
+#include "URMTests.h"
 #include "../Utils/Include/JoiningThread.h"
 // ---------- Init (unchanged) ----------
 static void Init() {

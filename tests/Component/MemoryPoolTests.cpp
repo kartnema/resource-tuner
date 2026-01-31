@@ -3,7 +3,7 @@
 
 #include "TestUtils.h"
 #include "MemoryPool.h"
-#include "TestAggregator.h"
+#include "URMTests.h"
 #include <vector>
 #include <string>
 #include <cstdint>
