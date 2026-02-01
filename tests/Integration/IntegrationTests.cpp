@@ -79,6 +79,37 @@ URM_TEST(TestHandleGeneration, {
     E_ASSERT((handle > 0));
 })
 
+URM_TEST_P(TestPropFetch, BROKEN, {
+    char prop1[] = "resource_tuner.pulse.duration";
+    char buf[64];
+    memset(buf, 0, sizeof(buf));
+
+    int8_t status = getProp(prop1, buf, sizeof(buf), "na");
+    E_ASSERT((status == 0));
+
+    std::cout<<LOG_BASE<<"Value Fetched for key: ["<<prop1<<"] is: "<<buf<<std::endl;
+    E_ASSERT((std::string(buf) == "60000000"));
+
+    char prop2[] = "resource_tuner.maximum.concurrent.requests";
+    memset(buf, 0, sizeof(buf));
+
+    status = getProp(prop2, buf, sizeof(buf), "na");
+    E_ASSERT((status == 0));
+
+    std::cout<<LOG_BASE<<"Value Fetched for key: ["<<prop2<<"] is: "<<buf<<std::endl;
+    E_ASSERT((std::string(buf) == "60"));
+
+    // Non Existent
+    char prop3[] = "resource_tuner.benchmakr.comparison.utilinets";
+    memset(buf, 0, sizeof(buf));
+
+    status = getProp(prop3, buf, sizeof(buf), "na");
+    E_ASSERT((status == 0));
+
+    std::cout<<LOG_BASE<<"Value Fetched for key: ["<<prop3<<"] is: "<<buf<<std::endl;
+    E_ASSERT((std::string(buf) == "na"));
+})
+
 /*
  * Description:
  * This Section contains tests which aim to verify the correctness of the Verifier.
@@ -1510,6 +1541,7 @@ URM_TEST(SingleClientSequentialRequests, {
 
     handle = tuneResources(6000, RequestPriority::REQ_PRIORITY_HIGH, 1, resourceList1);
     std::cout<<LOG_BASE<<"Handle Returned: "<<handle<<std::endl;
+
     handle = tuneResources(6000, RequestPriority::REQ_PRIORITY_HIGH, 1, resourceList2);
     std::cout<<LOG_BASE<<"Handle Returned: "<<handle<<std::endl;
 
@@ -1622,7 +1654,7 @@ URM_TEST(TestInfiniteDurationTuneRequestAndValidUntuning, {
     E_ASSERT((originalValue == testResourceOriginalValue));
 
     SysResource* resourceList = new SysResource[1];
-    SysResource resource = {0};
+    SysResource resource;
     memset(&resource, 0, sizeof(SysResource));
     resource.mResCode = CONSTRUCT_RES_CODE(0xff, 0x0002);
     resource.mNumValues = 1;
@@ -3314,10 +3346,9 @@ URM_TEST(TestSingleClientTuneSignal1, {
     int32_t testResourceOriginalValue = 300;
 
     std::string value;
-    int32_t originalValue, newValue;
+    int32_t newValue;
 
     value = AuxRoutines::readFromFile(testResourceName);
-    originalValue = C_STOI(value);
 
     int64_t handle =
         tuneSignal(
@@ -3419,10 +3450,9 @@ URM_TEST(TestSignalUntuning, {
     int32_t testResourceOriginalValue = 300;
 
     std::string value;
-    int32_t originalValue, newValue;
+    int32_t newValue;
 
     value = AuxRoutines::readFromFile(testResourceName);
-    originalValue = C_STOI(value);
 
     int64_t handle =
         tuneSignal(
@@ -3571,7 +3601,7 @@ URM_TEST(TestMultiResourceSignal, {
     };
 
     // Record original values
-    for(int32_t i = 0; i < tunedResources.size(); i++) {
+    for(int32_t i = 0; i < (int32_t)tunedResources.size(); i++) {
         if(tunedResources[i].name.length() > 0) {
             tunedResources[i].originalValue = C_STOI(AuxRoutines::readFromFile(tunedResources[i].name));
         }
@@ -3588,7 +3618,7 @@ URM_TEST(TestMultiResourceSignal, {
     std::this_thread::sleep_for(std::chrono::seconds(2));
 
     // Test Tuning
-    for(int32_t i = 0; i < tunedResources.size(); i++) {
+    for(int32_t i = 0; i < (int32_t)tunedResources.size(); i++) {
         if(tunedResources[i].name.length() > 0) {
             int32_t curValue = C_STOI(AuxRoutines::readFromFile(tunedResources[i].name));
             std::cout<<LOG_BASE<<tunedResources[i].name<<" Configured Value: "<<curValue<<std::endl;
@@ -3600,7 +3630,7 @@ URM_TEST(TestMultiResourceSignal, {
     std::this_thread::sleep_for(std::chrono::seconds(10));
 
     // Test Resetting
-    for(int32_t i = 0; i < tunedResources.size(); i++) {
+    for(int32_t i = 0; i < (int32_t)tunedResources.size(); i++) {
         if(tunedResources[i].name.length() > 0) {
             int32_t curValue = C_STOI(AuxRoutines::readFromFile(tunedResources[i].name));
             std::cout<<LOG_BASE<<tunedResources[i].name<<" Configured Value: "<<curValue<<std::endl;
@@ -3979,6 +4009,4 @@ URM_TEST(TestCgroupWriteAndReset6, {
     delete resourceList1;
 })
 
-int32_t main() {
-    TRIGGER_SUITE(TEST_CLASS);
-}
+REGISTER_AND_TRIGGER_SUITE(TEST_CLASS)

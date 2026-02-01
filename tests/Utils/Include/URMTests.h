@@ -6,6 +6,8 @@
 #include <cstdint>
 #include <iostream>
 
+#define BROKEN 901
+
 typedef void (*URMTestCase)(void);
 typedef std::pair<URMTestCase, std::string> URMTest;
 
@@ -35,7 +37,23 @@ public:
     }                                                                             \
     static TestAggregator CONCAT(aggregate, __LINE__) (testCallback, TEST_CLASS); \
 
-#define TRIGGER_SUITE(name)                                                       \
-    TestAggregator::runAll(name);                                                 \
+#define URM_TEST_P(testCallback, param, ...)                                      \
+    static void testCallback(void) {                                              \
+        try {                                                                     \
+            if(param != BROKEN) {                                                 \
+                LOG_START                                                         \
+                __VA_ARGS__                                                       \
+                LOG_END                                                           \
+            }                                                                     \
+        } catch(const std::exception& e) {                                        \
+            TestAggregator::addFail(__func__);                                    \
+        }                                                                         \
+    }                                                                             \
+    static TestAggregator CONCAT(aggregate, __LINE__) (testCallback, TEST_CLASS); \
+
+#define REGISTER_AND_TRIGGER_SUITE(name)                                          \
+    int32_t main() {                                                              \
+        return TestAggregator::runAll(name);                                      \
+    }                                                                             \
 
 #endif
