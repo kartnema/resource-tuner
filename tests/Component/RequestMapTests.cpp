@@ -8,12 +8,17 @@
 #include "TestAggregator.h"
 
 static void Init() {
-    MakeAlloc<ClientInfo> (30);
-    MakeAlloc<ClientTidData> (30);
-    MakeAlloc<std::unordered_set<int64_t>> (30);
-    MakeAlloc<Resource> (30);
-    MakeAlloc<ResIterable> (30);
-    MakeAlloc<Request> (30);
+    static int8_t initDone = false;
+    if(!initDone) {
+        initDone = true;
+
+        MakeAlloc<ClientInfo> (30);
+        MakeAlloc<ClientTidData> (30);
+        MakeAlloc<std::unordered_set<int64_t>> (30);
+        MakeAlloc<Resource> (30);
+        MakeAlloc<ResIterable> (30);
+        MakeAlloc<Request> (30);
+    }
 }
 
 // Helper methods for Resource Generation

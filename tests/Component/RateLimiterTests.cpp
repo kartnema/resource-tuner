@@ -25,16 +25,6 @@ static void Init() {
     }
 }
 
-// Helper methods for Resource Generation
-static Resource* generateResourceForTesting(int32_t seed) {
-    Resource* resource = (Resource*)malloc(sizeof(Resource));
-    resource->setResCode(16 + seed);
-    resource->setNumValues(1);
-    resource->setValueAt(0, 2 * seed);
-
-    return resource;
-}
-
 URM_TEST(TestClientSpammingScenario, {
     Init();
     std::shared_ptr<ClientDataManager> clientDataManager = ClientDataManager::getInstance();

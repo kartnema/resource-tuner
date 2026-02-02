@@ -27,7 +27,7 @@ int32_t TestAggregator::runAll(const std::string& name) {
         }
     }
 
-    std::cout<<"Summary:"<<std::endl;
+    std::cout<<"\nSummary:"<<std::endl;
     std::cout<<"Ran "<<mTestsCount<<" Test Cases"<<std::endl;
 
     uint32_t failCount = (uint32_t)mFailed.size();
