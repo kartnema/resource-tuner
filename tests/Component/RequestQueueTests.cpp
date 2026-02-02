@@ -3,13 +3,20 @@
 
 #include "RequestQueue.h"
 #include "TestUtils.h"
-#include "TestAggregator.h"
+#include "URMTests.h"
+
+#define TEST_CLASS "COMPONENT"
 
 static void Init() {
-    MakeAlloc<Message> (30);
+    static int8_t initDone = false;
+    if(!initDone) {
+        initDone = true;
+        MakeAlloc<Message> (30);
+    }
 }
 
-static void TestRequestQueueTaskEnqueue() {
+URM_TEST(TestRequestQueueTaskEnqueue, {
+    Init();
     std::shared_ptr<RequestQueue> queue = RequestQueue::getInstance();
     int32_t requestCount = 8;
     int32_t requestsProcessed = 0;
@@ -29,9 +36,10 @@ static void TestRequestQueueTaskEnqueue() {
     }
 
     E_ASSERT((requestsProcessed == requestCount));
-}
+})
 
-static void TestRequestQueueSingleTaskPickup1() {
+URM_TEST(TestRequestQueueSingleTaskPickup1, {
+    Init();
     std::shared_ptr<RequestQueue> requestQueue = RequestQueue::getInstance();
 
     // Consumer
@@ -63,9 +71,10 @@ static void TestRequestQueueSingleTaskPickup1() {
     requestQueue->addAndWakeup(req);
 
     consumerThread.join();
-}
+})
 
-static void TestRequestQueueSingleTaskPickup2() {
+URM_TEST(TestRequestQueueSingleTaskPickup2, {
+    Init();
     std::shared_ptr<RequestQueue> requestQueue = RequestQueue::getInstance();
     std::atomic<int32_t> requestsProcessed(0);
     int8_t taskCondition = false;
@@ -122,9 +131,9 @@ static void TestRequestQueueSingleTaskPickup2() {
     consumerThread.join();
 
     E_ASSERT((requestsProcessed.load() == 1));
-}
+})
 
-static void TestRequestQueueMultipleTaskPickup() {
+URM_TEST(TestRequestQueueMultipleTaskPickup, {
     std::shared_ptr<RequestQueue> requestQueue = RequestQueue::getInstance();
     std::atomic<int32_t> requestsProcessed(0);
     int8_t taskCondition = false;
@@ -211,9 +220,9 @@ static void TestRequestQueueMultipleTaskPickup() {
     producerThread.join();
 
     E_ASSERT((requestsProcessed.load() == 4));
-}
+})
 
-static void TestRequestQueueMultipleTaskAndProducersPickup() {
+URM_TEST(TestRequestQueueMultipleTaskAndProducersPickup, {
     std::shared_ptr<RequestQueue> requestQueue = RequestQueue::getInstance();
     std::atomic<int32_t> requestsProcessed(0);
     int32_t totalNumberOfThreads = 10;
@@ -266,7 +275,7 @@ static void TestRequestQueueMultipleTaskAndProducersPickup() {
         producerThreads.push_back(std::thread(threadStartRoutine));
     }
 
-    for(int32_t i = 0; i < producerThreads.size(); i++) {
+    for(int32_t i = 0; i < (int32_t)producerThreads.size(); i++) {
         producerThreads[i].join();
     }
 
@@ -292,14 +301,14 @@ static void TestRequestQueueMultipleTaskAndProducersPickup() {
     terminateThread.join();
 
     E_ASSERT((requestsProcessed.load() == totalNumberOfThreads + 1));
-}
+})
 
-static void TestRequestQueueEmptyPoll() {
+URM_TEST(TestRequestQueueEmptyPoll, {
     std::shared_ptr<RequestQueue> requestQueue = RequestQueue::getInstance();
     E_ASSERT((requestQueue->pop() == nullptr));
-}
+})
 
-static void TestRequestQueuePollingPriority1() {
+URM_TEST(TestRequestQueuePollingPriority1, {
     std::shared_ptr<RequestQueue> requestQueue = RequestQueue::getInstance();
     int8_t taskCondition = false;
     std::mutex taskLock;
@@ -411,9 +420,9 @@ static void TestRequestQueuePollingPriority1() {
 
     producerThread.join();
     consumerThread.join();
-}
+})
 
-static void TestRequestQueuePollingPriority2() {
+URM_TEST(TestRequestQueuePollingPriority2, {
     std::shared_ptr<RequestQueue> requestQueue = RequestQueue::getInstance();
     int8_t taskCondition = false;
     std::mutex taskLock;
@@ -501,9 +510,9 @@ static void TestRequestQueuePollingPriority2() {
 
     consumerThread.join();
     producerThread.join();
-}
+})
 
-static void TestRequestQueueInvalidPriority() {
+URM_TEST(TestRequestQueueInvalidPriority, {
     std::shared_ptr<RequestQueue> requestQueue = RequestQueue::getInstance();
 
     Request* invalidRequest = new Request();
@@ -515,4 +524,4 @@ static void TestRequestQueueInvalidPriority() {
     invalidRequest->setClientTID(2445);
 
     E_ASSERT((requestQueue->addAndWakeup(invalidRequest) == false));
-}
+})

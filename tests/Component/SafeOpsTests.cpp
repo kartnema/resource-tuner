@@ -8,139 +8,141 @@
 #include "SafeOps.h"
 #include "URMTests.h"
 
+#define TEST_CLASS "COMPONENT"
+
 // Test cases for Add function
-static void Overflow1() {
+URM_TEST(Overflow1, {
     OperationStatus status;
     // demonstrating implicit conversion by compiler resulting in proper value but still considered overflow
     int64_t result = Add(std::numeric_limits<int32_t>::max(), 2, status);
-    C_ASSERT(status == OVERFLOW);
-    C_ASSERT(result == std::numeric_limits<int32_t>::max());
-}
+    E_ASSERT((status == OVERFLOW));
+    E_ASSERT((result == std::numeric_limits<int32_t>::max()));
+})
 
-static void Underflow1() {
+URM_TEST(Underflow1, {
     OperationStatus status;
     int32_t result = Add(std::numeric_limits<int32_t>::lowest(), -1, status);
-    C_ASSERT(status == UNDERFLOW);
-    C_ASSERT(result == std::numeric_limits<int32_t>::lowest());
-}
+    E_ASSERT((status == UNDERFLOW));
+    E_ASSERT((result == std::numeric_limits<int32_t>::lowest()));
+})
 
-static void PositiveNoOverflow1() {
+URM_TEST(PositiveNoOverflow1, {
     OperationStatus status;
     int8_t result = Add(10, 20, status);
-    C_ASSERT(status == SUCCESS);
-    C_ASSERT(result == 30);
-}
+    E_ASSERT((status == SUCCESS));
+    E_ASSERT((result == 30));
+})
 
-static void NegativeNoUnderflow1() {
+URM_TEST(NegativeNoUnderflow1, {
     OperationStatus status;
     int8_t result = Add(-10, -20, status);
-    C_ASSERT(status == SUCCESS);
-    C_ASSERT(result == -30);
-}
+    E_ASSERT((status == SUCCESS));
+    E_ASSERT((result == -30));
+})
 
-static void IncorrectType1() {
+URM_TEST(IncorrectType1, {
     OperationStatus status;
     // based on the return type, -2 is assigned
     uint8_t result = Add(1,-2,status);
-    C_ASSERT(status == SUCCESS);
-    C_ASSERT(result == 255);
-}
+    E_ASSERT((status == SUCCESS));
+    E_ASSERT((result == 255));
+})
 
-static void DifferentTypes() {
+URM_TEST(DifferentTypes, {
     OperationStatus status;
     int8_t a = 127;
     int16_t b = 123;
     int16_t result = Add(static_cast<int16_t>(a),b,status);
-    C_ASSERT(status == SUCCESS);
-    C_ASSERT(result == 250);
-}
+    E_ASSERT((status == SUCCESS));
+    E_ASSERT((result == 250));
+})
 
 // Test cases for Subtract function
-static void Overflow2() {
+URM_TEST(Overflow2, {
     OperationStatus status;
     int64_t result = Subtract(std::numeric_limits<int64_t>::max(), static_cast<int64_t>(-1), status);
-    C_ASSERT(status == OVERFLOW);
-    C_ASSERT(result == std::numeric_limits<int64_t>::max());
-}
+    E_ASSERT((status == OVERFLOW));
+    E_ASSERT((result == std::numeric_limits<int64_t>::max()));
+})
 
-static void Underflow2() {
+URM_TEST(Underflow2, {
     OperationStatus status;
     int32_t result = Subtract(std::numeric_limits<int32_t>::lowest(), 1, status);
-    C_ASSERT(status == UNDERFLOW);
-    C_ASSERT(result == std::numeric_limits<int32_t>::lowest());
-}
+    E_ASSERT((status == UNDERFLOW));
+    E_ASSERT((result == std::numeric_limits<int32_t>::lowest()));
+})
 
-static void PositiveNoOverflow2() {
+URM_TEST(PositiveNoOverflow2, {
     OperationStatus status;
     int8_t result = Subtract(20, 10, status);
-    C_ASSERT(status == SUCCESS);
-    C_ASSERT(result == 10);
-}
+    E_ASSERT((status == SUCCESS));
+    E_ASSERT((result == 10));
+})
 
-static void NegativeNoUnderflow2() {
+URM_TEST(NegativeNoUnderflow2, {
     OperationStatus status;
     int8_t result = Subtract(-20, -10, status);
-    C_ASSERT(status == SUCCESS);
-    C_ASSERT(result == -10);
-}
+    E_ASSERT((status == SUCCESS));
+    E_ASSERT((result == -10));
+})
 
-static void Underflow3() {
+URM_TEST(Underflow3, {
      OperationStatus status;
      int64_t result = Multiply(std::numeric_limits<int64_t>::lowest(), static_cast<int64_t>(2), status);
-     C_ASSERT(status == UNDERFLOW);
-     C_ASSERT(result == std::numeric_limits<int64_t>::lowest());
-}
+     E_ASSERT((status == UNDERFLOW));
+     E_ASSERT((result == std::numeric_limits<int64_t>::lowest()));
+})
 
-static void PositiveNoOverflow3() {
+URM_TEST(PositiveNoOverflow3, {
      OperationStatus status;
      int64_t result = Multiply(10, 20, status);
-     C_ASSERT(status == SUCCESS);
-     C_ASSERT(result == 200);
-}
+     E_ASSERT((status == SUCCESS));
+     E_ASSERT((result == 200));
+})
 
-static void DoublePositiveOverflow() {
+URM_TEST(DoublePositiveOverflow, {
     OperationStatus status;
     double result = Multiply(std::numeric_limits<double>::max(), 2.7, status);
-    C_ASSERT(status == OVERFLOW);
-    C_ASSERT(result == std::numeric_limits<double>::max());
-}
+    E_ASSERT((status == OVERFLOW));
+    E_ASSERT((result == std::numeric_limits<double>::max()));
+})
 
-static void DoubleUnderflow() {
+URM_TEST(DoubleUnderflow, {
     OperationStatus status;
     double result = Multiply(2.0, std::numeric_limits<double>::lowest(), status);
-    C_ASSERT(status == UNDERFLOW);
-    C_ASSERT(result == std::numeric_limits<double>::lowest());
-}
+    E_ASSERT((status == UNDERFLOW));
+    E_ASSERT((result == std::numeric_limits<double>::lowest()));
+})
 
-static void DoublePositiveNoOverflow() {
+URM_TEST(DoublePositiveNoOverflow, {
     OperationStatus status;
     double result = Multiply(10.0, 2.0, status);
-    C_ASSERT(status == SUCCESS);
-    C_ASSERT(result == 20.0);
-}
+    E_ASSERT((status == SUCCESS));
+    E_ASSERT((result == 20.0));
+})
 
-static void DivByZero() {
+URM_TEST(DivByZero, {
     OperationStatus status;
     double result = Divide(10.0, 0.0, status);
-    C_ASSERT(status == DIVISION_BY_ZERO);
-    C_ASSERT(result == 10.0);
-}
+    E_ASSERT((status == DIVISION_BY_ZERO));
+    E_ASSERT((result == 10.0));
+})
 
-static void PositiveOverflow() {
+URM_TEST(PositiveOverflow, {
     OperationStatus status;
     double result = Divide(std::numeric_limits<double>::max(), 0.5, status);
-    C_ASSERT(status == OVERFLOW);
-    C_ASSERT(result == std::numeric_limits<double>::max());
-}
+    E_ASSERT((status == OVERFLOW));
+    E_ASSERT((result == std::numeric_limits<double>::max()));
+})
 
-static void Underflow4() {
+URM_TEST(Underflow4, {
     OperationStatus status;
     double result = Divide(std::numeric_limits<double>::max(), -0.5, status);
-    C_ASSERT(status == UNDERFLOW);
-    C_ASSERT(result == std::numeric_limits<double>::lowest());
-}
+    E_ASSERT((status == UNDERFLOW));
+    E_ASSERT((result == std::numeric_limits<double>::lowest()));
+})
 
-static void TestSafeDerefMacro() {
+URM_TEST(TestSafeDerefMacro, {
     int32_t* int_ptr = nullptr;
     int8_t exceptionHit = false;
     try {
@@ -149,10 +151,10 @@ static void TestSafeDerefMacro() {
         exceptionHit = true;
     }
 
-    C_ASSERT(exceptionHit == true);
-}
+    E_ASSERT((exceptionHit == true));
+})
 
-static void TestSafeAssignmentMacro() {
+URM_TEST(TestSafeAssignmentMacro, {
     int32_t* int_ptr = nullptr;
     int8_t exceptionHit = false;
     try {
@@ -161,10 +163,10 @@ static void TestSafeAssignmentMacro() {
         exceptionHit = true;
     }
 
-    C_ASSERT(exceptionHit == true);
-}
+    E_ASSERT((exceptionHit == true));
+})
 
-static void TestSafeStaticCastMacro() {
+URM_TEST(TestSafeStaticCastMacro, {
     int32_t* int_ptr = nullptr;
     int8_t exceptionHit = false;
     try {
@@ -173,10 +175,10 @@ static void TestSafeStaticCastMacro() {
         exceptionHit = true;
     }
 
-    C_ASSERT(exceptionHit == true);
-}
+    E_ASSERT((exceptionHit == true));
+})
 
-static void TestValidationMacro1() {
+URM_TEST(TestValidationMacro1, {
     int32_t val = -670;
     int8_t exceptionHit = false;
     try {
@@ -185,10 +187,10 @@ static void TestValidationMacro1() {
         exceptionHit = true;
     }
 
-    C_ASSERT(exceptionHit == true);
-}
+    E_ASSERT((exceptionHit == true));
+})
 
-static void TestValidationMacro2() {
+URM_TEST(TestValidationMacro2, {
     int32_t val = 100;
     int8_t exceptionHit = false;
     try {
@@ -197,5 +199,5 @@ static void TestValidationMacro2() {
         exceptionHit = true;
     }
 
-    C_ASSERT(exceptionHit == false);
-}
+    E_ASSERT((exceptionHit == false));
+})

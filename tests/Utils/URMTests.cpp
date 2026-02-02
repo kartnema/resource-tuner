@@ -27,7 +27,8 @@ int32_t TestAggregator::runAll(const std::string& name) {
         }
     }
 
-    std::cout<<"Ran "<<mTestsCount<<" test cases"<<std::endl;
+    std::cout<<"Summary:"<<std::endl;
+    std::cout<<"Ran "<<mTestsCount<<" Test Cases"<<std::endl;
 
     uint32_t failCount = (uint32_t)mFailed.size();
     uint32_t passCount = mTestsCount - failCount;
@@ -35,7 +36,7 @@ int32_t TestAggregator::runAll(const std::string& name) {
     std::cout<<"Fail: "<<failCount<<std::endl;
 
     if(failCount > 0) {
-        std::cout<<"Following Tests Failed: "<<std::endl;
+        std::cout<<"\nFollowing Tests Failed: "<<std::endl;
         for(std::string& name: mFailed) {
             std::cout<<name<<std::endl;
         }

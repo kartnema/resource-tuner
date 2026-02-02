@@ -35,10 +35,10 @@ if(BUILD_TESTS)
         ${CMAKE_CURRENT_SOURCE_DIR}/Component/ClientDataManagerTests.cpp
         # ${CMAKE_CURRENT_SOURCE_DIR}/Component/ParserTests.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/Component/ExtensionIntfTests.cpp
-        # ${CMAKE_CURRENT_SOURCE_DIR}/Component/MiscTests.cpp
-        # ${CMAKE_CURRENT_SOURCE_DIR}/Component/RequestQueueTests.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/Component/MiscTests.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/Component/RequestQueueTests.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/Component/ThreadPoolTests.cpp
-        # ${CMAKE_CURRENT_SOURCE_DIR}/Component/SafeOpsTests.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/Component/SafeOpsTests.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/Component/RateLimiterTests.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/Component/TimerTests.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/Component/DeviceInfoTests.cpp
