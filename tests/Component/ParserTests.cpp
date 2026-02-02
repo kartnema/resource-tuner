@@ -1,12 +1,6 @@
 // Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
 // SPDX-License-Identifier: BSD-3-Clause-Clear
 
-
-// ParserTests_mtest.cpp
-
-#define MTEST_NO_MAIN
-#include "../framework/mini.h"
-
 #include "ErrCodes.h"
 #include "TestUtils.h"
 #include "RestuneParser.h"
@@ -16,866 +10,843 @@
 #include "Utils.h"
 #include "RestuneInternal.h"
 #include "PropertiesRegistry.h"
-#include "TargetRegistry.h"
-#include "AppConfigs.h"
-#include "TestAggregator.h"
+#include "URMTests.h"
 
-#include <string>
-#include <vector>
-#include <unordered_set>
-#include <thread>
-#include <cstring>
-#include <iostream>
-
-
-using namespace mtest;
-
-// ----------------------------------------------------------------------------
-// ResourceParsingTests
-// ----------------------------------------------------------------------------
 namespace ResourceParsingTests {
     std::string __testGroupName = "ResourceParsingTests";
 
     static ErrCode parsingStatus = RC_SUCCESS;
-
     static void Init() {
         RestuneParser configProcessor;
-        // Use single-argument overload to avoid signature mismatch
-        parsingStatus = configProcessor.parseResourceConfigs("/etc/urm/tests/configs/ResourcesConfig.yaml");
+        parsingStatus = configProcessor.parseResourceConfigs("/etc/urm/tests/configs/ResourcesConfig.yaml", true);
     }
 
-    static void EnsureInit() {
-        static bool done = false;
-        if (!done) { Init(); done = true; }
+    static void TestResourceRestuneParserYAMLDataIntegrity1() {
+        C_ASSERT(ResourceRegistry::getInstance() != nullptr);
+        C_ASSERT(parsingStatus == RC_SUCCESS);
     }
 
-    MT_TEST(Component, ResourceRestuneParserYAMLDataIntegrity1, "resourceparsing") {
-        EnsureInit();
-        MT_REQUIRE(ctx, ResourceRegistry::getInstance() != nullptr);
-        MT_REQUIRE_EQ(ctx, parsingStatus, RC_SUCCESS);
-    }
-
-    MT_TEST(Component, ResourceRestuneParserYAMLDataIntegrity3_1, "resourceparsing") {
-        EnsureInit();
+    static void TestResourceRestuneParserYAMLDataIntegrity3_1() {
         ResConfInfo* resourceConfigInfo = ResourceRegistry::getInstance()->getResConf(0x80ff0000);
 
-        MT_REQUIRE(ctx, resourceConfigInfo != nullptr);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mResourceResType, 0xff);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mResourceResID, 0);
-        MT_REQUIRE_EQ(ctx, std::strcmp((const char*)resourceConfigInfo->mResourceName.data(), "TEST_RESOURCE_1"), 0);
-        MT_REQUIRE_EQ(ctx, std::strcmp((const char*)resourceConfigInfo->mResourcePath.data(), "/etc/urm/tests/nodes/sched_util_clamp_min.txt"), 0);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mHighThreshold, 1024);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mLowThreshold, 0);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mPolicy, HIGHER_BETTER);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mPermissions, PERMISSION_THIRD_PARTY);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mModes, (MODE_RESUME | MODE_DOZE));
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mApplyType, ResourceApplyType::APPLY_GLOBAL);
+        C_ASSERT(resourceConfigInfo != nullptr);
+        C_ASSERT(resourceConfigInfo->mResourceResType == 0xff);
+        C_ASSERT(resourceConfigInfo->mResourceResID == 0);
+        C_ASSERT(strcmp((const char*)resourceConfigInfo->mResourceName.data(), "TEST_RESOURCE_1") == 0);
+        C_ASSERT(strcmp((const char*)resourceConfigInfo->mResourcePath.data(), "/etc/urm/tests/nodes/sched_util_clamp_min.txt") == 0);
+        C_ASSERT(resourceConfigInfo->mHighThreshold == 1024);
+        C_ASSERT(resourceConfigInfo->mLowThreshold == 0);
+        C_ASSERT(resourceConfigInfo->mPolicy == HIGHER_BETTER);
+        C_ASSERT(resourceConfigInfo->mPermissions == PERMISSION_THIRD_PARTY);
+        C_ASSERT(resourceConfigInfo->mModes == (MODE_RESUME | MODE_DOZE));
+        C_ASSERT(resourceConfigInfo->mApplyType == ResourceApplyType::APPLY_GLOBAL);
     }
 
-    MT_TEST(Component, ResourceRestuneParserYAMLDataIntegrity3_2, "resourceparsing") {
-        EnsureInit();
+    static void TestResourceRestuneParserYAMLDataIntegrity3_2() {
         ResConfInfo* resourceConfigInfo = ResourceRegistry::getInstance()->getResConf(0x80ff0001);
 
-        MT_REQUIRE(ctx, resourceConfigInfo != nullptr);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mResourceResType, 0xff);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mResourceResID, 1);
-        MT_REQUIRE_EQ(ctx, std::strcmp((const char*)resourceConfigInfo->mResourceName.data(), "TEST_RESOURCE_2"), 0);
-        MT_REQUIRE_EQ(ctx, std::strcmp((const char*)resourceConfigInfo->mResourcePath.data(), "/etc/urm/tests/nodes/sched_util_clamp_max.txt"), 0);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mHighThreshold, 1024);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mLowThreshold, 512);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mPolicy, HIGHER_BETTER);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mPermissions, PERMISSION_THIRD_PARTY);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mModes, (MODE_RESUME | MODE_DOZE));
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mApplyType, ResourceApplyType::APPLY_GLOBAL);
+        C_ASSERT(resourceConfigInfo != nullptr);
+        C_ASSERT(resourceConfigInfo->mResourceResType == 0xff);
+        C_ASSERT(resourceConfigInfo->mResourceResID == 1);
+        C_ASSERT(strcmp((const char*)resourceConfigInfo->mResourceName.data(), "TEST_RESOURCE_2") == 0);
+        C_ASSERT(strcmp((const char*)resourceConfigInfo->mResourcePath.data(), "/etc/urm/tests/nodes/sched_util_clamp_max.txt") == 0);
+        C_ASSERT(resourceConfigInfo->mHighThreshold == 1024);
+        C_ASSERT(resourceConfigInfo->mLowThreshold == 512);
+        C_ASSERT(resourceConfigInfo->mPolicy == HIGHER_BETTER);
+        C_ASSERT(resourceConfigInfo->mPermissions == PERMISSION_THIRD_PARTY);
+        C_ASSERT(resourceConfigInfo->mModes == (MODE_RESUME | MODE_DOZE));
+        C_ASSERT(resourceConfigInfo->mApplyType == ResourceApplyType::APPLY_GLOBAL);
     }
 
-    MT_TEST(Component, ResourceRestuneParserYAMLDataIntegrity3_3, "resourceparsing") {
-        EnsureInit();
+    static void TestResourceRestuneParserYAMLDataIntegrity3_3() {
         ResConfInfo* resourceConfigInfo = ResourceRegistry::getInstance()->getResConf(0x80ff0005);
 
-        MT_REQUIRE(ctx, resourceConfigInfo != nullptr);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mResourceResType, 0xff);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mResourceResID, 5);
-        MT_REQUIRE_EQ(ctx, std::strcmp((const char*)resourceConfigInfo->mResourceName.data(), "TEST_RESOURCE_6"), 0);
-        MT_REQUIRE_EQ(ctx, std::strcmp((const char*)resourceConfigInfo->mResourcePath.data(), "/etc/urm/tests/nodes/target_test_resource2.txt"), 0);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mHighThreshold, 6500);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mLowThreshold, 50);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mPolicy, HIGHER_BETTER);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mPermissions, PERMISSION_THIRD_PARTY);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mModes, MODE_RESUME);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mApplyType, ResourceApplyType::APPLY_CORE);
+        C_ASSERT(resourceConfigInfo != nullptr);
+        C_ASSERT(resourceConfigInfo->mResourceResType == 0xff);
+        C_ASSERT(resourceConfigInfo->mResourceResID == 5);
+        C_ASSERT(strcmp((const char*)resourceConfigInfo->mResourceName.data(), "TEST_RESOURCE_6") == 0);
+        C_ASSERT(strcmp((const char*)resourceConfigInfo->mResourcePath.data(), "/etc/urm/tests/nodes/target_test_resource2.txt") == 0);
+        C_ASSERT(resourceConfigInfo->mHighThreshold == 6500);
+        C_ASSERT(resourceConfigInfo->mLowThreshold == 50);
+        C_ASSERT(resourceConfigInfo->mPolicy == HIGHER_BETTER);
+        C_ASSERT(resourceConfigInfo->mPermissions == PERMISSION_THIRD_PARTY);
+        C_ASSERT(resourceConfigInfo->mModes == MODE_RESUME);
+        C_ASSERT(resourceConfigInfo->mApplyType == ResourceApplyType::APPLY_CORE);
     }
-} // namespace ResourceParsingTests
+}
 
-// ----------------------------------------------------------------------------
-// SignalParsingTests
-// ----------------------------------------------------------------------------
 namespace SignalParsingTests {
     std::string __testGroupName = "SignalParsingTests";
 
     static ErrCode parsingStatus = RC_SUCCESS;
-
     static void Init() {
         RestuneParser configProcessor;
         parsingStatus = configProcessor.parseSignalConfigs("/etc/urm/tests/configs/SignalsConfig.yaml");
     }
 
-    static void EnsureInit() {
-        static bool done = false;
-        if (!done) { Init(); done = true; }
+    static void TestRestuneParserYAMLDataIntegrity1() {
+        C_ASSERT(SignalRegistry::getInstance() != nullptr);
+        C_ASSERT(parsingStatus == RC_SUCCESS);
     }
 
-    MT_TEST(Component, RestuneParserYAMLDataIntegrity1, "signalparsing") {
-        EnsureInit();
-        MT_REQUIRE(ctx, SignalRegistry::getInstance() != nullptr);
-        MT_REQUIRE_EQ(ctx, parsingStatus, RC_SUCCESS);
-    }
+    static void TestRestuneParserYAMLDataIntegrity3_1() {
+        SignalInfo* signalInfo = SignalRegistry::getInstance()->getSignalConfigById(0x0000000d, 0);
 
-    MT_TEST(Component, RestuneParserYAMLDataIntegrity3_1, "signalparsing") {
-        EnsureInit();
-        SignalInfo* signalInfo = SignalRegistry::getInstance()->getSignalConfigById(0x000d0000);
+        C_ASSERT(signalInfo != nullptr);
+        C_ASSERT(signalInfo->mSignalID == 0);
+        C_ASSERT(signalInfo->mSignalCategory == 0x0d);
+        C_ASSERT(strcmp((const char*)signalInfo->mSignalName.data(), "TEST_SIGNAL_1") == 0);
+        C_ASSERT(signalInfo->mTimeout == 4000);
 
-        MT_REQUIRE(ctx, signalInfo != nullptr);
-        MT_REQUIRE_EQ(ctx, signalInfo->mSignalID, 0);
-        MT_REQUIRE_EQ(ctx, signalInfo->mSignalCategory, 0x0d);
-        MT_REQUIRE_EQ(ctx, std::strcmp((const char*)signalInfo->mSignalName.data(), "TEST_SIGNAL_1"), 0);
-        MT_REQUIRE_EQ(ctx, signalInfo->mTimeout, 4000);
+        C_ASSERT(signalInfo->mPermissions != nullptr);
+        C_ASSERT(signalInfo->mDerivatives != nullptr);
+        C_ASSERT(signalInfo->mSignalResources != nullptr);
 
-        MT_REQUIRE(ctx, signalInfo->mPermissions != nullptr);
-        MT_REQUIRE(ctx, signalInfo->mDerivatives != nullptr);
-        MT_REQUIRE(ctx, signalInfo->mSignalResources != nullptr);
+        C_ASSERT(signalInfo->mPermissions->size() == 1);
+        C_ASSERT(signalInfo->mDerivatives->size() == 1);
+        C_ASSERT(signalInfo->mSignalResources->size() == 1);
 
-        MT_REQUIRE_EQ(ctx, (int)signalInfo->mPermissions->size(), 1);
-        MT_REQUIRE_EQ(ctx, (int)signalInfo->mDerivatives->size(), 1);
-        MT_REQUIRE_EQ(ctx, (int)signalInfo->mSignalResources->size(), 1);
+        C_ASSERT(signalInfo->mPermissions->at(0) == PERMISSION_THIRD_PARTY);
 
-        MT_REQUIRE_EQ(ctx, signalInfo->mPermissions->at(0), PERMISSION_THIRD_PARTY);
-        MT_REQUIRE_EQ(ctx, std::strcmp((const char*)signalInfo->mDerivatives->at(0).data(), "solar"), 0);
+        C_ASSERT(strcmp((const char*)signalInfo->mDerivatives->at(0).data(), "solar") == 0);
 
         Resource* resource1 = signalInfo->mSignalResources->at(0);
-        MT_REQUIRE(ctx, resource1 != nullptr);
-        MT_REQUIRE_EQ(ctx, resource1->getResCode(), 2147549184);
-        MT_REQUIRE_EQ(ctx, resource1->getValuesCount(), 1);
-        MT_REQUIRE_EQ(ctx, resource1->getValueAt(0), 700);
-        MT_REQUIRE_EQ(ctx, resource1->getResInfo(), 0);
+        C_ASSERT(resource1 != nullptr);
+        C_ASSERT(resource1->getResCode() == 2147549184);
+        C_ASSERT(resource1->getValuesCount() == 1);
+        C_ASSERT(resource1->getValueAt(0) == 700);
+        C_ASSERT(resource1->getResInfo() == 0);
     }
 
-    MT_TEST(Component, RestuneParserYAMLDataIntegrity3_2, "signalparsing") {
-        EnsureInit();
-        SignalInfo* signalInfo = SignalRegistry::getInstance()->getSignalConfigById(0x000d0001);
+    static void TestRestuneParserYAMLDataIntegrity3_2() {
+        SignalInfo* signalInfo = SignalRegistry::getInstance()->getSignalConfigById(0x0000010d, 0);
 
-        MT_REQUIRE(ctx, signalInfo != nullptr);
-        MT_REQUIRE_EQ(ctx, signalInfo->mSignalID, 1);
-        MT_REQUIRE_EQ(ctx, signalInfo->mSignalCategory, 0x0d);
-        MT_REQUIRE_EQ(ctx, std::strcmp((const char*)signalInfo->mSignalName.data(), "TEST_SIGNAL_2"), 0);
-        MT_REQUIRE_EQ(ctx, signalInfo->mTimeout, 5000);
+        C_ASSERT(signalInfo != nullptr);
+        C_ASSERT(signalInfo->mSignalID == 1);
+        C_ASSERT(signalInfo->mSignalCategory == 0x0d);
+        C_ASSERT(strcmp((const char*)signalInfo->mSignalName.data(), "TEST_SIGNAL_2") == 0);
+        C_ASSERT(signalInfo->mTimeout == 5000);
 
-        MT_REQUIRE(ctx, signalInfo->mPermissions != nullptr);
-        MT_REQUIRE(ctx, signalInfo->mDerivatives != nullptr);
-        MT_REQUIRE(ctx, signalInfo->mSignalResources != nullptr);
+        C_ASSERT(signalInfo->mPermissions != nullptr);
+        C_ASSERT(signalInfo->mDerivatives != nullptr);
+        C_ASSERT(signalInfo->mSignalResources != nullptr);
 
-        MT_REQUIRE_EQ(ctx, (int)signalInfo->mPermissions->size(), 1);
-        MT_REQUIRE_EQ(ctx, (int)signalInfo->mDerivatives->size(), 1);
-        MT_REQUIRE_EQ(ctx, (int)signalInfo->mSignalResources->size(), 2);
+        C_ASSERT(signalInfo->mPermissions->size() == 1);
+        C_ASSERT(signalInfo->mDerivatives->size() == 1);
+        C_ASSERT(signalInfo->mSignalResources->size() == 2);
 
-        MT_REQUIRE_EQ(ctx, signalInfo->mPermissions->at(0), PERMISSION_SYSTEM);
-        MT_REQUIRE_EQ(ctx, std::strcmp((const char*)signalInfo->mDerivatives->at(0).data(), "derivative_v2"), 0);
+        C_ASSERT(signalInfo->mPermissions->at(0) == PERMISSION_SYSTEM);
+
+        C_ASSERT(strcmp((const char*)signalInfo->mDerivatives->at(0).data(), "derivative_v2") == 0);
 
         Resource* resource1 = signalInfo->mSignalResources->at(0);
-        MT_REQUIRE_EQ(ctx, resource1->getResCode(), 8);
-        MT_REQUIRE_EQ(ctx, resource1->getValuesCount(), 1);
-        MT_REQUIRE_EQ(ctx, resource1->getValueAt(0), 814);
-        MT_REQUIRE_EQ(ctx, resource1->getResInfo(), 0);
+        C_ASSERT(resource1->getResCode() == 8);
+        C_ASSERT(resource1->getValuesCount() == 1);
+        C_ASSERT(resource1->getValueAt(0) == 814);
+        C_ASSERT(resource1->getResInfo() == 0);
 
         Resource* resource2 = signalInfo->mSignalResources->at(1);
-        MT_REQUIRE_EQ(ctx, resource2->getResCode(), 15);
-        MT_REQUIRE_EQ(ctx, resource2->getValuesCount(), 2);
-        MT_REQUIRE_EQ(ctx, resource2->getValueAt(0), 23);
-        MT_REQUIRE_EQ(ctx, resource2->getValueAt(1), 90);
-        MT_REQUIRE_EQ(ctx, resource2->getResInfo(), 256);
+        C_ASSERT(resource2->getResCode() == 15);
+        C_ASSERT(resource2->getValuesCount() == 2);
+        C_ASSERT(resource2->getValueAt(0) == 23);
+        C_ASSERT(resource2->getValueAt(1) == 90);
+        C_ASSERT(resource2->getResInfo() == 256);
     }
 
-    MT_TEST(Component, RestuneParserYAMLDataIntegrity3_3, "signalparsing") {
-        EnsureInit();
-        SignalInfo* signalInfo = SignalRegistry::getInstance()->getSignalConfigById(0x000d0003);
-        MT_REQUIRE_EQ(ctx, signalInfo, (SignalInfo*)nullptr);
+    static void TestRestuneParserYAMLDataIntegrity3_3() {
+        SignalInfo* signalInfo = SignalRegistry::getInstance()->getSignalConfigById(0x0000030d, 0);
+        C_ASSERT(signalInfo == nullptr);
     }
 
-    MT_TEST(Component, RestuneParserYAMLDataIntegrity3_4, "signalparsing") {
-        EnsureInit();
-        SignalInfo* signalInfo = SignalRegistry::getInstance()->getSignalConfigById(0x000d0007);
+    static void TestRestuneParserYAMLDataIntegrity3_4() {
+        SignalInfo* signalInfo = SignalRegistry::getInstance()->getSignalConfigById(0x0000070d, 0);
 
-        MT_REQUIRE(ctx, signalInfo != nullptr);
-        MT_REQUIRE_EQ(ctx, signalInfo->mSignalID, 0x0007);
-        MT_REQUIRE_EQ(ctx, signalInfo->mSignalCategory, 0x0d);
-        MT_REQUIRE_EQ(ctx, std::strcmp((const char*)signalInfo->mSignalName.data(), "TEST_SIGNAL_8"), 0);
-        MT_REQUIRE_EQ(ctx, signalInfo->mTimeout, 5500);
+        C_ASSERT(signalInfo != nullptr);
+        C_ASSERT(signalInfo->mSignalID == 0x0007);
+        C_ASSERT(signalInfo->mSignalCategory == 0x0d);
+        C_ASSERT(strcmp((const char*)signalInfo->mSignalName.data(), "TEST_SIGNAL_8") == 0);
+        C_ASSERT(signalInfo->mTimeout == 5500);
 
-        MT_REQUIRE(ctx, signalInfo->mPermissions != nullptr);
-        MT_REQUIRE_EQ(ctx, signalInfo->mDerivatives, (decltype(signalInfo->mDerivatives))nullptr);
-        MT_REQUIRE(ctx, signalInfo->mSignalResources != nullptr);
+        C_ASSERT(signalInfo->mPermissions != nullptr);
+        C_ASSERT(signalInfo->mDerivatives == nullptr);
+        C_ASSERT(signalInfo->mSignalResources != nullptr);
 
-        MT_REQUIRE_EQ(ctx, (int)signalInfo->mPermissions->size(), 1);
-        MT_REQUIRE_EQ(ctx, (int)signalInfo->mSignalResources->size(), 2);
+        C_ASSERT(signalInfo->mPermissions->size() == 1);
+        C_ASSERT(signalInfo->mSignalResources->size() == 2);
 
-        MT_REQUIRE_EQ(ctx, signalInfo->mPermissions->at(0), PERMISSION_THIRD_PARTY);
+        C_ASSERT(signalInfo->mPermissions->at(0) == PERMISSION_THIRD_PARTY);
 
         Resource* resource1 = signalInfo->mSignalResources->at(0);
-        MT_REQUIRE_EQ(ctx, resource1->getResCode(), 0x000900aa);
-        MT_REQUIRE_EQ(ctx, resource1->getValuesCount(), 3);
-        MT_REQUIRE_EQ(ctx, resource1->getValueAt(0), -1);
-        MT_REQUIRE_EQ(ctx, resource1->getValueAt(1), -1);
-        MT_REQUIRE_EQ(ctx, resource1->getValueAt(2), 68);
-        MT_REQUIRE_EQ(ctx, resource1->getResInfo(), 0);
+        C_ASSERT(resource1->getResCode() == 0x000900aa);
+        C_ASSERT(resource1->getValuesCount() == 3);
+        C_ASSERT(resource1->getValueAt(0) == -1);
+        C_ASSERT(resource1->getValueAt(1) == -1);
+        C_ASSERT(resource1->getValueAt(2) == 68);
+        C_ASSERT(resource1->getResInfo() == 0);
 
         Resource* resource2 = signalInfo->mSignalResources->at(1);
-        MT_REQUIRE_EQ(ctx, resource2->getResCode(), 0x000900dc);
-        MT_REQUIRE_EQ(ctx, resource2->getValuesCount(), 4);
-        MT_REQUIRE_EQ(ctx, resource2->getValueAt(0), -1);
-        MT_REQUIRE_EQ(ctx, resource2->getValueAt(1), -1);
-        MT_REQUIRE_EQ(ctx, resource2->getValueAt(2), 50);
-        MT_REQUIRE_EQ(ctx, resource2->getValueAt(3), 512);
-        MT_REQUIRE_EQ(ctx, resource2->getResInfo(), 0);
+        C_ASSERT(resource2->getResCode() == 0x000900dc);
+        C_ASSERT(resource2->getValuesCount() == 4);
+        C_ASSERT(resource2->getValueAt(0) == -1);
+        C_ASSERT(resource2->getValueAt(1) == -1);
+        C_ASSERT(resource2->getValueAt(2) == 50);
+        C_ASSERT(resource2->getValueAt(3) == 512);
+        C_ASSERT(resource2->getResInfo() == 0);
     }
-} // namespace SignalParsingTests
 
-// ----------------------------------------------------------------------------
-// InitConfigParsingTests
-// ----------------------------------------------------------------------------
+    static void RunTestGroup() {
+        std::cout<<"\nRunning tests from the Group: "<<__testGroupName<<std::endl;
+
+        Init();
+        RUN_TEST(TestRestuneParserYAMLDataIntegrity1);
+        RUN_TEST(TestRestuneParserYAMLDataIntegrity3_1);
+        RUN_TEST(TestRestuneParserYAMLDataIntegrity3_2);
+        RUN_TEST(TestRestuneParserYAMLDataIntegrity3_3);
+        RUN_TEST(TestRestuneParserYAMLDataIntegrity3_4);
+
+        std::cout<<"\n\nAll tests from the Group: "<<__testGroupName<<", Ran Successfully"<<std::endl;
+    }
+}
+
 namespace InitConfigParsingTests {
     std::string __testGroupName = "InitConfigParsingTests";
 
     static ErrCode parsingStatus = RC_SUCCESS;
-
     static void Init() {
         RestuneParser configProcessor;
         parsingStatus = configProcessor.parseInitConfigs("/etc/urm/tests/configs/InitConfig.yaml");
     }
 
-    static void EnsureInit() {
-        static bool done = false;
-        if (!done) { Init(); done = true; }
+    static void TestInitRestuneParserYAMLDataIntegrity1() {
+        C_ASSERT((TargetRegistry::getInstance() != nullptr));
+        C_ASSERT((parsingStatus == RC_SUCCESS));
     }
 
-    MT_TEST(Component, InitRestuneParserYAMLDataIntegrity1, "initconfigparsing") {
-        EnsureInit();
-        MT_REQUIRE(ctx, (TargetRegistry::getInstance() != nullptr));
-        MT_REQUIRE_EQ(ctx, parsingStatus, RC_SUCCESS);
+    static void TestInitRestuneParserYAMLDataIntegrity2() {
+        std::cout<<"Count of Cgroups created: "<<TargetRegistry::getInstance()->getCreatedCGroupsCount()<<std::endl;
+        C_ASSERT(TargetRegistry::getInstance()->getCreatedCGroupsCount() == 3);
     }
 
-    MT_TEST(Component, InitRestuneParserYAMLDataIntegrity2, "initconfigparsing") {
-        EnsureInit();
-        std::cout << "Count of Cgroups created: " << TargetRegistry::getInstance()->getCreatedCGroupsCount() << std::endl;
-        MT_REQUIRE_EQ(ctx, TargetRegistry::getInstance()->getCreatedCGroupsCount(), 3);
-    }
-
-    MT_TEST(Component, InitRestuneParserYAMLDataIntegrity3, "initconfigparsing") {
-        EnsureInit();
+    // Note don't rely on order here, since internally CGroup mapping data is stored
+    // as an unordered_map.
+    static void TestInitRestuneParserYAMLDataIntegrity3() {
         std::vector<std::string> cGroupNames;
         TargetRegistry::getInstance()->getCGroupNames(cGroupNames);
         std::vector<std::string> expectedNames = {"camera-cgroup", "audio-cgroup", "video-cgroup"};
 
-        MT_REQUIRE_EQ(ctx, (int)cGroupNames.size(), 3);
+        C_ASSERT(cGroupNames.size() == 3);
 
         std::unordered_set<std::string> expectedNamesSet;
-        for (int32_t i = 0; i < (int)cGroupNames.size(); i++) {
+        for(int32_t i = 0; i < cGroupNames.size(); i++) {
             expectedNamesSet.insert(cGroupNames[i]);
         }
 
-        for (int32_t i = 0; i < (int)expectedNames.size(); i++) {
-            MT_REQUIRE(ctx, expectedNamesSet.find(expectedNames[i]) != expectedNamesSet.end());
+        for(int32_t i = 0; i < expectedNames.size(); i++) {
+            C_ASSERT(expectedNamesSet.find(expectedNames[i]) != expectedNamesSet.end());
         }
     }
 
-    MT_TEST(Component, InitRestuneParserYAMLDataIntegrity4, "initconfigparsing") {
-        EnsureInit();
+    static void TestInitRestuneParserYAMLDataIntegrity4() {
         CGroupConfigInfo* cameraConfig = TargetRegistry::getInstance()->getCGroupConfig(801);
-        MT_REQUIRE(ctx, cameraConfig != nullptr);
-        MT_REQUIRE_EQ(ctx, cameraConfig->mCgroupName, std::string("camera-cgroup"));
-        MT_REQUIRE_EQ(ctx, cameraConfig->mIsThreaded, false);
+        C_ASSERT(cameraConfig != nullptr);
+        C_ASSERT(cameraConfig->mCgroupName == "camera-cgroup");
+        C_ASSERT(cameraConfig->mIsThreaded == false);
 
         CGroupConfigInfo* videoConfig = TargetRegistry::getInstance()->getCGroupConfig(803);
-        MT_REQUIRE(ctx, videoConfig != nullptr);
-        MT_REQUIRE_EQ(ctx, videoConfig->mCgroupName, std::string("video-cgroup"));
-        MT_REQUIRE_EQ(ctx, videoConfig->mIsThreaded, true);
+        C_ASSERT(videoConfig != nullptr);
+        C_ASSERT(videoConfig->mCgroupName == "video-cgroup");
+        C_ASSERT(videoConfig->mIsThreaded == true);
     }
 
-    MT_TEST(Component, InitRestuneParserYAMLDataIntegrity5, "initconfigparsing") {
-        EnsureInit();
-        MT_REQUIRE_EQ(ctx, TargetRegistry::getInstance()->getCreatedMpamGroupsCount(), 3);
+    static void TestInitRestuneParserYAMLDataIntegrity5() {
+        C_ASSERT(TargetRegistry::getInstance()->getCreatedMpamGroupsCount() == 3);
     }
 
-    MT_TEST(Component, InitRestuneParserYAMLDataIntegrity6, "initconfigparsing") {
-        EnsureInit();
+    // Note don't rely on order here, since internally CGroup mapping data is stored
+    // as an unordered_map.
+    static void TestInitRestuneParserYAMLDataIntegrity6() {
         std::vector<std::string> mpamGroupNames;
         TargetRegistry::getInstance()->getMpamGroupNames(mpamGroupNames);
         std::vector<std::string> expectedNames = {"camera-mpam-group", "audio-mpam-group", "video-mpam-group"};
 
-        MT_REQUIRE_EQ(ctx, (int)mpamGroupNames.size(), 3);
+        C_ASSERT(mpamGroupNames.size() == 3);
 
         std::unordered_set<std::string> expectedNamesSet;
-        for (int32_t i = 0; i < (int)mpamGroupNames.size(); i++) {
+        for(int32_t i = 0; i < mpamGroupNames.size(); i++) {
             expectedNamesSet.insert(mpamGroupNames[i]);
         }
 
-        for (int32_t i = 0; i < (int)expectedNames.size(); i++) {
-            MT_REQUIRE(ctx, expectedNamesSet.find(expectedNames[i]) != expectedNamesSet.end());
+        for(int32_t i = 0; i < expectedNames.size(); i++) {
+            C_ASSERT(expectedNamesSet.find(expectedNames[i]) != expectedNamesSet.end());
         }
     }
 
-    MT_TEST(Component, InitRestuneParserYAMLDataIntegrity7, "initconfigparsing") {
-        EnsureInit();
+    static void TestInitRestuneParserYAMLDataIntegrity7() {
         MpamGroupConfigInfo* cameraConfig = TargetRegistry::getInstance()->getMpamGroupConfig(0);
-        MT_REQUIRE(ctx, cameraConfig != nullptr);
-        MT_REQUIRE_EQ(ctx, cameraConfig->mMpamGroupName, std::string("camera-mpam-group"));
-        MT_REQUIRE_EQ(ctx, cameraConfig->mMpamGroupInfoID, 0);
-        MT_REQUIRE_EQ(ctx, cameraConfig->mPriority, 0);
+        C_ASSERT(cameraConfig != nullptr);
+        C_ASSERT(cameraConfig->mMpamGroupName == "camera-mpam-group");
+        C_ASSERT(cameraConfig->mMpamGroupInfoID == 0);
+        C_ASSERT(cameraConfig->mPriority == 0);
 
         MpamGroupConfigInfo* videoConfig = TargetRegistry::getInstance()->getMpamGroupConfig(2);
-        MT_REQUIRE(ctx, videoConfig != nullptr);
-        MT_REQUIRE_EQ(ctx, videoConfig->mMpamGroupName, std::string("video-mpam-group"));
-        MT_REQUIRE_EQ(ctx, videoConfig->mMpamGroupInfoID, 2);
-        MT_REQUIRE_EQ(ctx, videoConfig->mPriority, 2);
+        C_ASSERT(videoConfig != nullptr);
+        C_ASSERT(videoConfig->mMpamGroupName == "video-mpam-group");
+        C_ASSERT(videoConfig->mMpamGroupInfoID == 2);
+        C_ASSERT(videoConfig->mPriority == 2);
     }
-} // namespace InitConfigParsingTests
 
-// ----------------------------------------------------------------------------
-// PropertyParsingTests  (concurrent test converted to NO LAMBDAS)
-// ----------------------------------------------------------------------------
+    static void RunTestGroup() {
+        std::cout<<"\nRunning tests from the Group: "<<__testGroupName<<std::endl;
+
+        Init();
+        RUN_TEST(TestInitRestuneParserYAMLDataIntegrity1);
+        RUN_TEST(TestInitRestuneParserYAMLDataIntegrity2);
+        RUN_TEST(TestInitRestuneParserYAMLDataIntegrity3);
+        RUN_TEST(TestInitRestuneParserYAMLDataIntegrity4);
+        RUN_TEST(TestInitRestuneParserYAMLDataIntegrity5);
+        RUN_TEST(TestInitRestuneParserYAMLDataIntegrity6);
+        RUN_TEST(TestInitRestuneParserYAMLDataIntegrity7);
+
+        std::cout<<"\n\nAll tests from the Group: "<<__testGroupName<<", Ran Successfully"<<std::endl;
+    }
+}
+
 namespace PropertyParsingTests {
     std::string __testGroupName = "PropertyParsingTests";
 
     static ErrCode parsingStatus = RC_SUCCESS;
-
     static void Init() {
         RestuneParser configProcessor;
         parsingStatus = configProcessor.parsePropertiesConfigs("/etc/urm/tests/configs/PropertiesConfig.yaml");
     }
 
-    static void EnsureInit() {
-        static bool done = false;
-        if (!done) { Init(); done = true; }
+    static void TestSysRestuneParserYAMLDataIntegrity1() {
+        C_ASSERT(PropertiesRegistry::getInstance() != nullptr);
+        C_ASSERT(parsingStatus == RC_SUCCESS);
     }
 
-    MT_TEST(Component, SysRestuneParserYAMLDataIntegrity1, "propertyparsing") {
-        EnsureInit();
-        MT_REQUIRE(ctx, PropertiesRegistry::getInstance() != nullptr);
-        MT_REQUIRE_EQ(ctx, parsingStatus, RC_SUCCESS);
-    }
-
-    MT_TEST(Component, SysConfigGetPropSimpleRetrieval1, "propertyparsing") {
-        EnsureInit();
+    static void TestSysConfigGetPropSimpleRetrieval1() {
         std::string resultBuffer;
+
         int8_t propFound = submitPropGetRequest("test.debug.enabled", resultBuffer, "false");
 
-        MT_REQUIRE_EQ(ctx, propFound, true);
-        MT_REQUIRE_EQ(ctx, std::strcmp(resultBuffer.c_str(), "true"), 0);
+        C_ASSERT(propFound == true);
+        C_ASSERT(strcmp(resultBuffer.c_str(), "true") == 0);
     }
 
-    MT_TEST(Component, SysConfigGetPropSimpleRetrieval2, "propertyparsing") {
-        EnsureInit();
+    static void TestSysConfigGetPropSimpleRetrieval2() {
         std::string resultBuffer;
+
         int8_t propFound = submitPropGetRequest("test.current.worker_thread.count", resultBuffer, "false");
 
-        MT_REQUIRE_EQ(ctx, propFound, true);
-        MT_REQUIRE_EQ(ctx, std::strcmp(resultBuffer.c_str(), "125"), 0);
+        C_ASSERT(propFound == true);
+        C_ASSERT(strcmp(resultBuffer.c_str(), "125") == 0);
     }
 
-    MT_TEST(Component, SysConfigGetPropSimpleRetrievalInvalidProperty, "propertyparsing") {
-        EnsureInit();
+    static void TestSysConfigGetPropSimpleRetrievalInvalidProperty() {
         std::string resultBuffer;
+
         int8_t propFound = submitPropGetRequest("test.historic.worker_thread.count", resultBuffer, "5");
 
-        MT_REQUIRE_EQ(ctx, propFound, false);
-        MT_REQUIRE_EQ(ctx, std::strcmp(resultBuffer.c_str(), "5"), 0);
+        C_ASSERT(propFound == false);
+        C_ASSERT(strcmp(resultBuffer.c_str(), "5") == 0);
     }
 
-    // --- Concurrent retrieval (NO lambdas): free functions receive TestContext* ---
-    static void PropGet_CurrentWorkers(mtest::TestContext* tctx) {
-        std::string resultBuffer;
-        int8_t propFound = submitPropGetRequest("test.current.worker_thread.count", resultBuffer, "false");
-        MT_REQUIRE_EQ((*tctx), propFound, true);
-        MT_REQUIRE_EQ((*tctx), std::strcmp(resultBuffer.c_str(), "125"), 0);
-    }
-    static void PropGet_DebugEnabled(mtest::TestContext* tctx) {
-        std::string resultBuffer;
-        int8_t propFound = submitPropGetRequest("test.debug.enabled", resultBuffer, "false");
-        MT_REQUIRE_EQ((*tctx), propFound, true);
-        MT_REQUIRE_EQ((*tctx), std::strcmp(resultBuffer.c_str(), "true"), 0);
-    }
-    static void PropGet_DocBuildMode(mtest::TestContext* tctx) {
-        std::string resultBuffer;
-        int8_t propFound = submitPropGetRequest("test.doc.build.mode.enabled", resultBuffer, "false");
-        MT_REQUIRE_EQ((*tctx), propFound, true);
-        MT_REQUIRE_EQ((*tctx), std::strcmp(resultBuffer.c_str(), "false"), 0);
+    static void TestSysConfigGetPropConcurrentRetrieval() {
+        std::thread th1([&]{
+            std::string resultBuffer;
+            int8_t propFound = submitPropGetRequest("test.current.worker_thread.count", resultBuffer, "false");
+
+            C_ASSERT(propFound == true);
+            C_ASSERT(strcmp(resultBuffer.c_str(), "125") == 0);
+        });
+
+        std::thread th2([&]{
+            std::string resultBuffer;
+            int8_t propFound = submitPropGetRequest("test.debug.enabled", resultBuffer, "false");
+
+            C_ASSERT(propFound == true);
+            C_ASSERT(strcmp(resultBuffer.c_str(), "true") == 0);
+        });
+
+        std::thread th3([&]{
+            std::string resultBuffer;
+            int8_t propFound = submitPropGetRequest("test.doc.build.mode.enabled", resultBuffer, "false");
+
+            C_ASSERT(propFound == true);
+            C_ASSERT(strcmp(resultBuffer.c_str(), "false") == 0);
+        });
+
+        th1.join();
+        th2.join();
+        th3.join();
     }
 
-    MT_TEST(Component, SysConfigGetPropConcurrentRetrieval, "propertyparsing") {
-        EnsureInit();
-        std::thread th1(PropGet_CurrentWorkers, &ctx);
-        std::thread th2(PropGet_DebugEnabled, &ctx);
-        std::thread th3(PropGet_DocBuildMode, &ctx);
-        th1.join(); th2.join(); th3.join();
-    }
-} // namespace PropertyParsingTests
+    static void RunTestGroup() {
+        std::cout<<"\nRunning tests from the Group: "<<__testGroupName<<std::endl;
 
-// ----------------------------------------------------------------------------
-// TargetRestuneParserTests
-// ----------------------------------------------------------------------------
+        Init();
+        RUN_TEST(TestSysRestuneParserYAMLDataIntegrity1);
+        RUN_TEST(TestSysConfigGetPropSimpleRetrieval1);
+        RUN_TEST(TestSysConfigGetPropSimpleRetrieval2);
+        RUN_TEST(TestSysConfigGetPropSimpleRetrievalInvalidProperty);
+        RUN_TEST(TestSysConfigGetPropConcurrentRetrieval);
+
+        std::cout<<"\n\nAll tests from the Group: "<<__testGroupName<<", Ran Successfully"<<std::endl;
+    }
+}
+
 namespace TargetRestuneParserTests {
     std::string __testGroupName = "TargetRestuneParserTests";
 
     static ErrCode parsingStatus = RC_SUCCESS;
-
     static void Init() {
         UrmSettings::targetConfigs.targetName = "TestDevice";
         RestuneParser configProcessor;
         parsingStatus = configProcessor.parseTargetConfigs("/etc/urm/tests/configs/TargetConfigDup.yaml");
     }
 
-    static void EnsureInit() {
-        static bool done = false;
-        if (!done) { Init(); done = true; }
+    static void TestTargetRestuneParserYAMLDataIntegrity1() {
+        C_ASSERT(TargetRegistry::getInstance() != nullptr);
+        C_ASSERT(parsingStatus == RC_SUCCESS);
     }
 
-    MT_TEST(Component, TargetRestuneParserYAMLDataIntegrity1, "component-serial") {
-        EnsureInit();
-        MT_REQUIRE(ctx, TargetRegistry::getInstance() != nullptr);
-        MT_REQUIRE_EQ(ctx, parsingStatus, RC_SUCCESS);
+    static void TestTargetRestuneParserYAMLDataIntegrity2() {
+        std::cout<<"Determined Cluster Count = "<<UrmSettings::targetConfigs.mTotalClusterCount<<std::endl;
+        C_ASSERT(UrmSettings::targetConfigs.mTotalClusterCount == 4);
     }
 
-    MT_TEST(Component, TargetRestuneParserYAMLDataIntegrity2, "targetrestuneparser") {
-        EnsureInit();
-        std::cout << "Determined Cluster Count = " << UrmSettings::targetConfigs.mTotalClusterCount << std::endl;
-        MT_REQUIRE_EQ(ctx, UrmSettings::targetConfigs.mTotalClusterCount, 4);
+    static void TestTargetRestuneParserYAMLDataIntegrity3() {
+        C_ASSERT(TargetRegistry::getInstance()->getPhysicalClusterId(0) == 4);
+        C_ASSERT(TargetRegistry::getInstance()->getPhysicalClusterId(1) == 0);
+        C_ASSERT(TargetRegistry::getInstance()->getPhysicalClusterId(2) == 9);
+        C_ASSERT(TargetRegistry::getInstance()->getPhysicalClusterId(3) == 7);
     }
 
-    MT_TEST(Component, TargetRestuneParserYAMLDataIntegrity3, "targetrestuneparser") {
-        EnsureInit();
-        MT_REQUIRE_EQ(ctx, TargetRegistry::getInstance()->getPhysicalClusterId(0), 4);
-        MT_REQUIRE_EQ(ctx, TargetRegistry::getInstance()->getPhysicalClusterId(1), 0);
-        MT_REQUIRE_EQ(ctx, TargetRegistry::getInstance()->getPhysicalClusterId(2), 9);
-        MT_REQUIRE_EQ(ctx, TargetRegistry::getInstance()->getPhysicalClusterId(3), 7);
+    static void TestTargetRestuneParserYAMLDataIntegrity4() {
+        // Distribution of physical clusters
+        // 1:0 => 0, 1, 2, 3
+        // 0:4 => 4, 5, 6
+        // 3:7 => 7, 8
+        // 2:9 => 9
+        C_ASSERT(TargetRegistry::getInstance()->getPhysicalCoreId(1, 3) == 2);
+
+        C_ASSERT(TargetRegistry::getInstance()->getPhysicalCoreId(0, 2) == 5);
+
+        C_ASSERT(TargetRegistry::getInstance()->getPhysicalCoreId(3, 1) == 7);
+
+        C_ASSERT(TargetRegistry::getInstance()->getPhysicalCoreId(2, 1) == 9);
     }
 
-    MT_TEST(Component, TargetRestuneParserYAMLDataIntegrity4, "targetrestuneparser") {
-        EnsureInit();
-        // Core distribution checks
-        MT_REQUIRE_EQ(ctx, TargetRegistry::getInstance()->getPhysicalCoreId(1, 3), 2);
-        MT_REQUIRE_EQ(ctx, TargetRegistry::getInstance()->getPhysicalCoreId(0, 2), 5);
-        MT_REQUIRE_EQ(ctx, TargetRegistry::getInstance()->getPhysicalCoreId(3, 1), 7);
-        MT_REQUIRE_EQ(ctx, TargetRegistry::getInstance()->getPhysicalCoreId(2, 1), 9);
-    }
-} // namespace TargetRestuneParserTests
+    static void RunTestGroup() {
+        std::cout<<"\nRunning tests from the Group: "<<__testGroupName<<std::endl;
 
-// ----------------------------------------------------------------------------
-// ExtFeaturesParsingTests
-// ----------------------------------------------------------------------------
+        Init();
+        RUN_TEST(TestTargetRestuneParserYAMLDataIntegrity1);
+        RUN_TEST(TestTargetRestuneParserYAMLDataIntegrity2);
+        RUN_TEST(TestTargetRestuneParserYAMLDataIntegrity3);
+        RUN_TEST(TestTargetRestuneParserYAMLDataIntegrity4);
+
+        std::cout<<"\n\nAll tests from the Group: "<<__testGroupName<<", Ran Successfully"<<std::endl;
+    }
+}
+
 namespace ExtFeaturesParsingTests {
     std::string __testGroupName = "ExtFeaturesParsingTests";
 
     static ErrCode parsingStatus = RC_SUCCESS;
-
     static void Init() {
         RestuneParser configProcessor;
         parsingStatus = configProcessor.parseExtFeaturesConfigs("/etc/urm/tests/configs/ExtFeaturesConfig.yaml");
     }
 
-    static void EnsureInit() {
-        static bool done = false;
-        if (!done) { Init(); done = true; }
+    static void TestExtFeatRestuneParserYAMLDataIntegrity1() {
+        C_ASSERT(ExtFeaturesRegistry::getInstance() != nullptr);
+        C_ASSERT(parsingStatus == RC_SUCCESS);
     }
 
-    MT_TEST(Component, ExtFeatRestuneParserYAMLDataIntegrity1, "extfeatureparsing") {
-        EnsureInit();
-        MT_REQUIRE(ctx, ExtFeaturesRegistry::getInstance() != nullptr);
-        MT_REQUIRE_EQ(ctx, parsingStatus, RC_SUCCESS);
-    }
-
-    MT_TEST(Component, ExtFeatRestuneParserYAMLDataIntegrity3, "extfeatureparsing") {
-        EnsureInit();
+    static void TestExtFeatRestuneParserYAMLDataIntegrity3() {
         ExtFeatureInfo* feature =
             ExtFeaturesRegistry::getInstance()->getExtFeatureConfigById(0x00000001);
 
-        MT_REQUIRE(ctx, feature != nullptr);
-        MT_REQUIRE_EQ(ctx, feature->mFeatureId, 0x00000001);
-        MT_REQUIRE_EQ(ctx, feature->mFeatureName, std::string("FEAT-1"));
-        MT_REQUIRE_EQ(ctx, feature->mFeatureLib, std::string("/usr/lib/libtesttuner.so"));
+        C_ASSERT(feature != nullptr);
+        C_ASSERT(feature->mFeatureId == 0x00000001);
+        C_ASSERT(feature->mFeatureName == "FEAT-1");
+        C_ASSERT(feature->mFeatureLib == "/usr/lib/libtesttuner.so");
 
-        MT_REQUIRE(ctx, feature->mSignalsSubscribedTo != nullptr);
-        MT_REQUIRE_EQ(ctx, (int)feature->mSignalsSubscribedTo->size(), 2);
-        MT_REQUIRE_EQ(ctx, (*feature->mSignalsSubscribedTo)[0], 0x000dbbca);
-        MT_REQUIRE_EQ(ctx, (*feature->mSignalsSubscribedTo)[1], 0x000a00ff);
+        C_ASSERT(feature->mSignalsSubscribedTo != nullptr);
+        C_ASSERT(feature->mSignalsSubscribedTo->size() == 2);
+        C_ASSERT((*feature->mSignalsSubscribedTo)[0] == 0x000dbbca);
+        C_ASSERT((*feature->mSignalsSubscribedTo)[1] == 0x000a00ff);
     }
 
-    MT_TEST(Component, ExtFeatRestuneParserYAMLDataIntegrity4, "extfeatureparsing") {
-        EnsureInit();
+    static void TestExtFeatRestuneParserYAMLDataIntegrity4() {
         ExtFeatureInfo* feature =
             ExtFeaturesRegistry::getInstance()->getExtFeatureConfigById(0x00000002);
 
-        MT_REQUIRE(ctx, (feature != nullptr));
-        MT_REQUIRE_EQ(ctx, feature->mFeatureId, 0x00000002);
-        MT_REQUIRE_EQ(ctx, feature->mFeatureName, std::string("FEAT-2"));
-        MT_REQUIRE_EQ(ctx, feature->mFeatureLib, std::string("/usr/lib/libpropagate.so"));
+        C_ASSERT((feature != nullptr));
+        C_ASSERT((feature->mFeatureId == 0x00000002));
+        C_ASSERT((feature->mFeatureName == "FEAT-2"));
+        C_ASSERT((feature->mFeatureLib == "/usr/lib/libpropagate.so"));
 
-        MT_REQUIRE(ctx, (feature->mSignalsSubscribedTo != nullptr));
-        MT_REQUIRE_EQ(ctx, (int)feature->mSignalsSubscribedTo->size(), 2);
-        MT_REQUIRE_EQ(ctx, (*feature->mSignalsSubscribedTo)[0], 0x80a105ea);
-        MT_REQUIRE_EQ(ctx, (*feature->mSignalsSubscribedTo)[1], 0x800ccca5);
+        C_ASSERT((feature->mSignalsSubscribedTo != nullptr));
+        C_ASSERT((feature->mSignalsSubscribedTo->size() == 2));
+        C_ASSERT((*feature->mSignalsSubscribedTo)[0] == 0x80a105ea);
+        C_ASSERT((*feature->mSignalsSubscribedTo)[1] == 0x800ccca5);
     }
-} // namespace ExtFeaturesParsingTests
 
-// ----------------------------------------------------------------------------
-// ResourceParsingTestsAddOn
-// ----------------------------------------------------------------------------
+    static void RunTestGroup() {
+        std::cout<<"\nRunning tests from the Group: "<<__testGroupName<<std::endl;
+
+        Init();
+        RUN_TEST(TestExtFeatRestuneParserYAMLDataIntegrity1);
+        RUN_TEST(TestExtFeatRestuneParserYAMLDataIntegrity3);
+        RUN_TEST(TestExtFeatRestuneParserYAMLDataIntegrity4);
+
+        std::cout<<"\n\nAll tests from the Group: "<<__testGroupName<<", Ran Successfully"<<std::endl;
+    }
+}
+
 namespace ResourceParsingTestsAddOn {
     std::string __testGroupName = "ResourceParsingTestsAddOn";
 
     static ErrCode parsingStatus = RC_SUCCESS;
-
     static void Init() {
         RestuneParser configProcessor;
         std::string additionalResources = "/etc/urm/tests/configs/ResourcesConfigAddOn.yaml";
 
-        if (RC_IS_OK(parsingStatus)) {
-            // Single-argument overload for compatibility
-            parsingStatus = configProcessor.parseResourceConfigs(additionalResources);
+        if(RC_IS_OK(parsingStatus)) {
+            parsingStatus = configProcessor.parseResourceConfigs(additionalResources, true);
         }
     }
 
-    static void EnsureInit() {
-        static bool done = false;
-        if (!done) {
-            // Make sure base resources are parsed first (reuse ResourceParsingTests)
-            ResourceParsingTests::EnsureInit();
-            Init();
-            done = true;
-        }
+    static void TestResourceParsingSanity() {
+        C_ASSERT(ResourceRegistry::getInstance() != nullptr);
+        C_ASSERT(parsingStatus == RC_SUCCESS);
     }
 
-    MT_TEST(Component, ResourceParsingSanity, "resourceparsing") {
-        EnsureInit();
-        MT_REQUIRE(ctx, ResourceRegistry::getInstance() != nullptr);
-        MT_REQUIRE_EQ(ctx, parsingStatus, RC_SUCCESS);
-    }
-
-    MT_TEST(Component, ResourceParsingResourcesMerged1, "resourceparsing") {
-        EnsureInit();
+    static void TestResourceParsingResourcesMerged1() {
         ResConfInfo* resourceConfigInfo = ResourceRegistry::getInstance()->getResConf(0x80ff000b);
 
-        MT_REQUIRE(ctx, (resourceConfigInfo != nullptr));
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mResourceResType, 0xff);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mResourceResID, 0x000b);
-        MT_REQUIRE_EQ(ctx, std::strcmp((const char*)resourceConfigInfo->mResourceName.data(), "OVERRIDE_RESOURCE_1"), 0);
-        MT_REQUIRE_EQ(ctx, std::strcmp((const char*)resourceConfigInfo->mResourcePath.data(), "/etc/resouce-tuner/tests/Configs/pathB/overwrite"), 0);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mHighThreshold, 220);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mLowThreshold, 150);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mPolicy, LOWER_BETTER);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mPermissions, PERMISSION_SYSTEM);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mModes, (MODE_RESUME | MODE_DOZE));
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mApplyType, ResourceApplyType::APPLY_CORE);
+        C_ASSERT((resourceConfigInfo != nullptr));
+        C_ASSERT((resourceConfigInfo->mResourceResType == 0xff));
+        C_ASSERT((resourceConfigInfo->mResourceResID == 0x000b));
+        C_ASSERT((strcmp((const char*)resourceConfigInfo->mResourceName.data(), "OVERRIDE_RESOURCE_1") == 0));
+        C_ASSERT((strcmp((const char*)resourceConfigInfo->mResourcePath.data(), "/etc/resouce-tuner/tests/Configs/pathB/overwrite") == 0));
+        C_ASSERT((resourceConfigInfo->mHighThreshold == 220));
+        C_ASSERT((resourceConfigInfo->mLowThreshold == 150));
+        C_ASSERT((resourceConfigInfo->mPolicy == LOWER_BETTER));
+        C_ASSERT((resourceConfigInfo->mPermissions == PERMISSION_SYSTEM));
+        C_ASSERT((resourceConfigInfo->mModes == (MODE_RESUME | MODE_DOZE)));
+        C_ASSERT((resourceConfigInfo->mApplyType == ResourceApplyType::APPLY_CORE));
     }
 
-    MT_TEST(Component, ResourceParsingResourcesMerged2, "resourceparsing") {
-        EnsureInit();
+    static void TestResourceParsingResourcesMerged2() {
         ResConfInfo* resourceConfigInfo = ResourceRegistry::getInstance()->getResConf(0x80ff1000);
 
-        MT_REQUIRE(ctx, (resourceConfigInfo != nullptr));
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mResourceResType, 0xff);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mResourceResID, 0x1000);
-        MT_REQUIRE_EQ(ctx, std::strcmp((const char*)resourceConfigInfo->mResourceName.data(), "CUSTOM_SCALING_FREQ"), 0);
-        MT_REQUIRE_EQ(ctx, std::strcmp((const char*)resourceConfigInfo->mResourcePath.data(), "/usr/local/customfreq/node"), 0);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mHighThreshold, 90);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mLowThreshold, 80);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mPolicy, LAZY_APPLY);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mPermissions, PERMISSION_THIRD_PARTY);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mModes, MODE_DOZE);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mApplyType, ResourceApplyType::APPLY_CORE);
+        C_ASSERT((resourceConfigInfo != nullptr));
+        C_ASSERT((resourceConfigInfo->mResourceResType == 0xff));
+        C_ASSERT((resourceConfigInfo->mResourceResID == 0x1000));
+        C_ASSERT((strcmp((const char*)resourceConfigInfo->mResourceName.data(), "CUSTOM_SCALING_FREQ") == 0));
+        C_ASSERT((strcmp((const char*)resourceConfigInfo->mResourcePath.data(), "/usr/local/customfreq/node") == 0));
+        C_ASSERT((resourceConfigInfo->mHighThreshold == 90));
+        C_ASSERT((resourceConfigInfo->mLowThreshold == 80));
+        C_ASSERT((resourceConfigInfo->mPolicy == LAZY_APPLY));
+        C_ASSERT((resourceConfigInfo->mPermissions == PERMISSION_THIRD_PARTY));
+        C_ASSERT((resourceConfigInfo->mModes == MODE_DOZE));
+        C_ASSERT((resourceConfigInfo->mApplyType == ResourceApplyType::APPLY_CORE));
     }
 
-    MT_TEST(Component, ResourceParsingResourcesMerged3, "resourceparsing") {
-        EnsureInit();
+    static void TestResourceParsingResourcesMerged3() {
         ResConfInfo* resourceConfigInfo = ResourceRegistry::getInstance()->getResConf(0x80ff1001);
 
-        MT_REQUIRE(ctx, resourceConfigInfo != nullptr);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mResourceResType, 0xff);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mResourceResID, 0x1001);
-        MT_REQUIRE_EQ(ctx, std::strcmp((const char*)resourceConfigInfo->mResourceName.data(), "CUSTOM_RESOURCE_ADDED_BY_BU"), 0);
-        MT_REQUIRE_EQ(ctx, std::strcmp((const char*)resourceConfigInfo->mResourcePath.data(), "/some/bu/specific/node/path/customized_to_usecase"), 0);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mHighThreshold, 512);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mLowThreshold, 128);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mPolicy, LOWER_BETTER);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mPermissions, PERMISSION_SYSTEM);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mModes, MODE_RESUME);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mApplyType, ResourceApplyType::APPLY_GLOBAL);
+        C_ASSERT(resourceConfigInfo != nullptr);
+        C_ASSERT(resourceConfigInfo->mResourceResType == 0xff);
+        C_ASSERT(resourceConfigInfo->mResourceResID == 0x1001);
+        C_ASSERT(strcmp((const char*)resourceConfigInfo->mResourceName.data(), "CUSTOM_RESOURCE_ADDED_BY_BU") == 0);
+        C_ASSERT(strcmp((const char*)resourceConfigInfo->mResourcePath.data(), "/some/bu/specific/node/path/customized_to_usecase") == 0);
+        C_ASSERT(resourceConfigInfo->mHighThreshold == 512);
+        C_ASSERT(resourceConfigInfo->mLowThreshold == 128);
+        C_ASSERT(resourceConfigInfo->mPolicy == LOWER_BETTER);
+        C_ASSERT(resourceConfigInfo->mPermissions == PERMISSION_SYSTEM);
+        C_ASSERT(resourceConfigInfo->mModes == MODE_RESUME);
+        C_ASSERT(resourceConfigInfo->mApplyType == ResourceApplyType::APPLY_GLOBAL);
     }
 
-    MT_TEST(Component, ResourceParsingResourcesMerged4, "resourceparsing") {
-        EnsureInit();
+    static void TestResourceParsingResourcesMerged4() {
         ResConfInfo* resourceConfigInfo = ResourceRegistry::getInstance()->getResConf(0x80ff000c);
 
-        MT_REQUIRE(ctx, (resourceConfigInfo != nullptr));
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mResourceResType, 0xff);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mResourceResID, 0x000c);
-        MT_REQUIRE_EQ(ctx, std::strcmp((const char*)resourceConfigInfo->mResourceName.data(), "OVERRIDE_RESOURCE_2"), 0);
-        MT_REQUIRE_EQ(ctx, std::strcmp((const char*)resourceConfigInfo->mResourcePath.data(), "/proc/kernel/tid/kernel/uclamp.tid.sched/rt"), 0);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mHighThreshold, 100022);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mLowThreshold, 87755);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mPolicy, INSTANT_APPLY);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mPermissions, PERMISSION_THIRD_PARTY);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mModes, (MODE_RESUME | MODE_DOZE));
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mApplyType, ResourceApplyType::APPLY_GLOBAL);
+        C_ASSERT((resourceConfigInfo != nullptr));
+        C_ASSERT((resourceConfigInfo->mResourceResType == 0xff));
+        C_ASSERT((resourceConfigInfo->mResourceResID == 0x000c));
+        C_ASSERT((strcmp((const char*)resourceConfigInfo->mResourceName.data(), "OVERRIDE_RESOURCE_2") == 0));
+        C_ASSERT((strcmp((const char*)resourceConfigInfo->mResourcePath.data(), "/proc/kernel/tid/kernel/uclamp.tid.sched/rt") == 0));
+        C_ASSERT((resourceConfigInfo->mHighThreshold == 100022));
+        C_ASSERT((resourceConfigInfo->mLowThreshold == 87755));
+        C_ASSERT((resourceConfigInfo->mPolicy == INSTANT_APPLY));
+        C_ASSERT((resourceConfigInfo->mPermissions == PERMISSION_THIRD_PARTY));
+        C_ASSERT((resourceConfigInfo->mModes == (MODE_RESUME | MODE_DOZE)));
+        C_ASSERT((resourceConfigInfo->mApplyType == ResourceApplyType::APPLY_GLOBAL));
     }
 
-    MT_TEST(Component, ResourceParsingResourcesDefaultValuesCheck, "resourceparsing") {
-        EnsureInit();
+    static void TestResourceParsingResourcesDefaultValuesCheck() {
         ResConfInfo* resourceConfigInfo = ResourceRegistry::getInstance()->getResConf(0x80ff0009);
 
-        MT_REQUIRE(ctx, (resourceConfigInfo != nullptr));
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mResourceResType, 0xff);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mResourceResID, 0x0009);
-        MT_REQUIRE_EQ(ctx, std::strcmp((const char*)resourceConfigInfo->mResourceName.data(), "DEFAULT_VALUES_TEST"), 0);
-        MT_REQUIRE_EQ(ctx, std::strcmp((const char*)resourceConfigInfo->mResourcePath.data(), ""), 0);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mHighThreshold, -1);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mLowThreshold, -1);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mPolicy, LAZY_APPLY);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mPermissions, PERMISSION_THIRD_PARTY);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mModes, 0);
-        MT_REQUIRE_EQ(ctx, resourceConfigInfo->mApplyType, ResourceApplyType::APPLY_GLOBAL);
+        C_ASSERT((resourceConfigInfo != nullptr));
+        C_ASSERT((resourceConfigInfo->mResourceResType == 0xff));
+        C_ASSERT((resourceConfigInfo->mResourceResID == 0x0009));
+        C_ASSERT((strcmp((const char*)resourceConfigInfo->mResourceName.data(), "DEFAULT_VALUES_TEST") == 0));
+        C_ASSERT((strcmp((const char*)resourceConfigInfo->mResourcePath.data(), "") == 0));
+        C_ASSERT((resourceConfigInfo->mHighThreshold == -1));
+        C_ASSERT((resourceConfigInfo->mLowThreshold == -1));
+        C_ASSERT((resourceConfigInfo->mPolicy == LAZY_APPLY));
+        C_ASSERT((resourceConfigInfo->mPermissions == PERMISSION_THIRD_PARTY));
+        C_ASSERT((resourceConfigInfo->mModes == 0));
+        C_ASSERT((resourceConfigInfo->mApplyType == ResourceApplyType::APPLY_GLOBAL));
     }
-} // namespace ResourceParsingTestsAddOn
 
-// ----------------------------------------------------------------------------
-// SignalParsingTestsAddOn
-// ----------------------------------------------------------------------------
+    static void RunTestGroup() {
+        std::cout<<"\nRunning tests from the Group: "<<__testGroupName<<std::endl;
+
+        Init();
+        RUN_TEST(TestResourceParsingSanity);
+        RUN_TEST(TestResourceParsingResourcesMerged1);
+        RUN_TEST(TestResourceParsingResourcesMerged2);
+        RUN_TEST(TestResourceParsingResourcesMerged3);
+        RUN_TEST(TestResourceParsingResourcesMerged4);
+        RUN_TEST(TestResourceParsingResourcesDefaultValuesCheck);
+
+        std::cout<<"\n\nAll tests from the Group: "<<__testGroupName<<", Ran Successfully"<<std::endl;
+    }
+}
+
 namespace SignalParsingTestsAddOn {
     std::string __testGroupName = "SignalParsingTestsAddOn";
 
     static ErrCode parsingStatus = RC_SUCCESS;
-
     static void Init() {
         RestuneParser configProcessor;
+
         std::string signalsClassA = "/etc/urm/tests/configs/SignalsConfig.yaml";
         std::string signalsClassB = "/etc/urm/tests/configs/SignalsConfigAddOn.yaml";
 
         parsingStatus = configProcessor.parseSignalConfigs(signalsClassA);
-        if (RC_IS_OK(parsingStatus)) {
-            // Single-argument overload for compatibility
-            parsingStatus = configProcessor.parseSignalConfigs(signalsClassB);
+        if(RC_IS_OK(parsingStatus)) {
+            parsingStatus = configProcessor.parseSignalConfigs(signalsClassB, true);
         }
     }
 
-    static void EnsureInit() {
-        static bool done = false;
-        if (!done) {
-            // Ensure base signal set parsed first
-            SignalParsingTests::EnsureInit();
-            Init();
-            done = true;
-        }
+    static void TestSignalParsingSanity() {
+        C_ASSERT(SignalRegistry::getInstance() != nullptr);
+        C_ASSERT(parsingStatus == RC_SUCCESS);
     }
 
-    MT_TEST(Component, SignalParsingSanity, "signalparsing") {
-        EnsureInit();
-        MT_REQUIRE(ctx, SignalRegistry::getInstance() != nullptr);
-        MT_REQUIRE_EQ(ctx, parsingStatus, RC_SUCCESS);
-    }
+    static void TestSignalParsingSignalsMerged1() {
+        SignalInfo* signalInfo = SignalRegistry::getInstance()->getSignalConfigById(0x80aaddde, 0);
 
-    MT_TEST(Component, SignalParsingSignalsMerged1, "signalparsing") {
-        EnsureInit();
-        SignalInfo* signalInfo = SignalRegistry::getInstance()->getSignalConfigById(0x80deaadd);
+        C_ASSERT((signalInfo != nullptr));
+        C_ASSERT((signalInfo->mSignalID == 0xaadd));
+        C_ASSERT((signalInfo->mSignalCategory == 0xde));
+        C_ASSERT((strcmp((const char*)signalInfo->mSignalName.data(), "OVERRIDE_SIGNAL_1") == 0));
+        C_ASSERT((signalInfo->mTimeout == 14500));
 
-        MT_REQUIRE(ctx, (signalInfo != nullptr));
-        MT_REQUIRE_EQ(ctx, signalInfo->mSignalID, 0xaadd);
-        MT_REQUIRE_EQ(ctx, signalInfo->mSignalCategory, 0xde);
-        MT_REQUIRE_EQ(ctx, std::strcmp((const char*)signalInfo->mSignalName.data(), "OVERRIDE_SIGNAL_1"), 0);
-        MT_REQUIRE_EQ(ctx, signalInfo->mTimeout, 14500);
+        C_ASSERT((signalInfo->mPermissions != nullptr));
+        C_ASSERT((signalInfo->mDerivatives != nullptr));
+        C_ASSERT((signalInfo->mSignalResources != nullptr));
 
-        MT_REQUIRE(ctx, (signalInfo->mPermissions != nullptr));
-        MT_REQUIRE(ctx, (signalInfo->mDerivatives != nullptr));
-        MT_REQUIRE(ctx, (signalInfo->mSignalResources != nullptr));
+        C_ASSERT((signalInfo->mPermissions->size() == 1));
+        C_ASSERT((signalInfo->mDerivatives->size() == 1));
+        C_ASSERT((signalInfo->mSignalResources->size() == 1));
 
-        MT_REQUIRE_EQ(ctx, (int)signalInfo->mPermissions->size(), 1);
-        MT_REQUIRE_EQ(ctx, (int)signalInfo->mDerivatives->size(), 1);
-        MT_REQUIRE_EQ(ctx, (int)signalInfo->mSignalResources->size(), 1);
+        C_ASSERT(signalInfo->mPermissions->at(0) == PERMISSION_SYSTEM);
 
-        MT_REQUIRE_EQ(ctx, signalInfo->mPermissions->at(0), PERMISSION_SYSTEM);
-        MT_REQUIRE_EQ(ctx, std::strcmp((const char*)signalInfo->mDerivatives->at(0).data(), "test-derivative"), 0);
+        C_ASSERT(strcmp((const char*)signalInfo->mDerivatives->at(0).data(), "test-derivative") == 0);
 
         Resource* resource1 = signalInfo->mSignalResources->at(0);
-        MT_REQUIRE_EQ(ctx, resource1->getResCode(), 0x80dbaaa0);
-        MT_REQUIRE_EQ(ctx, resource1->getValuesCount(), 1);
-        MT_REQUIRE_EQ(ctx, resource1->getValueAt(0), 887);
-        MT_REQUIRE_EQ(ctx, resource1->getResInfo(), 0x000776aa);
+        C_ASSERT((resource1->getResCode() == 0x80dbaaa0));
+        C_ASSERT((resource1->getValuesCount() == 1));
+        C_ASSERT((resource1->getValueAt(0) == 887));
+        C_ASSERT((resource1->getResInfo() == 0x000776aa));
     }
 
-    MT_TEST(Component, SignalParsingSignalsMerged2, "signalparsing") {
-        EnsureInit();
-        SignalInfo* signalInfo = SignalRegistry::getInstance()->getSignalConfigById(0x000d0007);
+    static void TestSignalParsingSignalsMerged2() {
+        SignalInfo* signalInfo = SignalRegistry::getInstance()->getSignalConfigById(0x0000070d, 0);
 
-        MT_REQUIRE(ctx, signalInfo != nullptr);
-        MT_REQUIRE_EQ(ctx, signalInfo->mSignalID, 0x0007);
-        MT_REQUIRE_EQ(ctx, signalInfo->mSignalCategory, 0x0d);
-        MT_REQUIRE_EQ(ctx, std::strcmp((const char*)signalInfo->mSignalName.data(), "TEST_SIGNAL_8"), 0);
-        MT_REQUIRE_EQ(ctx, signalInfo->mTimeout, 5500);
+        C_ASSERT(signalInfo != nullptr);
+        C_ASSERT(signalInfo->mSignalID == 0x0007);
+        C_ASSERT(signalInfo->mSignalCategory == 0x0d);
+        C_ASSERT(strcmp((const char*)signalInfo->mSignalName.data(), "TEST_SIGNAL_8") == 0);
+        C_ASSERT(signalInfo->mTimeout == 5500);
 
-        MT_REQUIRE(ctx, signalInfo->mPermissions != nullptr);
-        MT_REQUIRE_EQ(ctx, signalInfo->mDerivatives, (decltype(signalInfo->mDerivatives))nullptr);
-        MT_REQUIRE(ctx, signalInfo->mSignalResources != nullptr);
+        C_ASSERT(signalInfo->mPermissions != nullptr);
+        C_ASSERT(signalInfo->mDerivatives == nullptr);
+        C_ASSERT(signalInfo->mSignalResources != nullptr);
 
-        MT_REQUIRE_EQ(ctx, (int)signalInfo->mPermissions->size(), 1);
-        MT_REQUIRE_EQ(ctx, (int)signalInfo->mSignalResources->size(), 2);
+        C_ASSERT(signalInfo->mPermissions->size() == 1);
+        C_ASSERT(signalInfo->mSignalResources->size() == 2);
 
-        MT_REQUIRE_EQ(ctx, signalInfo->mPermissions->at(0), PERMISSION_THIRD_PARTY);
+        C_ASSERT(signalInfo->mPermissions->at(0) == PERMISSION_THIRD_PARTY);
 
         Resource* resource1 = signalInfo->mSignalResources->at(0);
-        MT_REQUIRE_EQ(ctx, resource1->getResCode(), 0x000900aa);
-        MT_REQUIRE_EQ(ctx, resource1->getValuesCount(), 3);
-        MT_REQUIRE_EQ(ctx, resource1->getValueAt(0), -1);
-        MT_REQUIRE_EQ(ctx, resource1->getValueAt(1), -1);
-        MT_REQUIRE_EQ(ctx, resource1->getValueAt(2), 68);
-        MT_REQUIRE_EQ(ctx, resource1->getResInfo(), 0);
+        C_ASSERT(resource1->getResCode() == 0x000900aa);
+        C_ASSERT(resource1->getValuesCount() == 3);
+        C_ASSERT(resource1->getValueAt(0) == -1);
+        C_ASSERT(resource1->getValueAt(1) == -1);
+        C_ASSERT(resource1->getValueAt(2) == 68);
+        C_ASSERT(resource1->getResInfo() == 0);
 
         Resource* resource2 = signalInfo->mSignalResources->at(1);
-        MT_REQUIRE_EQ(ctx, resource2->getResCode(), 0x000900dc);
-        MT_REQUIRE_EQ(ctx, resource2->getValuesCount(), 4);
-        MT_REQUIRE_EQ(ctx, resource2->getValueAt(0), -1);
-        MT_REQUIRE_EQ(ctx, resource2->getValueAt(1), -1);
-        MT_REQUIRE_EQ(ctx, resource2->getValueAt(2), 50);
-        MT_REQUIRE_EQ(ctx, resource2->getValueAt(3), 512);
-        MT_REQUIRE_EQ(ctx, resource2->getResInfo(), 0);
+        C_ASSERT(resource2->getResCode() == 0x000900dc);
+        C_ASSERT(resource2->getValuesCount() == 4);
+        C_ASSERT(resource2->getValueAt(0) == -1);
+        C_ASSERT(resource2->getValueAt(1) == -1);
+        C_ASSERT(resource2->getValueAt(2) == 50);
+        C_ASSERT(resource2->getValueAt(3) == 512);
+        C_ASSERT(resource2->getResInfo() == 0);
     }
 
-    MT_TEST(Component, SignalParsingSignalsMerged3, "signalparsing") {
-        EnsureInit();
-        SignalInfo* signalInfo = SignalRegistry::getInstance()->getSignalConfigById(0x801e00ab);
+    static void TestSignalParsingSignalsMerged3() {
+        SignalInfo* signalInfo = SignalRegistry::getInstance()->getSignalConfigById(0x8000ab1e, 0);
 
-        MT_REQUIRE(ctx, signalInfo != nullptr);
-        MT_REQUIRE_EQ(ctx, signalInfo->mSignalID, 0x00ab);
-        MT_REQUIRE_EQ(ctx, signalInfo->mSignalCategory, 0x1e);
-        MT_REQUIRE_EQ(ctx, std::strcmp((const char*)signalInfo->mSignalName.data(), "CUSTOM_SIGNAL_1"), 0);
-        MT_REQUIRE_EQ(ctx, signalInfo->mTimeout, 6700);
+        C_ASSERT(signalInfo != nullptr);
+        C_ASSERT(signalInfo->mSignalID == 0x00ab);
+        C_ASSERT(signalInfo->mSignalCategory == 0x1e);
+        C_ASSERT(strcmp((const char*)signalInfo->mSignalName.data(), "CUSTOM_SIGNAL_1") == 0);
+        C_ASSERT(signalInfo->mTimeout == 6700);
 
-        MT_REQUIRE(ctx, signalInfo->mPermissions != nullptr);
-        MT_REQUIRE(ctx, signalInfo->mDerivatives != nullptr);
-        MT_REQUIRE(ctx, signalInfo->mSignalResources != nullptr);
+        C_ASSERT(signalInfo->mPermissions != nullptr);
+        C_ASSERT(signalInfo->mDerivatives != nullptr);
+        C_ASSERT(signalInfo->mSignalResources != nullptr);
 
-        MT_REQUIRE_EQ(ctx, (int)signalInfo->mPermissions->size(), 1);
-        MT_REQUIRE_EQ(ctx, (int)signalInfo->mDerivatives->size(), 1);
-        MT_REQUIRE_EQ(ctx, (int)signalInfo->mSignalResources->size(), 2);
+        C_ASSERT(signalInfo->mPermissions->size() == 1);
+        C_ASSERT(signalInfo->mDerivatives->size() == 1);
+        C_ASSERT(signalInfo->mSignalResources->size() == 2);
 
-        MT_REQUIRE_EQ(ctx, signalInfo->mPermissions->at(0), PERMISSION_THIRD_PARTY);
-        MT_REQUIRE_EQ(ctx, std::strcmp((const char*)signalInfo->mDerivatives->at(0).data(), "derivative-device1"), 0);
+        C_ASSERT(signalInfo->mPermissions->at(0) == PERMISSION_THIRD_PARTY);
+
+        C_ASSERT(strcmp((const char*)signalInfo->mDerivatives->at(0).data(), "derivative-device1") == 0);
 
         Resource* resource1 = signalInfo->mSignalResources->at(0);
-        MT_REQUIRE_EQ(ctx, resource1->getResCode(), 0x80f10000);
-        MT_REQUIRE_EQ(ctx, resource1->getValuesCount(), 1);
-        MT_REQUIRE_EQ(ctx, resource1->getValueAt(0), 665);
-        MT_REQUIRE_EQ(ctx, resource1->getResInfo(), 0x0a00f000);
+        C_ASSERT(resource1->getResCode() == 0x80f10000);
+        C_ASSERT(resource1->getValuesCount() == 1);
+        C_ASSERT(resource1->getValueAt(0) == 665);
+        C_ASSERT(resource1->getResInfo() == 0x0a00f000);
 
         Resource* resource2 = signalInfo->mSignalResources->at(1);
-        MT_REQUIRE_EQ(ctx, resource2->getResCode(), 0x800100d0);
-        MT_REQUIRE_EQ(ctx, resource2->getValuesCount(), 2);
-        MT_REQUIRE_EQ(ctx, resource2->getValueAt(0), 679);
-        MT_REQUIRE_EQ(ctx, resource2->getValueAt(1), 812);
-        MT_REQUIRE_EQ(ctx, resource2->getResInfo(), 0x00100112);
+        C_ASSERT((resource2->getResCode() == 0x800100d0));
+        C_ASSERT((resource2->getValuesCount() == 2));
+        C_ASSERT((resource2->getValueAt(0) == 679));
+        C_ASSERT((resource2->getValueAt(1) == 812));
+        C_ASSERT((resource2->getResInfo() == 0x00100112));
     }
 
-    MT_TEST(Component, SignalParsingSignalsMerged4, "signalparsing") {
-        EnsureInit();
-        SignalInfo* signalInfo = SignalRegistry::getInstance()->getSignalConfigById(0x00080000);
-        MT_REQUIRE_EQ(ctx, (signalInfo), (SignalInfo*)nullptr);
+    static void TestSignalParsingSignalsMerged4() {
+        SignalInfo* signalInfo = SignalRegistry::getInstance()->getSignalConfigById(0x00000008, 0);
+
+        C_ASSERT((signalInfo == nullptr));
     }
 
-    MT_TEST(Component, SignalParsingSignalsMerged5, "signalparsing") {
-        EnsureInit();
-        SignalInfo* signalInfo = SignalRegistry::getInstance()->getSignalConfigById(0x80ceffcf);
+    static void TestSignalParsingSignalsMerged5() {
+        SignalInfo* signalInfo = SignalRegistry::getInstance()->getSignalConfigById(0x80ffcfce, 0);
 
-        MT_REQUIRE(ctx, (signalInfo != nullptr));
-        MT_REQUIRE_EQ(ctx, signalInfo->mSignalID, 0xffcf);
-        MT_REQUIRE_EQ(ctx, signalInfo->mSignalCategory, 0xce);
-        MT_REQUIRE_EQ(ctx, std::strcmp((const char*)signalInfo->mSignalName.data(), "CAMERA_OPEN_CUSTOM"), 0);
-        MT_REQUIRE_EQ(ctx, signalInfo->mTimeout, 1);
+        C_ASSERT((signalInfo != nullptr));
+        C_ASSERT((signalInfo->mSignalID == 0xffcf));
+        C_ASSERT((signalInfo->mSignalCategory == 0xce));
+        C_ASSERT((strcmp((const char*)signalInfo->mSignalName.data(), "CAMERA_OPEN_CUSTOM") == 0));
+        C_ASSERT((signalInfo->mTimeout == 1));
 
-        MT_REQUIRE(ctx, (signalInfo->mPermissions != nullptr));
-        MT_REQUIRE_EQ(ctx, signalInfo->mDerivatives, (decltype(signalInfo->mDerivatives))nullptr);
-        MT_REQUIRE(ctx, (signalInfo->mSignalResources != nullptr));
+        C_ASSERT((signalInfo->mPermissions != nullptr));
+        C_ASSERT((signalInfo->mDerivatives == nullptr));
+        C_ASSERT((signalInfo->mSignalResources != nullptr));
 
-        MT_REQUIRE_EQ(ctx, (int)signalInfo->mPermissions->size(), 1);
-        MT_REQUIRE_EQ(ctx, (int)signalInfo->mSignalResources->size(), 2);
+        C_ASSERT((signalInfo->mPermissions->size() == 1));
+        C_ASSERT((signalInfo->mSignalResources->size() == 2));
 
-        MT_REQUIRE_EQ(ctx, signalInfo->mPermissions->at(0), PERMISSION_SYSTEM);
+        C_ASSERT((signalInfo->mPermissions->at(0) == PERMISSION_SYSTEM));
 
         Resource* resource1 = signalInfo->mSignalResources->at(0);
-        MT_REQUIRE_EQ(ctx, resource1->getResCode(), 0x80d9aa00);
-        MT_REQUIRE_EQ(ctx, resource1->getValuesCount(), 2);
-        MT_REQUIRE_EQ(ctx, resource1->getValueAt(0), 1);
-        MT_REQUIRE_EQ(ctx, resource1->getValueAt(1), 556);
-        MT_REQUIRE_EQ(ctx, resource1->getResInfo(), 0);
+        C_ASSERT((resource1->getResCode() == 0x80d9aa00));
+        C_ASSERT((resource1->getValuesCount() == 2));
+        C_ASSERT((resource1->getValueAt(0) == 1));
+        C_ASSERT((resource1->getValueAt(1) == 556));
+        C_ASSERT((resource1->getResInfo() == 0));
 
         Resource* resource2 = signalInfo->mSignalResources->at(1);
-        MT_REQUIRE_EQ(ctx, resource2->getResCode(), 0x80c6500f);
-        MT_REQUIRE_EQ(ctx, resource2->getValuesCount(), 3);
-        MT_REQUIRE_EQ(ctx, resource2->getValueAt(0), 1);
-        MT_REQUIRE_EQ(ctx, resource2->getValueAt(1), 900);
-        MT_REQUIRE_EQ(ctx, resource2->getValueAt(2), 965);
-        MT_REQUIRE_EQ(ctx, resource2->getResInfo(), 0);
+        C_ASSERT((resource2->getResCode() == 0x80c6500f));
+        C_ASSERT((resource2->getValuesCount() == 3));
+        C_ASSERT((resource2->getValueAt(0) == 1));
+        C_ASSERT((resource2->getValueAt(1)  == 900));
+        C_ASSERT((resource2->getValueAt(2)  == 965));
+        C_ASSERT((resource2->getResInfo() == 0));
     }
-} // namespace SignalParsingTestsAddOn
 
-// ----------------------------------------------------------------------------
-// AppConfigParserTests
-// ----------------------------------------------------------------------------
+    static void RunTestGroup() {
+        std::cout<<"\nRunning tests from the Group: "<<__testGroupName<<std::endl;
+
+        Init();
+        RUN_TEST(TestSignalParsingSanity)
+        RUN_TEST(TestSignalParsingSignalsMerged1)
+        RUN_TEST(TestSignalParsingSignalsMerged2)
+        RUN_TEST(TestSignalParsingSignalsMerged3)
+        RUN_TEST(TestSignalParsingSignalsMerged4)
+        RUN_TEST(TestSignalParsingSignalsMerged5)
+
+        std::cout<<"\n\nAll tests from the Group: "<<__testGroupName<<", Ran Successfully"<<std::endl;
+    }
+}
+
 namespace AppConfigParserTests {
     std::string __testGroupName = "AppConfigParserTests";
 
     static ErrCode parsingStatus = RC_SUCCESS;
-
     static void Init() {
         RestuneParser configProcessor;
         std::string perAppConfPath = "/etc/urm/tests/configs/PerApp.yaml";
 
-        if (RC_IS_OK(parsingStatus)) {
+        if(RC_IS_OK(parsingStatus)) {
             parsingStatus = configProcessor.parsePerAppConfigs(perAppConfPath);
         }
     }
 
-    static void EnsureInit() {
-        static bool done = false;
-        if (!done) { Init(); done = true; }
+    static void TestAppConfigParsingSanity() {
+        C_ASSERT(AppConfigs::getInstance() != nullptr);
+        C_ASSERT(parsingStatus == RC_SUCCESS);
     }
 
-    MT_TEST(Component, AppConfigParsingSanity, "appconfigparser") {
-        EnsureInit();
-        MT_REQUIRE(ctx, AppConfigs::getInstance() != nullptr);
-        MT_REQUIRE_EQ(ctx, parsingStatus, RC_SUCCESS);
-    }
-
-    MT_TEST(Component, AppConfigParsingIntegrity1, "appconfigparser") {
-        EnsureInit();
+    static void TestAppConfigParsingIntegrity1() {
         AppConfig* appConfigInfo = AppConfigs::getInstance()->getAppConfig("gst-launch-");
 
-        MT_REQUIRE_EQ(ctx, appConfigInfo->mAppName, std::string("gst-launch-"));
-        MT_REQUIRE_EQ(ctx, appConfigInfo->mNumThreads, 2);
+        C_ASSERT((appConfigInfo->mAppName == "gst-launch-"));
+        C_ASSERT((appConfigInfo->mNumThreads == 2));
 
-        MT_REQUIRE(ctx, (appConfigInfo->mThreadNameList != nullptr));
-        MT_REQUIRE(ctx, (appConfigInfo->mCGroupIds != nullptr));
+        C_ASSERT((appConfigInfo->mThreadNameList != nullptr));
+        C_ASSERT((appConfigInfo->mCGroupIds != nullptr));
 
-        MT_REQUIRE_EQ(ctx, appConfigInfo->mNumSignals, 0);
-        MT_REQUIRE_EQ(ctx, appConfigInfo->mSignalCodes, (decltype(appConfigInfo->mSignalCodes))nullptr);
+        C_ASSERT((appConfigInfo->mNumSignals == 0));
+        C_ASSERT((appConfigInfo->mSignalCodes == nullptr));
     }
 
-    MT_TEST(Component, AppConfigParsingIntegrity2, "appconfigparser") {
-        EnsureInit();
+    static void TestAppConfigParsingIntegrity2() {
         AppConfig* appConfigInfo = AppConfigs::getInstance()->getAppConfig("chrome");
 
-        MT_REQUIRE_EQ(ctx, appConfigInfo->mAppName, std::string("chrome"));
-        MT_REQUIRE_EQ(ctx, appConfigInfo->mNumThreads, 1);
+        C_ASSERT((appConfigInfo->mAppName == "chrome"));
+        C_ASSERT((appConfigInfo->mNumThreads == 1));
 
-        MT_REQUIRE(ctx, (appConfigInfo->mThreadNameList != nullptr));
-        MT_REQUIRE(ctx, (appConfigInfo->mCGroupIds != nullptr));
+        C_ASSERT((appConfigInfo->mThreadNameList != nullptr));
+        C_ASSERT((appConfigInfo->mCGroupIds != nullptr));
 
-        MT_REQUIRE_EQ(ctx, appConfigInfo->mNumSignals, 1);
-        MT_REQUIRE(ctx, (appConfigInfo->mSignalCodes != nullptr));
+        C_ASSERT((appConfigInfo->mNumSignals == 1));
+        C_ASSERT((appConfigInfo->mSignalCodes != nullptr));
     }
-} // namespace AppConfigParserTests
+
+    static void RunTestGroup() {
+        std::cout<<"\nRunning tests from the Group: "<<__testGroupName<<std::endl;
+
+        Init();
+        RUN_TEST(TestAppConfigParsingSanity)
+        RUN_TEST(TestAppConfigParsingIntegrity1)
+        RUN_TEST(TestAppConfigParsingIntegrity2)
+
+        std::cout<<"\n\nAll tests from the Group: "<<__testGroupName<<", Ran Successfully"<<std::endl;
+    }
+}
