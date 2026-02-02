@@ -43,7 +43,7 @@ URM_TEST(TestHandleGeneration, {
 
     int64_t handle = tuneResources(2000, 0, 1, resourceList);
 
-    delete resourceList;
+    delete[] resourceList;
 
     std::cout<<LOG_BASE<<"Handle Returned: "<<handle<<std::endl;
     E_ASSERT((handle > 0));
@@ -58,7 +58,7 @@ URM_TEST(TestHandleGeneration, {
 
     handle = tuneResources(2000, 0, 1, resourceList);
 
-    delete resourceList;
+    delete[] resourceList;
 
     std::cout<<LOG_BASE<<"Handle Returned: "<<handle<<std::endl;
     E_ASSERT((handle > 0));
@@ -73,7 +73,7 @@ URM_TEST(TestHandleGeneration, {
 
     handle = tuneResources(2000, 0, 1, resourceList);
 
-    delete resourceList;
+    delete[] resourceList;
 
     std::cout<<LOG_BASE<<"Handle Returned: "<<handle<<std::endl;
     E_ASSERT((handle > 0));
@@ -193,7 +193,7 @@ URM_TEST(TestNullOrInvalidRequestVerification3, {
     std::cout<<LOG_BASE<<"Handle Returned: "<<handle<<std::endl;
     E_ASSERT((handle == RC_REQ_SUBMISSION_FAILURE));
 
-    delete resourceList;
+    delete[] resourceList;
 })
 
 /**
@@ -233,7 +233,7 @@ URM_TEST(TestClientPriorityAcquisitionVerification, {
     newValue = C_STOI(value);
     E_ASSERT((newValue == testResourceOriginalValue));
 
-    delete resourceList;
+    delete[] resourceList;
 })
 
 /**
@@ -280,7 +280,7 @@ URM_TEST(TestInvalidResourceTuning, {
     newValue = C_STOI(value);
     E_ASSERT((newValue == validResourceOriginalValue));
 
-    delete resourceList;
+    delete[] resourceList;
 })
 
 /**
@@ -319,7 +319,7 @@ URM_TEST(OutOfBoundsResourceTuning, {
     newValue = C_STOI(value);
     E_ASSERT((newValue == testResourceOriginalValue));
 
-    delete resourceList;
+    delete[] resourceList;
 })
 
 /**
@@ -364,7 +364,7 @@ URM_TEST(ResourceLogicalToPhysicalTranslationVerification1, {
     newValue = C_STOI(value);
     E_ASSERT((newValue == testResourceOriginalValue));
 
-    delete resourceList;
+    delete[] resourceList;
 })
 
 /**
@@ -409,7 +409,7 @@ URM_TEST(ResourceLogicalToPhysicalTranslationVerification2, {
     newValue = C_STOI(value);
     E_ASSERT((newValue == testResourceOriginalValue));
 
-    delete resourceList;
+    delete[] resourceList;
 })
 
 /**
@@ -468,7 +468,7 @@ URM_TEST(ResourceLogicalToPhysicalTranslationVerification3, {
     newValue = C_STOI(value);
     E_ASSERT((newValue == testResourceOriginalValue));
 
-    delete resourceList;
+    delete[] resourceList;
 })
 
 /**
@@ -514,7 +514,7 @@ URM_TEST(ResourceLogicalToPhysicalTranslationVerification4, {
     newValue = C_STOI(value);
     E_ASSERT((newValue == testResourceOriginalValue));
 
-    delete resourceList;
+    delete[] resourceList;
 })
 
 /**
@@ -552,7 +552,7 @@ URM_TEST(UnSupportedResourceTuningVerification, {
     newValue = C_STOI(value);
     E_ASSERT((newValue == testResourceOriginalValue));
 
-    delete resourceList;
+    delete[] resourceList;
 })
 
 /**
@@ -589,7 +589,7 @@ URM_TEST(ResourceOperationModeVerification, {
     newValue = C_STOI(value);
     E_ASSERT((newValue == testResourceOriginalValue));
 
-    delete resourceList;
+    delete[] resourceList;
 })
 
 /**
@@ -631,7 +631,7 @@ URM_TEST(ClientPermissionsVerification, {
     newValue = C_STOI(value);
     E_ASSERT((newValue == testResourceOriginalValue));
 
-    delete resourceList;
+    delete[] resourceList;
 })
 
 /*
@@ -914,7 +914,7 @@ URM_TEST(SingleClientTuneRequest, {
     newValue = C_STOI(value);
     E_ASSERT((newValue == originalValue));
 
-    delete resourceList;
+    delete[] resourceList;
 })
 
 /**
@@ -1011,7 +1011,7 @@ URM_TEST(SingleClientTuneRequestMultipleResources, {
 
     std::this_thread::sleep_for(std::chrono::seconds(4));
 
-    delete resourceList;
+    delete[] resourceList;
 })
 
 /**
@@ -1046,7 +1046,7 @@ URM_TEST(TestMultipleClientsHigherIsBetterPolicy1, {
         std::cout<<LOG_BASE<<"Handle Returned: "<<handle<<std::endl;
 
         std::this_thread::sleep_for(std::chrono::seconds(3));
-        delete resourceList;
+        delete[] resourceList;
         exit(EXIT_SUCCESS);
 
     } else if(rc > 0) {
@@ -1080,7 +1080,7 @@ URM_TEST(TestMultipleClientsHigherIsBetterPolicy1, {
         std::cout<<LOG_BASE<<testResourceName<<" Reset Value: "<<newValue<<std::endl;
         E_ASSERT((newValue == originalValue));
 
-        delete resourceList;
+        delete[] resourceList;
     }
 })
 
@@ -1123,7 +1123,7 @@ URM_TEST(TestMultipleClientsHigherIsBetterPolicy2, {
         std::cout<<LOG_BASE<<"Handle Returned: "<<handle<<std::endl;
 
         std::this_thread::sleep_for(std::chrono::seconds(3));
-        delete resourceList;
+        delete[] resourceList;
         exit(EXIT_SUCCESS);
 
     } else if(rc1 > 0) {
@@ -1163,7 +1163,7 @@ URM_TEST(TestMultipleClientsHigherIsBetterPolicy2, {
         std::cout<<LOG_BASE<<testResourceName<<" Reset Value: "<<originalValue<<std::endl;
         E_ASSERT((newValue == originalValue));
 
-        delete resourceList;
+        delete[] resourceList;
     }
 })
 
@@ -1211,7 +1211,7 @@ URM_TEST(TestMultipleClientsLowerIsBetterPolicy, {
         // Give enough time for Resource Tuner to read process status
         // Else the Request will be dropped
         std::this_thread::sleep_for(std::chrono::seconds(3));
-        delete resourceList;
+        delete[] resourceList;
         exit(EXIT_SUCCESS);
 
     } else if(rc1 > 0) {
@@ -1235,7 +1235,7 @@ URM_TEST(TestMultipleClientsLowerIsBetterPolicy, {
             std::cout<<LOG_BASE<<"Handle Returned: "<<handle<<std::endl;
 
             std::this_thread::sleep_for(std::chrono::seconds(3));
-            delete resourceList;
+            delete[] resourceList;
             exit(EXIT_SUCCESS);
 
         } else if(rc2 > 0) {
@@ -1259,7 +1259,7 @@ URM_TEST(TestMultipleClientsLowerIsBetterPolicy, {
                 std::cout<<LOG_BASE<<"Handle Returned: "<<handle<<std::endl;
 
                 std::this_thread::sleep_for(std::chrono::seconds(3));
-                delete resourceList;
+                delete[] resourceList;
                 exit(EXIT_SUCCESS);
 
             } else if(rc3 > 0) {
@@ -1294,7 +1294,7 @@ URM_TEST(TestMultipleClientsLowerIsBetterPolicy, {
                 std::cout<<LOG_BASE<<testResourceName<<" Reset Value: "<<newValue<<std::endl;
                 E_ASSERT((newValue == originalValue));
 
-                delete resourceList;
+                delete[] resourceList;
             }
         }
     }
@@ -1336,7 +1336,7 @@ URM_TEST(TestMultipleClientsLazyApplyPolicy, {
         std::cout<<LOG_BASE<<"Handle Returned: "<<handle<<std::endl;
 
         std::this_thread::sleep_for(std::chrono::seconds(3));
-        delete resourceList;
+        delete[] resourceList;
         exit(EXIT_SUCCESS);
 
     } else if(rc1 > 0) {
@@ -1381,7 +1381,7 @@ URM_TEST(TestMultipleClientsLazyApplyPolicy, {
         std::cout<<LOG_BASE<<testResourceName<<" Reset Value: "<<newValue<<std::endl;
         E_ASSERT((newValue == originalValue));
 
-        delete resourceList;
+        delete[] resourceList;
     }
 })
 
@@ -1433,7 +1433,7 @@ URM_TEST(TestMultipleClientsTuneRequestDifferentResources, {
         std::cout<<LOG_BASE<<"Handle Returned: "<<handle<<std::endl;
 
         std::this_thread::sleep_for(std::chrono::seconds(3));
-        delete resourceList;
+        delete[] resourceList;
         exit(EXIT_SUCCESS);
 
     } else if(rc1 > 0) {
@@ -1449,7 +1449,7 @@ URM_TEST(TestMultipleClientsTuneRequestDifferentResources, {
             std::cout<<LOG_BASE<<"Handle Returned: "<<handle<<std::endl;
 
             std::this_thread::sleep_for(std::chrono::seconds(3));
-            delete resourceList;
+            delete[] resourceList;
             exit(EXIT_SUCCESS);
 
         } else if(rc2 > 0) {
@@ -1501,7 +1501,7 @@ URM_TEST(TestMultipleClientsTuneRequestDifferentResources, {
             waitpid(rc1, nullptr, 0);
             waitpid(rc2, nullptr, 0);
 
-            delete resourceList;
+            delete[] resourceList;
         }
     }
 })
@@ -1559,8 +1559,8 @@ URM_TEST(SingleClientSequentialRequests, {
     std::cout<<LOG_BASE<<testResourceName<<" Reset Value: "<<newValue<<std::endl;
     E_ASSERT((newValue == testResourceOriginalValue));
 
-    delete resourceList1;
-    delete resourceList2;
+    delete[] resourceList1;
+    delete[] resourceList2;
 })
 
 /**
@@ -1597,7 +1597,7 @@ URM_TEST(MultipleClientTIDsConcurrentRequests, {
         handle = tuneResources(6000, RequestPriority::REQ_PRIORITY_HIGH, 1, resourceList1);
         std::cout<<LOG_BASE<<"Handle Returned: "<<handle<<std::endl;
 
-        delete resourceList1;
+        delete[] resourceList1;
     });
 
     SysResource* resourceList2 = new SysResource[1];
@@ -1626,7 +1626,7 @@ URM_TEST(MultipleClientTIDsConcurrentRequests, {
 
     th.join();
 
-    delete resourceList2;
+    delete[] resourceList2;
 })
 
 /**
@@ -1682,7 +1682,7 @@ URM_TEST(TestInfiniteDurationTuneRequestAndValidUntuning, {
     std::cout<<LOG_BASE<<testResourceName<<" Untuned Value: "<<newValue<<std::endl;
     E_ASSERT((newValue == testResourceOriginalValue));
 
-    delete resourceList;
+    delete[] resourceList;
 })
 
 /**
@@ -1756,7 +1756,7 @@ URM_TEST(TestInfiniteDurationTuneRequestAndInValidUntuning, {
         std::cout<<LOG_BASE<<testResourceName<<" Reset Value: "<<newValue<<std::endl;
         E_ASSERT((newValue == testResourceOriginalValue));
 
-        delete resourceList;
+        delete[] resourceList;
     }
 })
 
@@ -1820,8 +1820,8 @@ URM_TEST(TestPriorityBasedResourceAcquisition1, {
     std::cout<<LOG_BASE<<testResourceName<<" Reset Value: "<<newValue<<std::endl;
     E_ASSERT((newValue == testResourceOriginalValue));
 
-    delete resourceList1;
-    delete resourceList2;
+    delete[] resourceList1;
+    delete[] resourceList2;
 })
 
 /**
@@ -1897,8 +1897,8 @@ URM_TEST(PriorityBasedResourceAcquisition2, {
     std::cout<<LOG_BASE<<testResourceName<<" Reset Value: "<<newValue<<std::endl;
     E_ASSERT((newValue == testResourceOriginalValue));
 
-    delete resourceList1;
-    delete resourceList2;
+    delete[] resourceList1;
+    delete[] resourceList2;
 })
 
 /**
@@ -1974,8 +1974,8 @@ URM_TEST(TestPriorityBasedResourceAcquisition3, {
     std::cout<<LOG_BASE<<testResourceName<<" Reset Value: "<<newValue<<std::endl;
     E_ASSERT((newValue == testResourceOriginalValue));
 
-    delete resourceList1;
-    delete resourceList2;
+    delete[] resourceList1;
+    delete[] resourceList2;
 })
 
 /**
@@ -2039,7 +2039,7 @@ URM_TEST(TestRequestValidRetuning, {
     std::cout<<LOG_BASE<<testResourceName<<" Reset Value: "<<newValue<<std::endl;
     E_ASSERT((newValue == testResourceOriginalValue));
 
-    delete resourceList;
+    delete[] resourceList;
 })
 
 /**
@@ -2102,7 +2102,7 @@ URM_TEST(TestRequestInvalidRetuning1, {
     std::cout<<LOG_BASE<<testResourceName<<" Reset Value: "<<newValue<<std::endl;
     E_ASSERT((newValue == testResourceOriginalValue));
 
-    delete resourceList;
+    delete[] resourceList;
 })
 
 /**
@@ -2163,7 +2163,7 @@ URM_TEST(RequestInvalidRetuning2, {
         std::cout<<LOG_BASE<<testResourceName<<" Reset Value: "<<newValue<<std::endl;
         E_ASSERT((newValue == testResourceOriginalValue));
 
-        delete resourceList;
+        delete[] resourceList;
     }
 
 })
@@ -2214,7 +2214,7 @@ URM_TEST(TestClusterTypeResourceTuneRequest1, {
     std::cout<<LOG_BASE<<testResourceName<<" Reset Value: "<<newValue<<std::endl;
     E_ASSERT((newValue == testResourceOriginalValue));
 
-    delete resourceList;
+    delete[] resourceList;
 })
 
 URM_TEST(ClusterTypeResourceTuneRequest2, {
@@ -2263,7 +2263,7 @@ URM_TEST(ClusterTypeResourceTuneRequest2, {
     std::cout<<LOG_BASE<<testResourceName<<" Reset Value: "<<newValue<<std::endl;
     E_ASSERT((newValue == testResourceOriginalValue));
 
-    delete resourceList;
+    delete[] resourceList;
 })
 
 /*
@@ -2326,7 +2326,7 @@ URM_TEST(TestWriteTo_sched_util_clamp_min_Node, {
     std::cout<<LOG_BASE<<testResourceName<<" Reset Value: "<<newValue<<std::endl;
     E_ASSERT((newValue == originalValue));
 
-    delete resourceList;
+    delete[] resourceList;
 })
 
 /**
@@ -2366,7 +2366,7 @@ URM_TEST(TestConcurrentWriteTo_sched_util_clamp_min_Node1, {
         std::cout<<LOG_BASE<<"Handle Returned: "<<handle<<std::endl;
 
         std::this_thread::sleep_for(std::chrono::seconds(3));
-        delete resourceList;
+        delete[] resourceList;
         exit(EXIT_SUCCESS);
 
     } else if(rc > 0) {
@@ -2397,7 +2397,7 @@ URM_TEST(TestConcurrentWriteTo_sched_util_clamp_min_Node1, {
         std::cout<<LOG_BASE<<testResourceName<<" Reset Value: "<<newValue<<std::endl;
         E_ASSERT((newValue == originalValue));
 
-        delete resourceList;
+        delete[] resourceList;
         wait(nullptr);
     }
 })
@@ -2443,7 +2443,7 @@ URM_TEST(TestConcurrentWriteTo_sched_util_clamp_min_Node2, {
         std::cout<<LOG_BASE<<"Handle Returned: "<<handle<<std::endl;
 
         std::this_thread::sleep_for(std::chrono::seconds(3));
-        delete resourceList;
+        delete[] resourceList;
         exit(EXIT_SUCCESS);
 
     } else if(rc > 0) {
@@ -2481,7 +2481,7 @@ URM_TEST(TestConcurrentWriteTo_sched_util_clamp_min_Node2, {
         std::cout<<LOG_BASE<<testResourceName<<" Reset Value: "<<newValue<<std::endl;
         E_ASSERT((newValue == originalValue));
 
-        delete resourceList;
+        delete[] resourceList;
         wait(nullptr);
     }
 })
@@ -2538,7 +2538,7 @@ URM_TEST(TestWriteTo_sched_util_clamp_min_NodeAndUntuning, {
     std::cout<<LOG_BASE<<testResourceName<<" Reset Value: "<<originalValue<<std::endl;
     E_ASSERT((newValue == originalValue));
 
-    delete resourceList;
+    delete[] resourceList;
 })
 
 /**
@@ -2579,7 +2579,7 @@ URM_TEST(TestConcurrentWriteTo_sched_util_clamp_min_Node3, {
         std::cout<<LOG_BASE<<"Handle Returned: "<<handle<<std::endl;
 
         std::this_thread::sleep_for(std::chrono::seconds(3));
-        delete resourceList;
+        delete[] resourceList;
         exit(EXIT_SUCCESS);
 
     } else if(rc > 0) {
@@ -2610,7 +2610,7 @@ URM_TEST(TestConcurrentWriteTo_sched_util_clamp_min_Node3, {
         std::cout<<LOG_BASE<<testResourceName<<" Reset Value: "<<newValue<<std::endl;
         E_ASSERT((newValue == originalValue));
 
-        delete resourceList;
+        delete[] resourceList;
         wait(nullptr);
     }
 })
@@ -2679,7 +2679,7 @@ URM_TEST(TestWriteTo_sched_util_clamp_min_NodeAndRetuning, {
     std::cout<<LOG_BASE<<testResourceName<<" Reset Value: "<<newValue<<std::endl;
     E_ASSERT((newValue == originalValue));
 
-    delete resourceList;
+    delete[] resourceList;
 })
 
 /**
@@ -2744,7 +2744,7 @@ URM_TEST(TestWriteTo_scaling_min_freq_Node1, {
     std::cout<<LOG_BASE<<testResourceName<<" Reset Value: "<<newValue<<std::endl;
     E_ASSERT((newValue == originalValue));
 
-    delete resourceList;
+    delete[] resourceList;
 })
 
 /**
@@ -2809,7 +2809,7 @@ URM_TEST(TestWriteTo_scaling_min_freq_Node2, {
     std::cout<<LOG_BASE<<testResourceName<<" Reset Value: "<<newValue<<std::endl;
     E_ASSERT((newValue == originalValue));
 
-    delete resourceList;
+    delete[] resourceList;
 })
 
 /**
@@ -2868,7 +2868,7 @@ URM_TEST(TestConcurrentWriteTo_scaling_min_freq_Node3, {
         std::cout<<LOG_BASE<<"Handle Returned: "<<handle<<std::endl;
 
         std::this_thread::sleep_for(std::chrono::seconds(3));
-        delete resourceList;
+        delete[] resourceList;
         exit(EXIT_SUCCESS);
 
     } else {
@@ -2887,7 +2887,7 @@ URM_TEST(TestConcurrentWriteTo_scaling_min_freq_Node3, {
             std::cout<<LOG_BASE<<"Handle Returned: "<<handle<<std::endl;
 
             std::this_thread::sleep_for(std::chrono::seconds(3));
-            delete resourceList;
+            delete[] resourceList;
             exit(EXIT_SUCCESS);
 
         } else {
@@ -2933,7 +2933,7 @@ URM_TEST(TestConcurrentWriteTo_scaling_min_freq_Node3, {
             std::cout<<LOG_BASE<<testResourceName<<" Reset Value: "<<newValue<<std::endl;
             E_ASSERT((newValue == originalValue));
 
-            delete resourceList;
+            delete[] resourceList;
 
         }
     }
@@ -3023,8 +3023,8 @@ URM_TEST(TestWriteTo_sched_util_clamp_max_Node1, {
     std::cout<<LOG_BASE<<testResourceName2<<" Reset Value: "<<newValue<<std::endl;
     E_ASSERT((newValue == originalValue2));
 
-    delete resourceList;
-    delete resourceList2;
+    delete[] resourceList;
+    delete[] resourceList2;
 })
 
 /**
@@ -3095,7 +3095,7 @@ URM_TEST(TestWriteTo_sched_util_clamp_max_Node2, {
         std::cout<<LOG_BASE<<"Handle Returned: "<<handle<<std::endl;
         std::this_thread::sleep_for(std::chrono::seconds(3));
 
-        delete resourceList;
+        delete[] resourceList;
         exit(EXIT_SUCCESS);
     }
 
@@ -3111,7 +3111,7 @@ URM_TEST(TestWriteTo_sched_util_clamp_max_Node2, {
         std::cout<<LOG_BASE<<"Handle Returned: "<<handle<<std::endl;
         std::this_thread::sleep_for(std::chrono::seconds(3));
 
-        delete resourceList;
+        delete[] resourceList;
         exit(EXIT_SUCCESS);
     }
 
@@ -3127,7 +3127,7 @@ URM_TEST(TestWriteTo_sched_util_clamp_max_Node2, {
         std::cout<<LOG_BASE<<"Handle Returned: "<<handle<<std::endl;
 
         std::this_thread::sleep_for(std::chrono::seconds(3));
-        delete resourceList;
+        delete[] resourceList;
         exit(EXIT_SUCCESS);
     }
 
@@ -3156,7 +3156,7 @@ URM_TEST(TestWriteTo_sched_util_clamp_max_Node2, {
     waitpid(pid2, nullptr, 0);
     waitpid(pid3, nullptr, 0);
 
-    delete resourceList;
+    delete[] resourceList;
 })
 
 URM_TEST(TestHeavyLoadWriteTo_sched_util_clamp_min_Node, {
@@ -3188,7 +3188,7 @@ URM_TEST(TestHeavyLoadWriteTo_sched_util_clamp_min_Node, {
             std::cout<<LOG_BASE<<"Handle Returned: "<<handle<<std::endl;
 
             std::this_thread::sleep_for(std::chrono::seconds(3));
-            delete resourceList;
+            delete[] resourceList;
             exit(EXIT_SUCCESS);
         }
     }
@@ -3268,7 +3268,7 @@ URM_TEST(TestWriteTo_pm_qos_resume_latency_us1, {
         E_ASSERT((newValue == originalValue));
     }
 
-    delete resourceList;
+    delete[] resourceList;
 })
 
 URM_TEST(TestWriteTo_pm_qos_resume_latency_us2, {
@@ -3323,7 +3323,7 @@ URM_TEST(TestWriteTo_pm_qos_resume_latency_us2, {
         E_ASSERT((newValue == originalValue));
     }
 
-    delete resourceList;
+    delete[] resourceList;
 })
 
 /*
@@ -3675,7 +3675,7 @@ URM_TEST(TestCgroupWriteAndResetBasicCase, {
     std::cout<<LOG_BASE<<testResourceName<<" Reset Value: "<<newValue<<std::endl;
     E_ASSERT((newValue == originalValue));
 
-    delete resourceList;
+    delete[] resourceList;
 })
 
 URM_TEST(TestCgroupWriteAndReset1, {
@@ -3727,8 +3727,8 @@ URM_TEST(TestCgroupWriteAndReset1, {
     newValue = C_STOI(value);
     E_ASSERT((newValue == originalValue));
 
-    delete resourceList;
-    delete resourceList1;
+    delete[] resourceList;
+    delete[] resourceList1;
 })
 
 URM_TEST(TestCgroupWriteAndReset2, {
@@ -3751,7 +3751,7 @@ URM_TEST(TestCgroupWriteAndReset2, {
         std::cout<<LOG_BASE<<"Handle Returned: "<<handle<<std::endl;
 
         std::this_thread::sleep_for(std::chrono::seconds(3));
-        delete resourceList;
+        delete[] resourceList;
         exit(EXIT_SUCCESS);
 
     } else if(rc > 0) {
@@ -3781,7 +3781,7 @@ URM_TEST(TestCgroupWriteAndReset2, {
         newValue = C_STOI(value);
         E_ASSERT((newValue == originalValue));
 
-        delete resourceList;
+        delete[] resourceList;
         wait(nullptr);
     }
 })
@@ -3807,7 +3807,7 @@ URM_TEST(TestCgroupWriteAndReset3, {
         std::cout<<LOG_BASE<<"Handle Returned: "<<handle<<std::endl;
 
         std::this_thread::sleep_for(std::chrono::seconds(2));
-        delete resourceList;
+        delete[] resourceList;
         exit(EXIT_SUCCESS);
 
     } else if(rc > 0) {
@@ -3840,7 +3840,7 @@ URM_TEST(TestCgroupWriteAndReset3, {
             E_ASSERT((newValue == originalValue));
         }
 
-        delete resourceList;
+        delete[] resourceList;
         wait(nullptr);
     }
 })
@@ -3866,7 +3866,7 @@ URM_TEST(TestCgroupWriteAndReset4, {
         std::cout<<LOG_BASE<<"Handle Returned: "<<handle<<std::endl;
 
         std::this_thread::sleep_for(std::chrono::seconds(2));
-        delete resourceList;
+        delete[] resourceList;
         exit(EXIT_SUCCESS);
 
     } else if(rc > 0) {
@@ -3901,7 +3901,7 @@ URM_TEST(TestCgroupWriteAndReset4, {
             E_ASSERT((newValue == originalValue));
         }
 
-        delete resourceList;
+        delete[] resourceList;
         wait(nullptr);
     }
 })
@@ -3970,7 +3970,7 @@ URM_TEST(TestCgroupWriteAndReset5,  {
         E_ASSERT((newValue == originalValue2));
     }
 
-    delete resourceList;
+    delete[] resourceList;
 })
 
 URM_TEST(TestCgroupWriteAndReset6, {
@@ -4006,7 +4006,7 @@ URM_TEST(TestCgroupWriteAndReset6, {
     std::cout<<LOG_BASE<<testResourceName<<" Reset Value: "<<value<<std::endl;
     E_ASSERT((value == originalValueString));
 
-    delete resourceList1;
+    delete[] resourceList1;
 })
 
 REGISTER_AND_TRIGGER_SUITE(TEST_CLASS)
