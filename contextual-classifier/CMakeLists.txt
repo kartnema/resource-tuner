@@ -19,8 +19,7 @@ set_target_properties(ContextualClassifier PROPERTIES
 )
 
 target_include_directories(ContextualClassifier
-    PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/Include
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Include
 )
 
 # fastText detection and USE_FASTTEXT macro
@@ -62,23 +61,21 @@ if(FASTTEXT_FOUND)
     )
 
     target_link_libraries(ml_inference_lib
-        PRIVATE
-            ${FASTTEXT_TARGET}
+        PRIVATE ${FASTTEXT_TARGET}
     )
 
     target_include_directories(ml_inference_lib
-        PUBLIC
-            ${CMAKE_CURRENT_SOURCE_DIR}/Include
+        PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Include
     )
 else()
     message(STATUS "fastText not found or ENABLE_FASTTEXT=OFF — falling back to base Inference only")
 endif()
 
 # Installation rules
-install(TARGETS ContextualClassifier DESTINATION lib)
-if(FASTTEXT_FOUND)
-    install(TARGETS ml_inference_lib DESTINATION lib)
-    install(FILES ${CMAKE_SOURCE_DIR}/contextual-classifier/Artifacts/fasttext_model_supervised.bin DESTINATION ${CMAKE_INSTALL_SYSCONFDIR}/classifier)
+install(TARGETS ContextualClassifier DESTINATION ${CMAKE_INSTALL_LIBDIR})
+if(FLORET_FOUND)
+    install(TARGETS ml_inference_lib DESTINATION ${CMAKE_INSTALL_LIBDIR})
+    install(FILES ${CMAKE_SOURCE_DIR}/contextual-classifier/Artifacts/floret_model_supervised.bin DESTINATION ${CMAKE_INSTALL_SYSCONFDIR}/urm/classifier)
 endif()
 
 install(FILES Configs/ignore-tokens.txt DESTINATION ${CMAKE_INSTALL_SYSCONFDIR}/urm/classifier)
