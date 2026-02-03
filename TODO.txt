@@ -12,3 +12,5 @@
     - Client API requests encoding / decoding support (Making Buffers smaller for efficiency)
     - Focused cgroup creation
     - Memory Leaks analysis and reduction. Major issues are resolved, still observing some lost blocks.
+    - Using PROC_EVENT_CLOSE events to influence garbage Collector
+

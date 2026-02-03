@@ -128,6 +128,14 @@ enum Modes {
     (int32_t) ((resInfo ^ (EXTRACT_RESOURCE_MPAM_VALUE(resInfo) << 16)) | (newValue << 16));  \
 })                                                                                            \
 
+#define GET_SIGNAL_ID(sigCode)({                                                              \
+    (uint32_t) ((uint64_t)sigCode >> 32);                                                     \
+})                                                                                            \
+
+#define GET_SIGNAL_TYPE(sigCode)({                                                            \
+    (uint32_t) (((uint64_t)sigCode) & 0xffffffff);                                            \
+})                                                                                            \
+
 #define CONSTRUCT_RES_CODE(resType, resCode) ({                                               \
     uint32_t resourceBitmap = 0;                                                              \
     resourceBitmap |= ((uint32_t)resCode);                                                    \

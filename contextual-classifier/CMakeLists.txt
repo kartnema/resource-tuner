@@ -78,5 +78,10 @@ if(FASTTEXT_FOUND)
     install(FILES ${CMAKE_SOURCE_DIR}/contextual-classifier/Artifacts/fasttext_model_supervised.bin DESTINATION ${CMAKE_INSTALL_SYSCONFDIR}/urm/classifier)
 endif()
 
-install(FILES Configs/ignore-tokens.txt DESTINATION ${CMAKE_INSTALL_SYSCONFDIR}/urm/classifier)
-install(FILES Configs/classifier-blocklist.txt DESTINATION ${CMAKE_INSTALL_SYSCONFDIR}/urm/classifier)
+install(
+  DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Configs/
+  DESTINATION ${CMAKE_INSTALL_SYSCONFDIR}/urm/classifier/
+  FILES_MATCHING
+  PATTERN "*.txt"
+  PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ
+)
