@@ -3,6 +3,7 @@
 
 #include "SignalRegistry.h"
 
+#include <iostream>
 static const int32_t unsupportedResoure = -2;
 
 static void freeSignalConfig(SignalInfo* signalInfo) {
@@ -42,7 +43,7 @@ int8_t SignalRegistry::isSignalConfigMalformed(SignalInfo* sConf) {
     return false;
 }
 
-void SignalRegistry::registerSignal(SignalInfo* signalInfo, int8_t isBuSpecified) {
+void SignalRegistry::registerSignal(SignalInfo* signalInfo) {
     if(this->isSignalConfigMalformed(signalInfo)) {
         freeSignalConfig(signalInfo);
         signalInfo = nullptr;
@@ -69,10 +70,6 @@ void SignalRegistry::registerSignal(SignalInfo* signalInfo, int8_t isBuSpecified
         this->mSILMap[signalBitmap] = signalTableIndex;
 
     } else {
-        if(isBuSpecified) {
-            signalBitmap |= (1UL << 63);
-        }
-
         this->mSILMap[signalBitmap] = this->mTotalSignals;
         this->mSignalsConfigs.push_back(signalInfo);
 

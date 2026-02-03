@@ -42,18 +42,18 @@ const std::string ALLOW_LIST_PATH =
 
 // MLInference
 Inference *ContextualClassifier::GetInferenceObject() {
-	return (new MLInference(FT_MODEL_PATH));
+    return (new MLInference(FT_MODEL_PATH));
 }
 #else
 
 // Generic / Stub Inference Object
 Inference *ContextualClassifier::GetInferenceObject() {
-	return (new Inference(FT_MODEL_PATH));
+    return (new Inference(FT_MODEL_PATH));
 }
 #endif
 
 ContextualClassifier::ContextualClassifier() {
-    this->mRestuneHandle = -1;
+    this->mRestuneHandle.mCurHandle = -1;
     mInference = GetInferenceObject();
 }
 
@@ -334,7 +334,10 @@ int32_t ContextualClassifier::ClassifyProcess(pid_t processPid,
     }
 
     LOGD(CLASSIFIER_TAG,
-         "Starting classification for PID: " + std::to_string(processPid));
+         "Starting classification for PID: "
+            + std::to_string(processPid)
+            + ", " + comm
+        );
     context = mInference->Classify(processPid);
     return context;
 }
@@ -425,13 +428,11 @@ int8_t ContextualClassifier::shouldProcBeIgnored(int32_t evType, pid_t pid) {
     if(this->mAllowedProcesses.size() > 0) {
         // Check in allowed-list is present
         if(this->mAllowedProcesses.count(procName) == 0U) {
-            LOGD(CLASSIFIER_TAG, "Ignoring process: " + procName);
             return true;
         }
     } else {
         // If allow-list is not present, check in blocklist
         if(this->mIgnoredProcesses.count(procName) != 0U) {
-            LOGD(CLASSIFIER_TAG, "Ignoring process: " + procName);
             return true;
         }
     }
@@ -445,11 +446,11 @@ void ContextualClassifier::MoveAppThreadsToCGroup(pid_t incomingPID,
                                                   int32_t cgroupIdentifier) {
     try {
         // Check for any outstanding request, if found untune it.
-        if(this->mRestuneHandle != -1) {
+        if(this->mRestuneHandle.mCurHandle != -1) {
             Request* untuneRequest = MPLACED(Request);
 
             untuneRequest->setRequestType(REQ_RESOURCE_UNTUNING);
-            untuneRequest->setHandle(this->mRestuneHandle);
+            untuneRequest->setHandle(this->mRestuneHandle.mCurHandle);
             untuneRequest->setDuration(-1);
             // Passing priority as HIGH_TRANSFER_PRIORITY (= -1)
             // - Ensures untune requests are processed before even SERVER_HIGH priority tune requests
@@ -458,21 +459,22 @@ void ContextualClassifier::MoveAppThreadsToCGroup(pid_t incomingPID,
             //   not free up the underlying Request object, allowing for reuse.
             // Priority Level: -2 is used to force server termination and cleanup so should not be used otherwise.
             untuneRequest->setPriority(SYSTEM_HIGH);
-            untuneRequest->setClientPID(incomingPID);
-            untuneRequest->setClientTID(incomingTID);
+            untuneRequest->setClientPID(this->mRestuneHandle.mCurReqPid);
+            untuneRequest->setClientTID(this->mRestuneHandle.mCurReqTid);
 
             // fast path to Request Queue
             // Mark verification status as true. Request still goes through RequestManager though.
             submitResProvisionRequest(untuneRequest, true);
-            this->mRestuneHandle = -1;
+            this->mRestuneHandle.mCurHandle = -1;
         }
 
+        int64_t handleGenerated = -1;
         // Issue a tune request for the new pid (and any associated app-config pids)
         Request* request = MPLACED(Request);
         request->setRequestType(REQ_RESOURCE_TUNING);
         // Generate and store the handle for future use
-        this->mRestuneHandle = AuxRoutines::generateUniqueHandle();
-        request->setHandle(this->mRestuneHandle);
+        handleGenerated = AuxRoutines::generateUniqueHandle();
+        request->setHandle(handleGenerated);
         request->setDuration(-1);
         request->setPriority(SYSTEM_LOW);
         request->setClientPID(incomingPID);
@@ -499,17 +501,23 @@ void ContextualClassifier::MoveAppThreadsToCGroup(pid_t incomingPID,
 
         // Anything to issue
         if(request->getResourcesCount() > 0) {
+            // Record:
+            this->mRestuneHandle.mCurHandle = handleGenerated;
+            this->mRestuneHandle.mCurReqPid = incomingPID;
+            this->mRestuneHandle.mCurReqTid = incomingTID;
+
             // fast path to Request Queue
             submitResProvisionRequest(request, true);
+
         } else {
             Request::cleanUpRequest(request);
-            this->mRestuneHandle = -1;
+            this->mRestuneHandle.mCurHandle = -1;
         }
 
     } catch(const std::exception& e) {
         LOGE(CLASSIFIER_TAG,
              "Failed to move per-app threads to cgroup, Error: " + std::string(e.what()));
-        this->mRestuneHandle = -1;
+        this->mRestuneHandle.mCurHandle = -1;
     }
 }
 
