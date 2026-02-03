@@ -6,7 +6,6 @@
 #include <string>
 #include <thread>
 #include <memory>
-#include <iostream>
 #include "ErrCodes.h"
 #include "Extensions.h"
 #include "AuxRoutines.h"

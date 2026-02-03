@@ -3,7 +3,6 @@
 
 #include "SignalRegistry.h"
 
-#include <iostream>
 static const int32_t unsupportedResoure = -2;
 
 static void freeSignalConfig(SignalInfo* signalInfo) {
