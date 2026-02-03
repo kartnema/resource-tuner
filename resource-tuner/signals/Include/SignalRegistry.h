@@ -87,7 +87,7 @@ public:
      *          Malformed, then it will be freed as part of this routine, else it will
      *          be added to the "mSignalsConfigs" vector.
      */
-    void registerSignal(SignalInfo* signalInfo, int8_t isBuSpecified=false);
+    void registerSignal(SignalInfo* signalInfo);
 
     int8_t isSignalConfigMalformed(SignalInfo* sConf);
 

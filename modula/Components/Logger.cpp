@@ -631,7 +631,7 @@ void Logger::typeLog(CommonMessageTypes type, const std::string& funcName, ...) 
 
         case CommonMessageTypes::SIGNAL_REGISTRY_SIGNAL_NOT_FOUND:
             vsnprintf(buffer, sizeof(buffer),
-                      "Signal ID [0x%08x] not found in the registry", args);
+                      "Signal ID [%ld] not found in the registry", args);
 
             Logger::log(LOG_ERR, "RESTUNE_SIGNAL_REGISTRY", funcName, buffer);
             break;

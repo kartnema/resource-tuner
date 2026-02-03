@@ -50,14 +50,20 @@ struct ProcEvent {
     int32_t type; // CC_APP_OPEN / CC_APP_CLOSE / CC_IGNORE
 };
 
+typedef struct {
+    int64_t mCurHandle;
+    pid_t mCurReqPid;
+    pid_t mCurReqTid;
+} RestuneHandleInfo;
+
 class ContextualClassifier {
 private:
-    int64_t mRestuneHandle;
     int8_t mDebugMode = false;
     volatile int8_t mNeedExit = false;
 
     NetLinkComm mNetLinkComm;
     Inference *mInference;
+    RestuneHandleInfo mRestuneHandle;
 
     // Event queue for classifier main thread
     std::queue<ProcEvent> mPendingEv;
@@ -68,7 +74,6 @@ private:
 
     std::unordered_set<std::string> mIgnoredProcesses;
     std::unordered_set<std::string> mAllowedProcesses;
-    std::unordered_map<pid_t, uint64_t> mResTunerHandles;
 
     void ClassifierMain();
     int32_t HandleProcEv();

@@ -236,6 +236,9 @@ static void processIncomingRequest(Request* request, int8_t isValidated=false) {
     std::shared_ptr<RequestManager> requestManager = RequestManager::getInstance();
     std::shared_ptr<RequestQueue> requestQueue = RequestQueue::getInstance();
 
+    pid_t clientPid = request->getClientPID();
+    pid_t clientTid = request->getClientTID();
+
     if(request->getRequestType() == REQ_RESOURCE_TUNING) {
         // Perform a Global Rate Limit Check before Processing the Request
         // This is to check if the current Active Request count has hit the
@@ -250,8 +253,8 @@ static void processIncomingRequest(Request* request, int8_t isValidated=false) {
         }
 
         // Client Checks
-        if(!clientDataManager->clientExists(request->getClientPID(), request->getClientTID())) {
-            if(!clientDataManager->createNewClient(request->getClientPID(), request->getClientTID())) {
+        if(!clientDataManager->clientExists(clientPid, clientTid)) {
+            if(!clientDataManager->createNewClient(clientPid, clientTid)) {
                 // Client Entry Could not be Created, don't Proceed further with the Request
                 TYPELOGV(CLIENT_ENTRY_CREATION_FAILURE, request->getHandle());
 
@@ -266,7 +269,7 @@ static void processIncomingRequest(Request* request, int8_t isValidated=false) {
        request->getRequestType() == REQ_RESOURCE_RETUNING) {
         // Note: Client Data Manager initialisation is not necessary for Untune / Retune Requests,
         // since the client is expected to be allocated already (as part of the Tune Request)
-        if(!clientDataManager->clientExists(request->getClientPID(), request->getClientTID())) {
+        if(!isValidated && !clientDataManager->clientExists(clientPid, clientTid)) {
             // Client does not exist, drop the request
             Request::cleanUpRequest(request);
             return;
