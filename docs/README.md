@@ -38,6 +38,7 @@
     - [4.3.3. Properties Config](#433-properties-config)
     - [4.3.4. Signal Configs](#434-signal-configs)
     - [4.3.5. Per-App Configs](#435-per-app-configs)
+  - [4.4. Urm Config Parsing](#44-urm-config-parsing)
 
 - [5. Client CLI](#5-client-cli)
   - [5.1. Send a Tune Request](#51-send-a-tune-request)
@@ -577,7 +578,6 @@ int64_t tuneSignal(uint32_t sigId,
 - `sigID` (`uint32_t`): A uniqued 32-bit (unsigned) identifier for the Signal
     - The last 16 bits (17-32) are used to specify the SigID
     - The next 8 bits (9-16) are used to specify the Signal Category
-    - In addition for Custom Signals, the MSB must be set to 1 as well
 - `sigType` (`uint32_t`): Type of the signal, sigType is typically used in multimedia pipelines (camera, encoder, transcoder) where the same signal ID may represent multiple mode variants. Default value is 0.
 - `duration` (`int64_t`): Duration (in milliseconds) to tune the Signal for. A value of -1 denotes infinite duration.
 - `properties` (`int32_t`): Properties of the Request.
@@ -656,7 +656,6 @@ int8_t relaySignal(uint32_t sigId,
 - `sigId` (`uint32_t`): A uniqued 32-bit (unsigned) identifier for the Signal
     - The last 16 bits (17-32) are used to specify the SigID
     - The next 8 bits (9-16) are used to specify the Signal Category
-    - In addition for Custom Signals, the MSB must be set to 1 as well
 - `sigType` (`uint32_t`): Type of the signal, useful for use-case based signal filtering and selection, i.e.
                           in situations where multiple variants of the same core signal (with minor changes)
                           need to exist to support different use-case scenarios. If no such filtering is needed, pass this field as 0.
@@ -888,11 +887,21 @@ PerAppConfigs:
   - App: "chrome"
     Threads:
        - {"chrome": "FOCUSED_CGROUP_IDENTIFIER"}
-    Configurations: ["0x80034aab"]
+    Configurations: ["0x00034aab"]
 
 ```
 
 PerApp configs should be defined in /etc/urm/custom/PerApp.yaml.
+
+## 4.4. Urm Config Parsing
+Urm provides by default some base / default configs for Resources, Signals, Init and Properties. These
+configs can be extended or overriden via user-specified customizations. Urm parses the configs in the following order: Common -> Target-Specific -> Custom.
+
+Where target-specific configs refers to configs indexed by the target identifier, these configs are unique to that target.
+
+Custom Configs are user-specified via the Extensions Interface, as described in detail later in the section: "Customizations & Extensions".
+
+Both target-specific and custom configs are optional.
 
 ## 5. Client CLI
 URM provides a minimal CLI to interact with the server. This is provided to help with development and debugging purposes.
@@ -913,7 +922,7 @@ Example:
 /usr/bin/urmCli --tune --duration 5000 --priority 0 --num 1 --res "65536:700"
 
 # Multiple Resources in single Request
-/usr/bin/urmCli --tune --duration 4400 --priority 1 --num 2 --res "0x80030000:700,0x80040001:155667"
+/usr/bin/urmCli --tune --duration 4400 --priority 1 --num 2 --res "0x00030000:700,0x00040001:155667"
 
 # Multi-Valued Resource
 /usr/bin/urmCli --tune --duration 9500 --priority 0 --num 1 --res "0x00090002:0,0,1,3,5"

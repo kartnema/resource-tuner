@@ -80,26 +80,26 @@ std::vector<SignalInfo*> SignalRegistry::getSignalConfigs() {
     return this->mSignalsConfigs;
 }
 
-SignalInfo* SignalRegistry::getSignalConfigById(uint64_t sigID) {
-    if(this->mSILMap.find(sigID) == this->mSILMap.end()) {
-        TYPELOGV(SIGNAL_REGISTRY_SIGNAL_NOT_FOUND, sigID);
+SignalInfo* SignalRegistry::getSignalConfigById(uint64_t sigCode) {
+    if(this->mSILMap.find(sigCode) == this->mSILMap.end()) {
+        TYPELOGV(SIGNAL_REGISTRY_SIGNAL_NOT_FOUND, GET_SIGNAL_ID(sigCode), GET_SIGNAL_TYPE(sigCode));
         return nullptr;
     }
 
-    int32_t mResourceTableIndex = this->mSILMap[sigID];
+    int32_t mResourceTableIndex = this->mSILMap[sigCode];
     return this->mSignalsConfigs[mResourceTableIndex];
 }
 
-SignalInfo* SignalRegistry::getSignalConfigById(uint32_t sigCode, uint32_t sigType) {
+SignalInfo* SignalRegistry::getSignalConfigById(uint32_t sigId, uint32_t sigType) {
     // Create the 64-bit index
-    uint64_t signalBitmap = (uint64_t)sigCode;
+    uint64_t signalBitmap = (uint64_t)sigId;
 
     // Add the sub-type
     signalBitmap <<= 32; // Make Room
     signalBitmap |= sigType;
 
     if(this->mSILMap.find(signalBitmap) == this->mSILMap.end()) {
-        TYPELOGV(SIGNAL_REGISTRY_SIGNAL_NOT_FOUND, signalBitmap);
+        TYPELOGV(SIGNAL_REGISTRY_SIGNAL_NOT_FOUND, sigId, sigType);
         return nullptr;
     }
 
