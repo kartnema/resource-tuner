@@ -147,9 +147,9 @@ public:
      *            - PERMISSION_THIRD_PARTY: If the Client has Third Party level access\n
      *            - -1: If the Client could not be determined.
      */
-    int8_t getClientLevelByClientID(int32_t clientPID);
+    int8_t getClientLevelByID(pid_t clientPID);
 
-    void getThreadsByClientId(int32_t clientPID, std::vector<int32_t>& threadIDs);
+    void getThreadsByClientId(pid_t clientPID, std::vector<int32_t>& threadIDs);
 
     /**
      * @brief This method is called by the PulseMonitor to fetch the list of all active clients.

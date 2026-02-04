@@ -165,7 +165,7 @@ void ClientDataManager::deleteRequestByClientId(int32_t clientTID, int64_t reque
     this->mGlobalTableMutex.unlock_shared();
 }
 
-int8_t ClientDataManager::getClientLevelByClientID(int32_t clientPID) {
+int8_t ClientDataManager::getClientLevelByID(pid_t clientPID) {
     this->mGlobalTableMutex.lock_shared();
 
     if(this->mClientRepo.find(clientPID) == this->mClientRepo.end()) {
@@ -179,7 +179,7 @@ int8_t ClientDataManager::getClientLevelByClientID(int32_t clientPID) {
     return clientLevel;
 }
 
-void ClientDataManager::getThreadsByClientId(int32_t clientPID, std::vector<int32_t>& threadIDs) {
+void ClientDataManager::getThreadsByClientId(pid_t clientPID, std::vector<int32_t>& threadIDs) {
     this->mGlobalTableMutex.lock_shared();
 
     if(this->mClientRepo.find(clientPID) == this->mClientRepo.end()) {

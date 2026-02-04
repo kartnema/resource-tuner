@@ -67,7 +67,7 @@ public:
     ErrCode startClientGarbageCollectorDaemon();
 
     void stopClientGarbageCollectorDaemon();
-    void submitClientThreadsForCleanup(int32_t clientTid);
+    void submitClientForCleanup(pid_t clientPid);
 
     static std::shared_ptr<ClientGarbageCollector> getInstance() {
         if(mClientGarbageCollectorInstance == nullptr) {
