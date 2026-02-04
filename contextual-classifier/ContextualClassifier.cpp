@@ -26,13 +26,13 @@
 #define CLASSIFIER_TAG "CONTEXTUAL_CLASSIFIER"
 #define CLASSIFIER_CONFIGS_DIR "/etc/urm/classifier/"
 
-const std::string FT_MODEL_PATH =
+static const std::string FT_MODEL_PATH =
     CLASSIFIER_CONFIGS_DIR "fasttext_model_supervised.bin";
-const std::string IGNORE_PROC_PATH =
+static const std::string IGNORE_PROC_PATH =
     CLASSIFIER_CONFIGS_DIR "classifier-blocklist.txt";
-const std::string IGNORE_TOKENS_PATH =
+static const std::string IGNORE_TOKENS_PATH =
     CLASSIFIER_CONFIGS_DIR "ignore-tokens.txt";
-const std::string ALLOW_LIST_PATH =
+static const std::string ALLOW_LIST_PATH =
     CLASSIFIER_CONFIGS_DIR "allow-list.txt";
 
 #ifdef USE_FASTTEXT
