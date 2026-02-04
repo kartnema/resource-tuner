@@ -357,7 +357,7 @@ ResourceConfigs:
     Permissions: "third_party"
     Modes: ["display_on"]
     Policy: "pass_through"
-    ApplyType: "core"
+    ApplyType: "global"
 
   - ResType: "0x0b"
     ResID: "0x0001"
