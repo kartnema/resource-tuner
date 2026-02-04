@@ -13,7 +13,8 @@
 #include <vector>
 #include <unordered_map>
 
-#include "Utils.h"
+#define CONCAT_IMPL(a, b) a##b
+#define CONCAT(a, b) CONCAT_IMPL(a, b)
 
 typedef void (*ResourceLifecycleCallback)(void*);
 typedef void (*PostProcessingCallback)(void*);
