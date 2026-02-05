@@ -82,10 +82,10 @@ static ErrCode loadExtensionsLib() {
 
 static void preAllocateMemory() {
     // Preallocate Memory for certain frequently used types.
-    int32_t concurrentRequestsUB = UrmSettings::metaConfigs.mMaxConcurrentRequests;
-    int32_t resourcesPerRequestUB = UrmSettings::metaConfigs.mMaxResourcesPerRequest;
+    uint32_t concurrentRequestsUB = UrmSettings::metaConfigs.mMaxConcurrentRequests;
+    uint32_t resourcesPerRequestUB = UrmSettings::metaConfigs.mMaxResourcesPerRequest;
 
-    int32_t maxBlockCount = concurrentRequestsUB * resourcesPerRequestUB;
+    uint32_t maxBlockCount = concurrentRequestsUB * resourcesPerRequestUB;
 
     MakeAlloc<Message> (concurrentRequestsUB);
     MakeAlloc<Request> (concurrentRequestsUB);
@@ -154,7 +154,7 @@ static ErrCode fetchMetaConfigs() {
         submitPropGetRequest(GARBAGE_COLLECTOR_DURATION, resultBuffer, "83000");
         UrmSettings::metaConfigs.mClientGarbageCollectorDuration = (uint32_t)std::stol(resultBuffer);
 
-        submitPropGetRequest(GARBAGE_COLLECTOR_BATCH_SIZE, resultBuffer, "5");
+        submitPropGetRequest(GARBAGE_COLLECTOR_BATCH_SIZE, resultBuffer, "20");
         UrmSettings::metaConfigs.mCleanupBatchSize = (uint32_t)std::stol(resultBuffer);
 
         submitPropGetRequest(RATE_LIMITER_DELTA, resultBuffer, "5");

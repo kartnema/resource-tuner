@@ -45,7 +45,7 @@ private:
 
     Timer* mTimer;
     std::mutex mGcQueueMutex;
-    std::queue<int32_t> mGcQueue;
+    std::queue<pid_t> mGcQueue;
     uint32_t mGarbageCollectionDuration;
 
     ClientGarbageCollector();

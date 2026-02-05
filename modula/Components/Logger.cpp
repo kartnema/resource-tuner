@@ -631,7 +631,7 @@ void Logger::typeLog(CommonMessageTypes type, const std::string& funcName, ...) 
 
         case CommonMessageTypes::SIGNAL_REGISTRY_SIGNAL_NOT_FOUND:
             vsnprintf(buffer, sizeof(buffer),
-                      "Signal with: ID [%08x] and Type [%08x] not found in the registry. "\
+                      "Signal with: ID [0x%08x] and Type [0x%08x] not found in the registry. "\
                       "Dropping Request.", args);
 
             Logger::log(LOG_ERR, "RESTUNE_SIGNAL_REGISTRY", funcName, buffer);
@@ -660,8 +660,8 @@ void Logger::typeLog(CommonMessageTypes type, const std::string& funcName, ...) 
 
         case CommonMessageTypes::CLIENT_ENTRY_CREATION_FAILURE:
             vsnprintf(buffer, sizeof(buffer),
-                      "Client Tracking Entry could not be created for handle [%ld] \
-                      Dropping Request", args);
+                      "Client Tracking Entry could not be created for handle [%ld], "\
+                      "Dropping Request.", args);
 
             Logger::log(LOG_ERR, "URM_SERVER", funcName, buffer);
             break;
