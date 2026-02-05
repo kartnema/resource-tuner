@@ -18,6 +18,7 @@
 #include "Logger.h"
 #include "AuxRoutines.h"
 #include "ContextualClassifier.h"
+#include "ClientGarbageCollector.h"
 #include "RestuneInternal.h"
 #include "SignalRegistry.h"
 #include "Extensions.h"
@@ -216,22 +217,21 @@ void ContextualClassifier::ClassifierMain() {
     pthread_setname_np(pthread_self(), "urmClassifier");
     while (true) {
         ProcEvent ev{};
-        {
-            std::unique_lock<std::mutex> lock(this->mQueueMutex);
-            this->mQueueCond.wait(
-                lock,
-                [this] {
-                    return !this->mPendingEv.empty() || this->mNeedExit;
-                }
-            );
 
-            if(this->mNeedExit) {
-                return;
+        std::unique_lock<std::mutex> lock(this->mQueueMutex);
+        this->mQueueCond.wait(
+            lock,
+            [this] {
+                return !this->mPendingEv.empty() || this->mNeedExit;
             }
+        );
 
-            ev = this->mPendingEv.front();
-            this->mPendingEv.pop();
+        if(this->mNeedExit) {
+            return;
         }
+
+        ev = this->mPendingEv.front();
+        this->mPendingEv.pop();
 
         if(ev.type == CC_APP_OPEN) {
             std::string comm;
@@ -282,8 +282,10 @@ void ContextualClassifier::ClassifierMain() {
                 // Step 4: Apply actions, call tuneSignal
                 this->ApplyActions(sigId, sigType, ev.pid, ev.tgid);
             }
-        } else if (ev.type == CC_APP_CLOSE) {
+        } else if(ev.type == CC_APP_CLOSE) {
             // No Action Needed, Pulse Monitor to take care of cleanup
+            ClientGarbageCollector::getInstance()->submitClientForCleanup(ev.pid);
+            ClientDataManager::getInstance()->deleteClientPID(ev.pid);
         }
     }
 }

@@ -137,7 +137,7 @@ static int8_t VerifyIncomingRequest(Request* req) {
         return false;
     }
     int8_t clientPermissions =
-        ClientDataManager::getInstance()->getClientLevelByClientID(req->getClientPID());
+        ClientDataManager::getInstance()->getClientLevelByID(req->getClientPID());
     // If the client permissions could not be determined, reject this request.
     // This could happen if the /proc/<pid>/status file for the Process could not be opened.
     if(clientPermissions == -1) {

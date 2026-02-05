@@ -11,7 +11,7 @@ ClientGarbageCollector::ClientGarbageCollector() {
         UrmSettings::metaConfigs.mClientGarbageCollectorDuration;
 }
 
-void ClientGarbageCollector::submitClientThreadsForCleanup(int32_t clientPid) {
+void ClientGarbageCollector::submitClientForCleanup(pid_t clientPid) {
     const std::lock_guard<std::mutex> lock(this->mGcQueueMutex);
 
     std::vector<int32_t> threadIDs;
