@@ -55,14 +55,14 @@ Inference *ContextualClassifier::GetInferenceObject() {
 }
 #endif
 
+static ContextualClassifier *gClassifier = nullptr;
+static const int32_t pendingQueueControlSize = 30;
+
 ContextualClassifier::ContextualClassifier() {
     this->mRestuneHandles[CURR_RESTUNE_CGRP_HNDL].mCurHandle = -1;
     this->mRestuneHandles[CURR_RESTUNE_SIG_HNDL].mCurHandle = -1;
     mInference = GetInferenceObject();
 }
-
-static ContextualClassifier *gClassifier = nullptr;
-static const int32_t pendingQueueControlSize = 30;
 
 void ContextualClassifier::untuneRequestHelper(int32_t index) {
     try {
@@ -103,7 +103,7 @@ static ResIterable* createMovePidResource(int32_t cGroupdId, pid_t pid) {
     return resIterable;
 }
 
-static Request* createResourceTuningRequest(uint32_t sigId,
+static Request* createTuneRequestFromSignal(uint32_t sigId,
                                             uint32_t sigType,
                                             pid_t incomingPID,
                                             pid_t incomingTID) {
@@ -378,9 +378,24 @@ void ContextualClassifier::ApplyActions(uint32_t sigId,
                                         pid_t incomingPID,
                                         pid_t incomingTID) {
     if(this->mRestuneHandles[CURR_RESTUNE_SIG_HNDL].mCurHandle != -1) {
-        Request* request = createResourceTuningRequest(sigId, sigType, incomingPID, incomingTID);
-        if(request != nullptr) {
-            submitResProvisionRequest(request, false);
+        untuneRequestHelper(CURR_RESTUNE_SIG_HNDL);
+        mRestuneHandles[CURR_RESTUNE_SIG_HNDL].mCurHandle = -1;
+    }
+
+    Request* request = createTuneRequestFromSignal(sigId, sigType, incomingPID, incomingTID);
+    if(request != nullptr) {
+        if(request->getResourcesCount() > 0) {
+            // Record:
+            this->mRestuneHandles[CURR_RESTUNE_SIG_HNDL].mCurHandle = request->getHandle();
+            this->mRestuneHandles[CURR_RESTUNE_SIG_HNDL].mCurReqPid = incomingPID;
+            this->mRestuneHandles[CURR_RESTUNE_SIG_HNDL].mCurReqTid = incomingTID;
+
+            // fast path to Request Queue
+            submitResProvisionRequest(request, true);
+
+        } else {
+            Request::cleanUpRequest(request);
+            this->mRestuneHandles[CURR_RESTUNE_SIG_HNDL].mCurHandle = -1;
         }
     }
 }
@@ -488,6 +503,7 @@ void ContextualClassifier::MoveAppThreadsToCGroup(pid_t incomingPID,
         // Issue a tune request for the new pid (and any associated app-config pids)
         Request* request = MPLACED(Request);
         request->setRequestType(REQ_RESOURCE_TUNING);
+
         // Generate and store the handle for future use
         handleGenerated = AuxRoutines::generateUniqueHandle();
         request->setHandle(handleGenerated);
