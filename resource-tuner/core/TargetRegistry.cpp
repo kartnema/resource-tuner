@@ -483,6 +483,75 @@ void TargetRegistry::addCacheInfoMapping(CacheInfo* cacheInfo) {
     this->mCacheInfoMapping[cacheInfo->mCacheType] = cacheInfo;
 }
 
+ErrCode TargetRegistry::addIrqAffine(int32_t irqNum, const std::string& cpuVal) {
+    try {
+        this->mIrqApplications[irqNum].push_back(std::stoi(cpuVal));
+    } catch(const std::exception& e) {
+        return RC_INVALID_VALUE;
+    }
+
+    return RC_SUCCESS;
+}
+
+void TargetRegistry::getIrqConfigs(int32_t irqNum, std::vector<int32_t>& cpuIds) {
+    if(this->mIrqApplications.find(irqNum) == this->mIrqApplications.end()) {
+        return;
+    }
+
+    for(int32_t i = 0; i < (int32_t)this->mIrqApplications[irqNum].size(); i++) {
+        cpuIds.push_back(this->mIrqApplications[irqNum][i]);
+    }
+}
+
+void TargetRegistry::applyPostBootConfigs() {
+    std::string dirPath = "/proc/irq/";
+    DIR* dir = opendir(dirPath.c_str());
+    if(dir == nullptr) {
+        return;
+    }
+
+    // Construct mask
+    uint64_t mask = 0;
+
+    std::vector<int32_t> cpuIds;
+    this->getIrqConfigs(-1, cpuIds);
+    for(int32_t cpuId: cpuIds) {
+        mask |= ((uint64_t)1 << cpuId);
+    }
+
+    struct dirent* entry;
+    while((entry = readdir(dir)) != nullptr) {
+        std::string filePath = dirPath + std::string(entry->d_name) + "/";
+        filePath.append("smp_affinity");
+
+        if(AuxRoutines::fileExists(filePath)) {
+            AuxRoutines::writeToFile(filePath, std::to_string(mask));
+        }
+    }
+    closedir(dir);
+
+    for(std::pair<int32_t, std::vector<int32_t>> entry: this->mIrqApplications) {
+        cpuIds.clear();
+        if(entry.first == -1) {
+            continue;
+        }
+
+        uint64_t mask = 0;
+
+        this->getIrqConfigs(entry.first, cpuIds);
+        for(int32_t cpuId: cpuIds) {
+            mask |= ((uint64_t)1 << cpuId);
+        }
+
+        std::string filePath = dirPath + std::to_string(entry.first) + "/";
+        filePath.append("smp_affinity");
+
+        if(AuxRoutines::fileExists(filePath)) {
+            AuxRoutines::writeToFile(filePath, std::to_string(mask));
+        }
+    }
+}
+
 // Methods for Building CGroup Config from InitConfigs.yaml
 CGroupConfigInfoBuilder::CGroupConfigInfoBuilder() {
     this->mCGroupConfigInfo = new(std::nothrow) CGroupConfigInfo;
