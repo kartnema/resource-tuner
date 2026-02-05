@@ -377,6 +377,7 @@ void ContextualClassifier::ApplyActions(uint32_t sigId,
                                         uint32_t sigType,
                                         pid_t incomingPID,
                                         pid_t incomingTID) {
+
     if(this->mRestuneHandles[CURR_RESTUNE_SIG_HNDL].mCurHandle != -1) {
         untuneRequestHelper(CURR_RESTUNE_SIG_HNDL);
         mRestuneHandles[CURR_RESTUNE_SIG_HNDL].mCurHandle = -1;
@@ -391,7 +392,7 @@ void ContextualClassifier::ApplyActions(uint32_t sigId,
             this->mRestuneHandles[CURR_RESTUNE_SIG_HNDL].mCurReqTid = incomingTID;
 
             // fast path to Request Queue
-            submitResProvisionRequest(request, true);
+            submitResProvisionRequest(request, false);
 
         } else {
             Request::cleanUpRequest(request);
