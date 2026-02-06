@@ -105,7 +105,7 @@ static int8_t isKey(const std::string& keyName) {
         INIT_CONFIGS_ELEM_CACHE_INFO_BLK_CNT,
         INIT_CONFIGS_ELEM_CACHE_INFO_PRIO_AWARE,
         INIT_CONFIGS_IRQ_CONFIGS_LIST,
-        INIT_CONFIG_IRQ_AFFINE_ALL,
+        INIT_CONFIG_IRQ_AFFINE_CLUSTER,
         INIT_CONFIG_IRQ_AFFINE_ONE,
         SIGNAL_CONFIGS_ROOT,
         SIGNAL_CONFIGS_ELEM_SIGID,
@@ -151,7 +151,7 @@ static int8_t isKeyTypeList(const std::string& keyName) {
     if(keyName == INIT_CONFIGS_ELEM_CACHE_INFO_LIST) return true;
 
     if(keyName == INIT_CONFIGS_IRQ_CONFIGS_LIST) return true;
-    if(keyName == INIT_CONFIG_IRQ_AFFINE_ALL) return true;
+    if(keyName == INIT_CONFIG_IRQ_AFFINE_CLUSTER) return true;
     if(keyName == INIT_CONFIG_IRQ_AFFINE_ONE) return true;
 
     if(keyName == RESOURCE_CONFIGS_ELEM_MODES) return true;
@@ -492,7 +492,7 @@ ErrCode RestuneParser::parseInitConfigYamlNode(const std::string& filePath) {
 
                 topKey = keyTracker.top();
 
-                if(topKey == INIT_CONFIG_IRQ_AFFINE_ALL) {
+                if(topKey == INIT_CONFIG_IRQ_AFFINE_CLUSTER) {
                     inAffineAllList = true;
                 } else if(topKey == INIT_CONFIG_IRQ_AFFINE_ONE) {
                     intAffineOneList = true;
@@ -512,7 +512,6 @@ ErrCode RestuneParser::parseInitConfigYamlNode(const std::string& filePath) {
                             rc = TargetRegistry::getInstance()->
                                 addIrqAffine(-1, itemArray[i]);
                             if(RC_IS_NOTOK(rc)) {
-                                    printf("fail::514\n");
                                 return RC_YAML_INVALID_SYNTAX;
                             }
                         }
@@ -528,7 +527,6 @@ ErrCode RestuneParser::parseInitConfigYamlNode(const std::string& filePath) {
                                 rc = TargetRegistry::getInstance()->
                                     addIrqAffine(irqLine, itemArray[i]);
                                 if(RC_IS_NOTOK(rc)) {
-                                    printf("fail::529\n");
                                     return RC_YAML_INVALID_SYNTAX;
                                 }
                             }
@@ -648,7 +646,7 @@ ErrCode RestuneParser::parseInitConfigYamlNode(const std::string& filePath) {
                 ADD_TO_CACHE_INFO_BUILDER(INIT_CONFIGS_ELEM_CACHE_INFO_BLK_CNT, setNumBlocks);
                 ADD_TO_CACHE_INFO_BUILDER(INIT_CONFIGS_ELEM_CACHE_INFO_PRIO_AWARE, setPriorityAware);
 
-                if(topKey == INIT_CONFIG_IRQ_AFFINE_ALL || topKey == INIT_CONFIG_IRQ_AFFINE_ONE) {
+                if(topKey == INIT_CONFIG_IRQ_AFFINE_CLUSTER || topKey == INIT_CONFIG_IRQ_AFFINE_ONE) {
                     itemArray.push_back(value);
                 }
 
