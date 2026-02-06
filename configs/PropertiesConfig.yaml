@@ -12,7 +12,7 @@ PropertyConfigs:
     Value: "23000"
 
   - Name: resource_tuner.garbage_collection.duration
-    Value: "2000"
+    Value: "1000"
 
   - Name: resource_tuner.garbage_collection.batch_size
     Value: "20"
