@@ -105,7 +105,7 @@ static int8_t isKey(const std::string& keyName) {
         INIT_CONFIGS_ELEM_CACHE_INFO_BLK_CNT,
         INIT_CONFIGS_ELEM_CACHE_INFO_PRIO_AWARE,
         INIT_CONFIGS_IRQ_CONFIGS_LIST,
-        INIT_CONFIG_IRQ_AFFINE_CLUSTER,
+        INIT_CONFIG_IRQ_AFFINE_TO_CLUSTER,
         INIT_CONFIG_IRQ_AFFINE_ONE,
         SIGNAL_CONFIGS_ROOT,
         SIGNAL_CONFIGS_ELEM_SIGID,
@@ -151,7 +151,7 @@ static int8_t isKeyTypeList(const std::string& keyName) {
     if(keyName == INIT_CONFIGS_ELEM_CACHE_INFO_LIST) return true;
 
     if(keyName == INIT_CONFIGS_IRQ_CONFIGS_LIST) return true;
-    if(keyName == INIT_CONFIG_IRQ_AFFINE_CLUSTER) return true;
+    if(keyName == INIT_CONFIG_IRQ_AFFINE_TO_CLUSTER) return true;
     if(keyName == INIT_CONFIG_IRQ_AFFINE_ONE) return true;
 
     if(keyName == RESOURCE_CONFIGS_ELEM_MODES) return true;
@@ -463,8 +463,8 @@ ErrCode RestuneParser::parseInitConfigYamlNode(const std::string& filePath) {
 
     int8_t parsingDone = false;
     int8_t docMarker = false;
-    int8_t inAffineAllList = false;
-    int8_t intAffineOneList = false;
+    int8_t inAffineClusterList = false;
+    int8_t inAffineOneList = false;
 
     std::string value;
     std::string topKey;
@@ -492,10 +492,10 @@ ErrCode RestuneParser::parseInitConfigYamlNode(const std::string& filePath) {
 
                 topKey = keyTracker.top();
 
-                if(topKey == INIT_CONFIG_IRQ_AFFINE_CLUSTER) {
-                    inAffineAllList = true;
+                if(topKey == INIT_CONFIG_IRQ_AFFINE_TO_CLUSTER) {
+                    inAffineClusterList = true;
                 } else if(topKey == INIT_CONFIG_IRQ_AFFINE_ONE) {
-                    intAffineOneList = true;
+                    inAffineOneList = true;
                 }
 
                 break;
@@ -505,36 +505,25 @@ ErrCode RestuneParser::parseInitConfigYamlNode(const std::string& filePath) {
                     return RC_YAML_INVALID_SYNTAX;
                 }
 
-                if(inAffineAllList) {
-                    // Add threads to builder
+                if(inAffineClusterList) {
                     if(RC_IS_OK(rc)) {
-                        for(int32_t i = 0; i < (int32_t)itemArray.size(); i++) {
-                            rc = TargetRegistry::getInstance()->
-                                addIrqAffine(-1, itemArray[i]);
-                            if(RC_IS_NOTOK(rc)) {
-                                return RC_YAML_INVALID_SYNTAX;
-                            }
+                        rc = TargetRegistry::getInstance()->addIrqAffine(itemArray, true);
+                        if(RC_IS_NOTOK(rc)) {
+                            return RC_YAML_INVALID_SYNTAX;
                         }
                     }
                     itemArray.clear();
-                    inAffineAllList = !inAffineAllList;
+                    inAffineClusterList = !inAffineClusterList;
 
-                } else if(intAffineOneList) {
+                } else if(inAffineOneList) {
                     if(RC_IS_OK(rc)) {
-                        if(itemArray.size() > 1) {
-                            int32_t irqLine = std::stoi(itemArray[0]);
-                            for(int32_t i = 1; i < (int32_t)itemArray.size(); i++) {
-                                rc = TargetRegistry::getInstance()->
-                                    addIrqAffine(irqLine, itemArray[i]);
-                                if(RC_IS_NOTOK(rc)) {
-                                    return RC_YAML_INVALID_SYNTAX;
-                                }
-                            }
+                        rc = TargetRegistry::getInstance()->addIrqAffine(itemArray);
+                        if(RC_IS_NOTOK(rc)) {
+                            return RC_YAML_INVALID_SYNTAX;
                         }
-
                     }
                     itemArray.clear();
-                    intAffineOneList = !intAffineOneList;
+                    inAffineOneList = !inAffineOneList;
                 }
 
                 keyTracker.pop();
@@ -646,7 +635,7 @@ ErrCode RestuneParser::parseInitConfigYamlNode(const std::string& filePath) {
                 ADD_TO_CACHE_INFO_BUILDER(INIT_CONFIGS_ELEM_CACHE_INFO_BLK_CNT, setNumBlocks);
                 ADD_TO_CACHE_INFO_BUILDER(INIT_CONFIGS_ELEM_CACHE_INFO_PRIO_AWARE, setPriorityAware);
 
-                if(topKey == INIT_CONFIG_IRQ_AFFINE_CLUSTER || topKey == INIT_CONFIG_IRQ_AFFINE_ONE) {
+                if(topKey == INIT_CONFIG_IRQ_AFFINE_TO_CLUSTER || topKey == INIT_CONFIG_IRQ_AFFINE_ONE) {
                     itemArray.push_back(value);
                 }
 

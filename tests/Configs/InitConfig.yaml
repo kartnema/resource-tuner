@@ -43,5 +43,5 @@ InitConfigs:
       PriorityAware: 1
 
   - IRQConfigs:
-    - AffineAllIRQs: [1, 2, 3, 4, 5, 6]
-    - AffineIRQ: [323, 5, 6]
+    - AffineIRQ: [-1, 1, 2, 3, 4, 5, 6]
+    - AffineIRQToCluster: [323, 5, 6]

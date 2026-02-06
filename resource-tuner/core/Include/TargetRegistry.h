@@ -86,7 +86,6 @@ private:
     std::unordered_map<int32_t, CGroupConfigInfo*> mCGroupMapping;
     std::unordered_map<int32_t, MpamGroupConfigInfo*> mMpamGroupMapping;
     std::unordered_map<std::string, CacheInfo*> mCacheInfoMapping;
-    std::unordered_map<int32_t, std::vector<int32_t>> mIrqApplications;
 
     TargetRegistry();
 
@@ -165,10 +164,8 @@ public:
 
     void displayTargetInfo();
 
-    ErrCode addIrqAffine(int32_t irqNum, const std::string& cpuVal);
-    void getIrqConfigs(int32_t irqNum, std::vector<int32_t>& cpuIds);
-
-    void applyPostBootConfigs();
+    ErrCode addIrqAffine(std::vector<std::string>& values,
+                         int8_t areClusterValues = false);
 
     static std::shared_ptr<TargetRegistry> getInstance() {
         if(targetRegistryInstance == nullptr) {

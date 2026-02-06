@@ -77,8 +77,8 @@
 
 // IRQ Configs
 #define INIT_CONFIGS_IRQ_CONFIGS_LIST "IRQConfigs"
-#define INIT_CONFIG_IRQ_AFFINE_ALL "AffineAllIRQs"
 #define INIT_CONFIG_IRQ_AFFINE_ONE "AffineIRQ"
+#define INIT_CONFIG_IRQ_AFFINE_TO_CLUSTER "AffineIRQToCluster"
 
 // Properties
 #define PROPERTY_CONFIGS_ROOT "PropertyConfigs"
