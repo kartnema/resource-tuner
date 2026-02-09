@@ -505,6 +505,9 @@ ErrCode TargetRegistry::addIrqAffine(std::vector<std::string>& values,
         std::vector<int32_t> tmpCoreIds;
         for(int32_t id: ids) {
             ClusterInfo* cInfo = this->getClusterInfo(id);
+            if(cInfo == nullptr) {
+                continue;
+            }
             for(int32_t c = cInfo->mStartCpu; c < cInfo->mStartCpu + cInfo->mNumCpus; c++) {
                 tmpCoreIds.push_back(c);
             }
