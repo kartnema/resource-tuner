@@ -33,7 +33,7 @@ if(BUILD_TESTS)
         RestuneComponentTests
         ${CMAKE_CURRENT_SOURCE_DIR}/Component/MemoryPoolTests.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/Component/ClientDataManagerTests.cpp
-        # ${CMAKE_CURRENT_SOURCE_DIR}/Component/ParserTests.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/Component/ParserTests.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/Component/ExtensionIntfTests.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/Component/MiscTests.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/Component/RequestQueueTests.cpp
