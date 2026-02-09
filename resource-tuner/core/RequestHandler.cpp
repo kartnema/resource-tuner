@@ -374,27 +374,54 @@ void submitResProvisionReqMsg(void* msg) {
     }
 }
 
-int8_t submitPropGetRequest(const std::string& prop,
-                            std::string& buffer,
-                            const std::string& defaultValue) {
-    std::string propertyName(prop);
-    std::string result = "";
+size_t submitPropGetRequest(void* msg, std::string& result) {
+    if(msg == nullptr) {
+        return 0;
+    }
+    std::shared_ptr<PropertiesRegistry> propReg = PropertiesRegistry::getInstance();
 
-    int8_t propFound = false;
-    if((propFound = PropertiesRegistry::getInstance()->queryProperty(propertyName, result)) == false) {
-        result = defaultValue;
+    MsgForwardInfo* info = (MsgForwardInfo*) msg;
+    if(info == nullptr) {
+        return 0;
     }
 
-    buffer = result;
-    return propFound;
+    int8_t* ptr8 = (int8_t*)info->mBuffer;
+    DEREF_AND_INCR(ptr8, int8_t);
+    DEREF_AND_INCR(ptr8, int8_t);
+
+    uint64_t* ptr64 = (uint64_t*)ptr8;
+    DEREF_AND_INCR(ptr64, uint64_t);
+
+    char* charIterator = (char*)ptr64;
+    const char* propNamePtr = charIterator;
+
+    while(*charIterator != '\0') {
+        charIterator++;
+    }
+    charIterator++;
+    std::string propName = propNamePtr;
+
+    std::string buffer = "";
+    size_t writtenBytes = propReg->queryProperty(propName, buffer);
+    if(writtenBytes > 0) {
+        result = buffer;
+    }
+
+    return writtenBytes;
 }
 
-ErrCode submitPropRequest(void* context) {
-    if(context == nullptr) return RC_BAD_ARG;
-    PropConfig* propConfig = static_cast<PropConfig*>(context);
+size_t submitPropGetRequest(const std::string& propName,
+                            std::string& result,
+                            const std::string& defVal) {
+    std::shared_ptr<PropertiesRegistry> propReg = PropertiesRegistry::getInstance();
 
-    const char* defaultValue = "na";
-    submitPropGetRequest(propConfig->mPropName, propConfig->mResult, defaultValue);
+    std::string buffer = "";
+    size_t writtenBytes = propReg->queryProperty(propName, buffer);
+    if(writtenBytes > 0) {
+        result = buffer;
+    } else {
+        result = defVal;
+    }
 
-    return RC_SUCCESS;
+    return writtenBytes;
 }

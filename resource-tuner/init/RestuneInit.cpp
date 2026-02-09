@@ -707,4 +707,4 @@ static ErrCode tear(void* arg) {
     return RC_SUCCESS;
 }
 
-RESTUNE_REGISTER_MODULE(MOD_RESTUNE, init, tear);
+URM_REGISTER_MODULE(MOD_RESTUNE, init, tear);

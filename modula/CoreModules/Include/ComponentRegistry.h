@@ -31,7 +31,8 @@ public:
     static ModuleInfo getModuleInfo(ModuleID moduleID);
 };
 
-#define RESTUNE_REGISTER_MODULE(identifier, registration, teardown) \
+#define URM_REGISTER_MODULE(identifier, registration, teardown) \
         static ComponentRegistry CONCAT(_module, identifier)(identifier, registration, teardown);
+
 
 #endif
