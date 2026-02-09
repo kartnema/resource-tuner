@@ -22,8 +22,7 @@ static std::string getFullResourceNodePath(ResConfInfo* rConf, int32_t id) {
 }
 
 static std::string getCGroupTypeResourceNodePath(Resource* resource, const std::string& cGroupName) {
-    ResConfInfo* rConf =
-        ResourceRegistry::getInstance()->getResConf(resource->getResCode());
+    ResConfInfo* rConf = ResourceRegistry::getInstance()->getResConf(resource->getResCode());
 
     if(rConf == nullptr) return "";
     std::string filePath = rConf->mResourcePath;
@@ -40,7 +39,9 @@ static std::string getCGroupTypeResourceNodePath(Resource* resource, const std::
 void defaultClusterLevelApplierCb(void* context) {
     if(context == nullptr) return;
     Resource* resource = static_cast<Resource*>(context);
+
     ResConfInfo* rConf = ResourceRegistry::getInstance()->getResConf(resource->getResCode());
+    if(rConf == nullptr) return;
 
     // Get the Cluster ID
     int32_t clusterID = resource->getClusterValue();
@@ -85,8 +86,7 @@ void defaultClusterLevelTearCb(void* context) {
     // Get the Cluster ID
     int32_t clusterID = resource->getClusterValue();
     std::string resourceNodePath = getFullResourceNodePath(rConf, clusterID);
-    std::string defVal =
-        ResourceRegistry::getInstance()->getDefaultValue(resourceNodePath);
+    std::string defVal = ResourceRegistry::getInstance()->getDefaultValue(resourceNodePath);
 
     TYPELOGV(NOTIFY_NODE_RESET, resourceNodePath.c_str(), defVal.c_str());
     std::ofstream resourceFileStream(resourceNodePath);
@@ -282,8 +282,7 @@ void defaultCGroupLevelTearCb(void* context) {
 
     if(cGroupName.length() > 0) {
         std::string controllerFilePath = getCGroupTypeResourceNodePath(resource, cGroupName);
-        std::string defVal =
-            ResourceRegistry::getInstance()->getDefaultValue(controllerFilePath);
+        std::string defVal = ResourceRegistry::getInstance()->getDefaultValue(controllerFilePath);
 
         TYPELOGV(NOTIFY_NODE_RESET, controllerFilePath.c_str(), defVal.c_str());
         std::ofstream controllerFile(controllerFilePath);
@@ -644,8 +643,7 @@ static void resetRunOnCoresExclusively(void* context) {
             const std::string cGroupCpuSetFilePath =
                 UrmSettings::mBaseCGroupPath + cGroupName + "/cpuset.cpus";
 
-            std::string defVal =
-                ResourceRegistry::getInstance()->getDefaultValue(cGroupCpuSetFilePath);
+            std::string defVal = ResourceRegistry::getInstance()->getDefaultValue(cGroupCpuSetFilePath);
 
             TYPELOGV(NOTIFY_NODE_RESET, cGroupCpuSetFilePath.c_str(), defVal.c_str());
             std::ofstream controllerFile(cGroupCpuSetFilePath);
