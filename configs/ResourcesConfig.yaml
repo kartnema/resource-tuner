@@ -72,6 +72,16 @@ ResourceConfigs:
     Policy: "pass_through"
     ApplyType: "global"
 
+  - ResType: "0x03"
+    ResID: "0x0003"
+    Name: "RES_SCHED_RT_RUNTIME"
+    Path: "/proc/sys/kernel/sched_rt_runtime_us"
+    Supported: true
+    Permissions: "third_party"
+    Modes: ["display_on"]
+    Policy: "pass_through"
+    ApplyType: "global"
+
   - ResType: "0x04"
     ResID: "0x0000"
     Unit: "Hz"
@@ -103,6 +113,36 @@ ResourceConfigs:
     Modes: ["display_on", "doze"]
     Policy: "lower_is_better"
     ApplyType: "cluster"
+
+  - ResType: "0x04"
+    ResID: "0x0003"
+    Name: "RES_CPU_IDLE_DISABLE_ST0"
+    Path: "/sys/devices/system/cpu/cpu%d/cpuidle/state0/disable"
+    Supported: true
+    Permissions: "third_party"
+    Modes: ["display_on", "doze"]
+    Policy: "pass_through"
+    ApplyType: "core"
+
+  - ResType: "0x04"
+    ResID: "0x0004"
+    Name: "RES_CPU_IDLE_DISABLE_ST1"
+    Path: "/sys/devices/system/cpu/cpu%d/cpuidle/state1/disable"
+    Supported: true
+    Permissions: "third_party"
+    Modes: ["display_on", "doze"]
+    Policy: "pass_through"
+    ApplyType: "core"
+
+  - ResType: "0x04"
+    ResID: "0x0005"
+    Name: "RES_CPU_IDLE_DISABLE_ST2"
+    Path: "/sys/devices/system/cpu/cpu%d/cpuidle/state2/disable"
+    Supported: true
+    Permissions: "third_party"
+    Modes: ["display_on", "doze"]
+    Policy: "pass_through"
+    ApplyType: "core"
 
   - ResType: "0x05"
     ResID: "0x0000"
