@@ -116,7 +116,7 @@ ResourceConfigs:
 
   - ResType: "0x04"
     ResID: "0x0003"
-    Name: "RES_CPU_IDLE_DISABLE_STATE0"
+    Name: "RES_CPU_IDLE_DISABLE_ST0"
     Path: "/sys/devices/system/cpu/cpu%d/cpuidle/state0/disable"
     Supported: true
     Permissions: "third_party"
@@ -126,7 +126,7 @@ ResourceConfigs:
 
   - ResType: "0x04"
     ResID: "0x0004"
-    Name: "RES_CPU_IDLE_DISABLE_STATE1"
+    Name: "RES_CPU_IDLE_DISABLE_ST1"
     Path: "/sys/devices/system/cpu/cpu%d/cpuidle/state1/disable"
     Supported: true
     Permissions: "third_party"
@@ -136,7 +136,7 @@ ResourceConfigs:
 
   - ResType: "0x04"
     ResID: "0x0005"
-    Name: "RES_CPU_IDLE_DISABLE_STATE2"
+    Name: "RES_CPU_IDLE_DISABLE_ST2"
     Path: "/sys/devices/system/cpu/cpu%d/cpuidle/state2/disable"
     Supported: true
     Permissions: "third_party"
