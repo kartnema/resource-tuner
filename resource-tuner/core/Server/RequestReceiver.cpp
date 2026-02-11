@@ -17,7 +17,7 @@ void RequestReceiver::forwardMessage(int32_t clientSocket, MsgForwardInfo* info)
 
     if(info->mRequestType == REQ_PROP_GET) {
         std::string result = "";
-        int32_t writeLen = submitPropGetRequest(info, result);
+        size_t writeLen = submitPropGetRequest(info, result);
         if(writeLen == 0) {
             result = "na";
             writeLen = result.length();

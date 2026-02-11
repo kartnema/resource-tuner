@@ -38,10 +38,9 @@ void submitResProvisionRequest(Request* request, int8_t isVerified);
  * @param prop Name of the Property to be fetched.
  * @param buffer A buffer to hold the result, i.e. the property value corresponding to the specified name.
  * @param defValue Value to return in case a property with the specified Name is not found in the Config Store
- * @return int8_t:\n
- *            - 1: If the Property was found in the store
- *            - 0: Otherwise
+ * @return size_t: Number of bytes written to the result buffer.
  */
+
 size_t submitPropGetRequest(void* request, std::string& result);
 
 size_t submitPropGetRequest(const std::string& propName, std::string& result, const std::string& defVal);
