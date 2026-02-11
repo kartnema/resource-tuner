@@ -24,18 +24,7 @@ ResourceConfigs:
     LowThreshold: 0
     Permissions: "third_party"
     Modes: ["display_on", "doze"]
-    Policy: "lower_is_better"
-    ApplyType: "cluster"
-
-  - ResType: "0x01"
-    ResID: "0x0002"
-    Name: "RES_PM_QOS_LATENCY"
-    Path: "/sys/devices/system/cpu/cpu%d/power/pm_qos_resume_latency_us"
-    Supported: true
-    LowThreshold: 0
-    Permissions: "third_party"
-    Modes: ["display_on", "doze"]
-    Policy: "lower_is_better"
+    Policy: "pass_through"
     ApplyType: "core"
 
   - ResType: "0x03"
@@ -326,7 +315,7 @@ ResourceConfigs:
     Supported: true
     Permissions: "third_party"
     Modes: ["display_on", "doze"]
-    Policy: higher_is_better
+    Policy: "higher_is_better"
     ApplyType: "global"
 
   - ResType: "0x0a"
@@ -336,7 +325,7 @@ ResourceConfigs:
     Supported: true
     Permissions: "third_party"
     Modes: ["display_on", "doze"]
-    Policy: higher_is_better
+    Policy: "higher_is_better"
     ApplyType: "global"
 
   - ResType: "0x0a"
@@ -347,7 +336,8 @@ ResourceConfigs:
     LowThreshold: 0
     Permissions: "third_party"
     Modes: ["display_on", "doze"]
-    Policy: higher_is_better
+    Policy: "higher_is_better"
+    ApplyType: "global"
 
   - ResType: "0x0b"
     ResID: "0x0000"
