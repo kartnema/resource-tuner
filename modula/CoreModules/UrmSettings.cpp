@@ -7,7 +7,7 @@ int32_t UrmSettings::serverOnlineStatus = false;
 MetaConfigs UrmSettings::metaConfigs{};
 TargetConfigs UrmSettings::targetConfigs{};
 
-const std::string UrmSettings::mTargetConfDir = "/etc/urm/target/";
+const std::string UrmSettings::mTargetConfDir = "/usr/lib/urm/";
 
 const std::string UrmSettings::mCommonResourceFilePath =
                                     "/etc/urm/common/ResourcesConfig.yaml";

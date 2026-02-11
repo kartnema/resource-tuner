@@ -24,10 +24,10 @@ if(BUILD_TESTS)
     target_include_directories(RestuneTestUtils PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Utils/Include)
     install(TARGETS RestuneTestUtils DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
-    add_library(RestunePlugin ${CMAKE_CURRENT_SOURCE_DIR}/Utils/Setup.cpp)
-    set_target_properties(RestunePlugin PROPERTIES VERSION 1.0.0 SOVERSION 1)
-    target_link_libraries(RestunePlugin UrmExtAPIs)
-    install(TARGETS RestunePlugin DESTINATION ${CMAKE_INSTALL_SYSCONFDIR}/urm/extensions)
+    add_library(UrmTestPlugin ${CMAKE_CURRENT_SOURCE_DIR}/Utils/Setup.cpp)
+    set_target_properties(UrmTestPlugin PROPERTIES VERSION 1.0.0 SOVERSION 1)
+    target_link_libraries(UrmTestPlugin UrmExtAPIs)
+    install(TARGETS UrmTestPlugin DESTINATION ${CMAKE_INSTALL_LIBDIR}/urm)
 
     add_executable(
         RestuneComponentTests
