@@ -144,7 +144,7 @@ uint32_t MLInference::predict(
     int pid,
     const std::map<std::string, std::string> &raw_data,
     std::string &cat) {
-    std::lock_guard<std::mutex> lock(predict_mutex_);
+    const std::lock_guard<std::mutex> lock(predict_mutex_);
     syslog(LOG_DEBUG, "Starting prediction.");
 
     std::string concatenated_text;
