@@ -79,7 +79,7 @@ URM_TEST(TestHandleGeneration, {
     E_ASSERT((handle > 0));
 })
 
-URM_TEST_P(TestPropFetch, BROKEN, {
+URM_TEST(TestPropFetch, {
     char prop1[] = "resource_tuner.pulse.duration";
     char buf[64];
     memset(buf, 0, sizeof(buf));
@@ -100,7 +100,7 @@ URM_TEST_P(TestPropFetch, BROKEN, {
     E_ASSERT((std::string(buf) == "60"));
 
     // Non Existent
-    char prop3[] = "resource_tuner.benchmakr.comparison.utilinets";
+    char prop3[] = "resource_tuner.benchmark.comparison.utilinets";
     memset(buf, 0, sizeof(buf));
 
     status = getProp(prop3, buf, sizeof(buf), "na");
