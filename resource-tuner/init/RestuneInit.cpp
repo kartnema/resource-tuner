@@ -6,6 +6,8 @@
 #include <string>
 #include <thread>
 #include <memory>
+
+#include "Config.h"
 #include "ErrCodes.h"
 #include "Extensions.h"
 #include "AuxRoutines.h"
@@ -46,7 +48,7 @@ static ErrCode loadExtensionsLib() {
         }
     }
 
-    std::string libDirPath = UrmSettings::mExtensionPluginsLibPath;
+    std::string libDirPath = std::string(LIBDIR_PATH) + "/urm/";
     DIR* dir = opendir(libDirPath.c_str());
     if(dir == nullptr) {
         return RC_SUCCESS; // Return success regardless, since this is an extension.
