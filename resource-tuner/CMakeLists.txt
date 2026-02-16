@@ -18,10 +18,16 @@ list(APPEND LINK_LIBS
   ${LIBYAML_LIBRARIES}
 )
 
+pkg_check_modules(PC_SYSTEMD QUIET systemd)
+if(PC_SYSTEMD_FOUND)
+  list(APPEND LINK_LIBS libsystemd)
+  list(APPEND SOURCES dbus-modules/RestuneDBusInternal.cpp)
+else()
+  list(APPEND SOURCES dbus-modules/RestuneDBusStubs.cpp)
+endif()
+
 if(BUILD_STATE_DETECTOR)
-  pkg_check_modules(SYSTEMD REQUIRED libsystemd)
-  list(APPEND SOURCES extensions/StateDetector.cpp)
-  list(APPEND LINK_LIBS ${SYSTEMD_LIBRARIES})
+  list(APPEND SOURCES dbus-modules/StateDetector.cpp)
 endif()
 
 add_library(RestuneCore ${SOURCES})
@@ -33,4 +39,5 @@ target_include_directories(RestuneCore PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/core/I
 target_include_directories(RestuneCore PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/core/Server/Include)
 target_include_directories(RestuneCore PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/signals/Include)
 target_include_directories(RestuneCore PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/init/Include)
+target_include_directories(RestuneCore PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/dbus-modules/Include)
 install(TARGETS RestuneCore LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
