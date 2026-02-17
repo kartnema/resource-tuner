@@ -26,6 +26,8 @@ ErrCode RestuneSDBus::restartService(const std::string& unitName) {
     return RC_SUCCESS;
 }
 
-void* RestuneSDBus::getBus() {}
+void* RestuneSDBus::getBus() {
+    return nullptr;
+}
 
 RestuneSDBus::~RestuneSDBus() {}
