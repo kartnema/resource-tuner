@@ -7,7 +7,6 @@ std::shared_ptr<RestuneSDBus> RestuneSDBus::restuneSDBusInstance = nullptr;
 
 RestuneSDBus::RestuneSDBus() {}
 
-// rename extensions folder to dbus-modules
 ErrCode RestuneSDBus::startService(const std::string& unitName) {
     (void)unitName;
     LOGE("URM_DBUS_DEP_MODULES", "dBus support not found, skipping.");

@@ -22,7 +22,6 @@ RestuneSDBus::RestuneSDBus() {
     }
 }
 
-// rename extensions folder to dbus-modules
 ErrCode RestuneSDBus::startService(const std::string& unitName) {
     if(this->mBus == nullptr) return RC_MODULE_INIT_FAILURE;
 
