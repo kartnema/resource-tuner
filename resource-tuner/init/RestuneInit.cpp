@@ -191,7 +191,7 @@ static ErrCode parseUtil(const std::string& filePath,
     ErrCode opStatus = RC_SUCCESS;
     RestuneParser configProcessor;
 
-    TYPELOGV(NOTIFY_PARSING_START, desc.c_str());
+    TYPELOGV(NOTIFY_PARSING_START, desc.c_str(), filePath.c_str());
     opStatus = configProcessor.parse(configType, filePath);
 
     if(RC_IS_NOTOK(opStatus)) {
@@ -204,6 +204,10 @@ static ErrCode parseUtil(const std::string& filePath,
 }
 
 static std::string getFullTargetBasedConfPath(const std::string& configFileName) {
+    if(UrmSettings::targetConfigs.targetName.length() == 0) {
+        return "";
+    }
+
     std::string filePath = "";
     filePath.append(UrmSettings::mTargetConfDir);
     filePath.append(UrmSettings::targetConfigs.targetName);
@@ -231,7 +235,6 @@ static ErrCode fetchCustomProperties() {
     for(int32_t i = 0; i < 4; i++) {
         std::string filePath = customConfPaths[i];
         if(AuxRoutines::fileExists(filePath)) {
-            TYPELOGV(NOTIFY_CUSTOM_CONFIG_FILE, "Property", filePath.c_str());
             opStatus = parseUtil(filePath, "prop-custom", ConfigType::PROPERTIES_CONFIG);
             if(RC_IS_NOTOK(opStatus)) {
                 return opStatus;
@@ -262,7 +265,6 @@ static ErrCode fetchResources() {
     for(int32_t i = 0; i < 4; i++) {
         filePath = customConfPaths[i];
         if(AuxRoutines::fileExists(filePath)) {
-            TYPELOGV(NOTIFY_CUSTOM_CONFIG_FILE, "Resource", filePath.c_str());
             opStatus = parseUtil(filePath, "resource-custom", ConfigType::RESOURCE_CONFIG);
             if(RC_IS_NOTOK(opStatus)) {
                 return opStatus;
@@ -291,7 +293,6 @@ static ErrCode fetchTargetInfo() {
     for(int32_t i = 0; i < 4; i++) {
         std::string filePath = customConfPaths[i];
         if(AuxRoutines::fileExists(filePath)) {
-            TYPELOGV(NOTIFY_CUSTOM_CONFIG_FILE, "Target", filePath.c_str());
             opStatus = parseUtil(filePath, "target-custom", ConfigType::RESOURCE_CONFIG);
             if(RC_IS_NOTOK(opStatus)) {
                 return opStatus;
@@ -321,7 +322,6 @@ static ErrCode fetchInitInfo() {
     for(int32_t i = 0; i < 4; i++) {
         filePath = customConfPaths[i];
         if(AuxRoutines::fileExists(filePath)) {
-            TYPELOGV(NOTIFY_CUSTOM_CONFIG_FILE, "Init", filePath.c_str());
             opStatus = parseUtil(filePath, "init-custom", ConfigType::INIT_CONFIG);
             if(RC_IS_NOTOK(opStatus)) {
                 return opStatus;
@@ -352,7 +352,6 @@ static ErrCode fetchSignals() {
     for(int32_t i = 0; i < 4; i++) {
         filePath = customConfPaths[i];
         if(AuxRoutines::fileExists(filePath)) {
-            TYPELOGV(NOTIFY_CUSTOM_CONFIG_FILE, "Signal", filePath.c_str());
             opStatus = parseUtil(filePath, "signal-custom", ConfigType::SIGNALS_CONFIG);
             if(RC_IS_NOTOK(opStatus)) {
                 return opStatus;
@@ -378,7 +377,6 @@ static ErrCode fetchExtFeatureConfigs() {
     for(int32_t i = 0; i < 4; i++) {
         std::string filePath = customConfPaths[i];
         if(AuxRoutines::fileExists(filePath)) {
-            TYPELOGV(NOTIFY_CUSTOM_CONFIG_FILE, "ExtFeature", filePath.c_str());
             opStatus = parseUtil(filePath, "ext-features-custom", ConfigType::EXT_FEATURES_CONFIG);
             if(RC_IS_NOTOK(opStatus)) {
                 return opStatus;
@@ -402,7 +400,6 @@ static ErrCode fetchPerAppConfigs() {
     for(int32_t i = 0; i < 4; i++) {
         std::string filePath = customConfPaths[i];
         if(filePath.length() > 0 && AuxRoutines::fileExists(filePath)) {
-            TYPELOGV(NOTIFY_CUSTOM_CONFIG_FILE, "AppConfig", filePath.c_str());
             opStatus = parseUtil(filePath, "app-config-custom", ConfigType::APP_CONFIG);
             if(RC_IS_NOTOK(opStatus)) {
                 return opStatus;
