@@ -16,9 +16,9 @@ const std::string UrmSettings::mCustomResourcesPath =
 const std::string UrmSettings::mDevIndexedResourcesPath =
                                     "/etc/urm/target/ResourcesConfig.yaml";
 
-const std::string UrmSettings::mCommonSignalFilePath =
+const std::string UrmSettings::mCommonSignalsPath =
                                     "/etc/urm/common/SignalsConfig.yaml";
-const std::string UrmSettings::mCustomSignalFilePath =
+const std::string UrmSettings::mCustomSignalsPath =
                                     "/etc/urm/custom/SignalsConfig.yaml";
 const std::string UrmSettings::mDevIndexedSignalsPath =
                                     "/etc/urm/target/SignalsConfig.yaml";

@@ -336,7 +336,7 @@ static ErrCode fetchSignals() {
     ErrCode opStatus = RC_SUCCESS;
 
     // Parse Common Signal Configs
-    std::string filePath = UrmSettings::mCommonSignalFilePath;
+    std::string filePath = UrmSettings::mCommonSignalsPath;
     opStatus = parseUtil(filePath, "signal-common", ConfigType::SIGNALS_CONFIG);
     if(RC_IS_NOTOK(opStatus)) {
         return opStatus;
@@ -345,14 +345,14 @@ static ErrCode fetchSignals() {
     std::string customConfPaths[4] = {
         UrmSettings::mDevIndexedSignalsPath,
         getFullTargetBasedConfPath("SignalsConfig.yaml"),
-        UrmSettings::mCustomSignalFilePath,
+        UrmSettings::mCustomSignalsPath,
         Extensions::getSignalsConfigFilePath(),
     };
 
     for(int32_t i = 0; i < 4; i++) {
         filePath = customConfPaths[i];
         if(AuxRoutines::fileExists(filePath)) {
-            TYPELOGV(NOTIFY_CUSTOM_CONFIG_FILE, "signal-custom", filePath.c_str());
+            TYPELOGV(NOTIFY_CUSTOM_CONFIG_FILE, "Signal", filePath.c_str());
             opStatus = parseUtil(filePath, "signal-custom", ConfigType::SIGNALS_CONFIG);
             if(RC_IS_NOTOK(opStatus)) {
                 return opStatus;
@@ -402,7 +402,7 @@ static ErrCode fetchPerAppConfigs() {
     for(int32_t i = 0; i < 4; i++) {
         std::string filePath = customConfPaths[i];
         if(filePath.length() > 0 && AuxRoutines::fileExists(filePath)) {
-            TYPELOGV(NOTIFY_CUSTOM_CONFIG_FILE, "app-config-custom", filePath.c_str());
+            TYPELOGV(NOTIFY_CUSTOM_CONFIG_FILE, "AppConfig", filePath.c_str());
             opStatus = parseUtil(filePath, "app-config-custom", ConfigType::APP_CONFIG);
             if(RC_IS_NOTOK(opStatus)) {
                 return opStatus;

@@ -53,8 +53,8 @@ public:
     static const std::string mCustomResourcesPath;
     static const std::string mDevIndexedResourcesPath;
 
-    static const std::string mCommonSignalFilePath;
-    static const std::string mCustomSignalFilePath;
+    static const std::string mCommonSignalsPath;
+    static const std::string mCustomSignalsPath;
     static const std::string mDevIndexedSignalsPath;
 
     static const std::string mCommonPropertiesPath;
