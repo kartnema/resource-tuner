@@ -4,6 +4,11 @@
 #ifndef RESTUNE_DBUS_INTERNAL_H
 #define RESTUNE_DBUS_INTERNAL_H
 
+#include <memory>
+
+#include "Logger.h"
+#include "ErrCodes.h"
+
 class RestuneSDBus {
 private:
     static std::shared_ptr<RestuneSDBus> restuneSDBusInstance;

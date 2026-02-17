@@ -746,6 +746,13 @@ void Logger::typeLog(CommonMessageTypes type, const std::string& funcName, ...) 
             Logger::log(LOG_INFO, "CONTEXTUAL_CLASSIFIER", funcName, buffer);
             break;
 
+        case CommonMessageTypes::SYSTEM_BUS_CONN_FAILED:
+            vsnprintf(buffer, sizeof(buffer),
+                      "Failed to establish connection with system bus, Error: %s", args);
+
+            Logger::log(LOG_ERR, "RESTUNE_COCO_TABLE", funcName, std::string(buffer));
+            break;
+
         default:
             break;
     }

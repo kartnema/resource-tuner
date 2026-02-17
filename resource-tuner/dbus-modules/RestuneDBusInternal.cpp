@@ -17,18 +17,20 @@ RestuneSDBus::RestuneSDBus() {
 
     // Connect to the system bus
     int32_t rc;
-    if((rc = sd_bus_default_system(&this->mBus)) < 0) {
+    if((rc = sd_bus_default_system((sd_bus**)&this->mBus)) < 0) {
         TYPELOGV(SYSTEM_BUS_CONN_FAILED, strerror(-rc));
     }
 }
 
 // rename extensions folder to dbus-modules
-ErrCode startService(const std::string& unitName) {
+ErrCode RestuneSDBus::startService(const std::string& unitName) {
     if(this->mBus == nullptr) return RC_MODULE_INIT_FAILURE;
 
-    // Start irqbalance
+    sd_bus_error error = SD_BUS_ERROR_NULL;
+    sd_bus_message *reply = NULL;
+
     int32_t rc = sd_bus_call_method(
-        this->mBus,
+        static_cast<sd_bus*>(this->mBus),
         SYSTEMD_DBUS_NAME,
         SYSTEMD_DBUS_PATH,
         SYSTEMD_DBUS_IF,
@@ -51,11 +53,14 @@ ErrCode startService(const std::string& unitName) {
     return RC_SUCCESS;
 }
 
-ErrCode stopService(const std::string& unitName) {
+ErrCode RestuneSDBus::stopService(const std::string& unitName) {
     if(this->mBus == nullptr) return RC_DBUS_COMM_FAIL;
 
-    rc = sd_bus_call_method(
-        this->mBus,
+    sd_bus_error error = SD_BUS_ERROR_NULL;
+    sd_bus_message *reply = NULL;
+
+    int32_t rc = sd_bus_call_method(
+        static_cast<sd_bus*>(this->mBus),
         SYSTEMD_DBUS_NAME,
         SYSTEMD_DBUS_PATH,
         SYSTEMD_DBUS_IF,
@@ -78,11 +83,14 @@ ErrCode stopService(const std::string& unitName) {
     return RC_SUCCESS;
 }
 
-ErrCode restartService(const std::string& unitName) {
+ErrCode RestuneSDBus::restartService(const std::string& unitName) {
     if(this->mBus == nullptr) return RC_DBUS_COMM_FAIL;
 
-    rc = sd_bus_call_method(
-        this->mBus,
+    sd_bus_error error = SD_BUS_ERROR_NULL;
+    sd_bus_message *reply = NULL;
+
+    int32_t rc = sd_bus_call_method(
+        static_cast<sd_bus*>(this->mBus),
         SYSTEMD_DBUS_NAME,
         SYSTEMD_DBUS_PATH,
         SYSTEMD_DBUS_IF,
@@ -110,7 +118,7 @@ void* RestuneSDBus::getBus() {
 
 RestuneSDBus::~RestuneSDBus() {
     if(this->mBus != nullptr) {
-        sd_bus_unref(this->mBus);
+        sd_bus_unref((sd_bus*)this->mBus);
         this->mBus = nullptr;
     }
 }

@@ -557,7 +557,7 @@ ErrCode TargetRegistry::addIrqAffine(std::vector<std::string>& values,
     return RC_SUCCESS;
 }
 
-ErrCode addLogLimit(std::vector<std::string>& values) {
+ErrCode TargetRegistry::addLogLimit(std::vector<std::string>& values) {
     if(values.size() < 1) {
         return RC_INVALID_VALUE;
     }
