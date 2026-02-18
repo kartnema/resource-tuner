@@ -27,9 +27,6 @@
 #define CLASSIFIER_TAG "CONTEXTUAL_CLASSIFIER"
 #define CLASSIFIER_CONFIGS_DIR "/etc/urm/classifier/"
 
-#define CURR_RESTUNE_CGRP_HNDL 0
-#define CURR_RESTUNE_SIG_HNDL 1
-
 static const std::string FT_MODEL_PATH =
     CLASSIFIER_CONFIGS_DIR "fasttext_model_supervised.bin";
 static const std::string IGNORE_PROC_PATH =
@@ -60,17 +57,15 @@ static ContextualClassifier *gClassifier = nullptr;
 static const int32_t pendingQueueControlSize = 30;
 
 ContextualClassifier::ContextualClassifier() {
-    this->mRestuneHandles[CURR_RESTUNE_CGRP_HNDL].mCurHandle = -1;
-    this->mRestuneHandles[CURR_RESTUNE_SIG_HNDL].mCurHandle = -1;
     mInference = GetInferenceObject();
 }
 
-void ContextualClassifier::untuneRequestHelper(int32_t index) {
+void ContextualClassifier::untuneRequestHelper(int64_t handle) {
     try {
         Request* untuneRequest = MPLACED(Request);
 
         untuneRequest->setRequestType(REQ_RESOURCE_UNTUNING);
-        untuneRequest->setHandle(this->mRestuneHandles[index].mCurHandle);
+        untuneRequest->setHandle(handle);
         untuneRequest->setDuration(-1);
         // Passing priority as HIGH_TRANSFER_PRIORITY (= -1)
         // - Ensures untune requests are processed before even SERVER_HIGH priority tune requests
@@ -79,8 +74,8 @@ void ContextualClassifier::untuneRequestHelper(int32_t index) {
         //   not free up the underlying Request object, allowing for reuse.
         // Priority Level: -2 is used to force server termination and cleanup so should not be used otherwise.
         untuneRequest->setPriority(SYSTEM_HIGH);
-        untuneRequest->setClientPID(this->mRestuneHandles[index].mCurReqPid);
-        untuneRequest->setClientTID(this->mRestuneHandles[index].mCurReqTid);
+        untuneRequest->setClientPID(0);
+        untuneRequest->setClientTID(0);
 
         // fast path to Request Queue
         // Mark verification status as true. Request still goes through RequestManager though.
@@ -258,6 +253,15 @@ void ContextualClassifier::ClassifierMain() {
                 sigId = this->GetSignalIDForWorkload(contextType);
 
                 // Step 2:
+                // Untune any Configurations from the last proc-invocation
+                for(int64_t handle: this->mCurrRestuneHandles) {
+                    if(handle > 0) {
+                        untuneRequestHelper(handle);
+                    }
+                }
+                this->mCurrRestuneHandles.clear();
+
+                // Step 2:
                 // - Move the process to focused-cgroup, Also involves removing the process
                 //  already there from the cgroup.
                 // - Move the "threads" from per-app config to appropriate cgroups
@@ -379,26 +383,17 @@ void ContextualClassifier::ApplyActions(uint32_t sigId,
                                         uint32_t sigType,
                                         pid_t incomingPID,
                                         pid_t incomingTID) {
-
-    if(this->mRestuneHandles[CURR_RESTUNE_SIG_HNDL].mCurHandle != -1) {
-        untuneRequestHelper(CURR_RESTUNE_SIG_HNDL);
-        mRestuneHandles[CURR_RESTUNE_SIG_HNDL].mCurHandle = -1;
-    }
-
     Request* request = createTuneRequestFromSignal(sigId, sigType, incomingPID, incomingTID);
     if(request != nullptr) {
         if(request->getResourcesCount() > 0) {
             // Record:
-            this->mRestuneHandles[CURR_RESTUNE_SIG_HNDL].mCurHandle = request->getHandle();
-            this->mRestuneHandles[CURR_RESTUNE_SIG_HNDL].mCurReqPid = incomingPID;
-            this->mRestuneHandles[CURR_RESTUNE_SIG_HNDL].mCurReqTid = incomingTID;
+            this->mCurrRestuneHandles.push_back(request->getHandle());
 
             // fast path to Request Queue
             submitResProvisionRequest(request, true);
 
         } else {
             Request::cleanUpRequest(request);
-            this->mRestuneHandles[CURR_RESTUNE_SIG_HNDL].mCurHandle = -1;
         }
     }
 }
@@ -496,12 +491,6 @@ void ContextualClassifier::MoveAppThreadsToCGroup(pid_t incomingPID,
                                                   const std::string& comm,
                                                   int32_t cgroupIdentifier) {
     try {
-        // Check for any outstanding request, if found untune it.
-        if(this->mRestuneHandles[CURR_RESTUNE_CGRP_HNDL].mCurHandle != -1) {
-            untuneRequestHelper(CURR_RESTUNE_CGRP_HNDL);
-            mRestuneHandles[CURR_RESTUNE_CGRP_HNDL].mCurHandle = -1;
-        }
-
         int64_t handleGenerated = -1;
         // Issue a tune request for the new pid (and any associated app-config pids)
         Request* request = MPLACED(Request);
@@ -537,22 +526,42 @@ void ContextualClassifier::MoveAppThreadsToCGroup(pid_t incomingPID,
         // Anything to issue
         if(request->getResourcesCount() > 0) {
             // Record:
-            this->mRestuneHandles[CURR_RESTUNE_CGRP_HNDL].mCurHandle = handleGenerated;
-            this->mRestuneHandles[CURR_RESTUNE_CGRP_HNDL].mCurReqPid = incomingPID;
-            this->mRestuneHandles[CURR_RESTUNE_CGRP_HNDL].mCurReqTid = incomingTID;
+            this->mCurrRestuneHandles.push_back(request->getHandle());
 
             // fast path to Request Queue
             submitResProvisionRequest(request, true);
 
         } else {
             Request::cleanUpRequest(request);
-            this->mRestuneHandles[CURR_RESTUNE_CGRP_HNDL].mCurHandle = -1;
+        }
+
+        // Configure any associated signal
+        if(appConfig != nullptr && appConfig->mSignalCodes != nullptr) {
+            int32_t numSignals = appConfig->mNumSignals;
+            // Go over the list of proc names (comm) and get their pids
+            for(int32_t i = 0; i < numSignals; i++) {
+                Request* request = createTuneRequestFromSignal(
+                    appConfig->mSignalCodes[i],
+                    0,
+                    incomingPID,
+                    incomingTID);
+
+                if(request != nullptr) {
+                    if(request->getResourcesCount() > 0) {
+                        // fast path to Request Queue
+                        this->mCurrRestuneHandles.push_back(request->getHandle());
+                        submitResProvisionRequest(request, true);
+
+                    } else {
+                        Request::cleanUpRequest(request);
+                    }
+                }
+            }
         }
 
     } catch(const std::exception& e) {
         LOGE(CLASSIFIER_TAG,
              "Failed to move per-app threads to cgroup, Error: " + std::string(e.what()));
-        this->mRestuneHandles[CURR_RESTUNE_CGRP_HNDL].mCurHandle = -1;
     }
 }
 
