@@ -27,9 +27,6 @@
 #define CLASSIFIER_TAG "CONTEXTUAL_CLASSIFIER"
 #define CLASSIFIER_CONFIGS_DIR "/etc/urm/classifier/"
 
-#define CURR_RESTUNE_CGRP_HNDL 0
-#define CURR_RESTUNE_SIG_HNDL 1
-
 static const std::string FT_MODEL_PATH =
     CLASSIFIER_CONFIGS_DIR "fasttext_model_supervised.bin";
 static const std::string IGNORE_PROC_PATH =
@@ -258,7 +255,9 @@ void ContextualClassifier::ClassifierMain() {
                 // Step 2:
                 // Untune any Configurations from the last proc-invocation
                 for(int64_t handle: this->mCurrRestuneHandles) {
-                    untuneRequestHelper(handle);
+                    if(handle > 0) {
+                        untuneRequestHelper(handle);
+                    }
                 }
                 this->mCurrRestuneHandles.clear();
 
