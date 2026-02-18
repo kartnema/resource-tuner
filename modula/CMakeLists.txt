@@ -17,4 +17,12 @@ target_include_directories(UrmAuxUtils PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/CoreMo
 target_include_directories(UrmAuxUtils PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/CoreModules/Include)
 install(TARGETS UrmAuxUtils LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/Common/Include/UrmPlatformAL.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Urm)
+install(
+  FILES ${CMAKE_CURRENT_SOURCE_DIR}/Common/Include/UrmPlatformAL.h
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Urm
+)
+
+install(
+  FILES ${CMAKE_CURRENT_SOURCE_DIR}/Components/Include/Logger.h
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Urm
+)
