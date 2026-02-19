@@ -14,7 +14,7 @@
 
 #include "FeaturePruner.h"
 
-#define CLASSIFIER_CONF_DIR "/etc/classifier/"
+#define CLASSIFIER_CONF_DIR "/etc/urm/classifier/"
 const std::string IGNORE_TOKENS_PATH = CLASSIFIER_CONF_DIR "ignore-tokens.txt";
 
 class FeatureExtractor {
