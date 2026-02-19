@@ -11,7 +11,7 @@
 #include "NetLinkComm.h"
 #include "ContextualClassifier.h"
 
-#define CLASSIFIER_TAG "NetLinkComm"
+#define CLASSIFIER_TAG "CLASSIFIER_NETLINK"
 #define PROCP_THRESH 50
 
 static int8_t procHasControlTerminal(pid_t pid) {
