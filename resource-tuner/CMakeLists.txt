@@ -58,3 +58,9 @@ endif()
 
 # Install RestuneCore
 install(TARGETS RestuneCore LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+# Install Headers
+install(
+  FILES ${CMAKE_CURRENT_SOURCE_DIR}/core/Include/ResourceRegistry.h
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Urm
+)
