@@ -113,17 +113,14 @@ private:
                                 int32_t cgroupIdentifier);
 
     void configureAppSignals(pid_t incomingPID,
-                                       pid_t incomingTID,
-                                       const std::string& comm);
+                             pid_t incomingTID,
+                             const std::string& comm);
 
     void untuneRequestHelper(int64_t handle);
 
 public:
     ContextualClassifier();
     ~ContextualClassifier();
-    Inference *getInference() {
-        return mInference;
-    }
 
     ErrCode Init();
     ErrCode Terminate();
