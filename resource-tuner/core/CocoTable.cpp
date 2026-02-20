@@ -245,17 +245,17 @@ int8_t CocoTable::insertInCocoTable(ResIterable* newNode, int8_t priority) {
     enum Policy policy = this->mResourceRegistry->getResConf(resource->getResCode())->mPolicy;
     DLManager* dlm = this->mCocoTable[primaryIndex][secondaryIndex];
 
+    // Unlikely
+    if(dlm == nullptr) {
+        return false;
+    }
+
     // Special handling for resources with policy: "pass_through"
     if(rConf->mPolicy == Policy::PASS_THROUGH) {
         // straightaway apply the action
         dlm->mRank++;
         this->fastPathApply(resource);
         return true;
-    }
-
-    // Unlikely
-    if(dlm == nullptr) {
-        return false;
     }
 
     switch(policy) {
