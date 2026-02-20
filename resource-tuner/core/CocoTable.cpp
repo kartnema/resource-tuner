@@ -47,11 +47,6 @@ static int8_t comparLBetter(DLRootNode* newNode, DLRootNode* targetNode) {
     return newValue < targetValue;
 }
 
-int8_t CocoTable::needsAllocation(Resource* res) {
-    ResConfInfo* rConf = this->mResourceRegistry->getResConf(res->getResCode());
-    return (rConf->mPolicy != Policy::PASS_THROUGH);
-}
-
 std::shared_ptr<CocoTable> CocoTable::mCocoTableInstance = nullptr;
 std::mutex CocoTable::instanceProtectionLock {};
 
@@ -237,13 +232,6 @@ int8_t CocoTable::insertInCocoTable(ResIterable* newNode, int8_t priority) {
     Resource* resource = (Resource*) newNode->mData;
     ResConfInfo* rConf = this->mResourceRegistry->getResConf(resource->getResCode());
 
-    // Special handling for resources with policy: "pass_through"
-    if(rConf->mPolicy == Policy::PASS_THROUGH) {
-        // straightaway apply the action
-        this->fastPathApply(resource);
-        return true;
-    }
-
     int32_t primaryIndex = this->getCocoTablePrimaryIndex(resource->getResCode());
     int32_t secondaryIndex = this->getCocoTableSecondaryIndex(resource, priority);
 
@@ -256,6 +244,14 @@ int8_t CocoTable::insertInCocoTable(ResIterable* newNode, int8_t priority) {
 
     enum Policy policy = this->mResourceRegistry->getResConf(resource->getResCode())->mPolicy;
     DLManager* dlm = this->mCocoTable[primaryIndex][secondaryIndex];
+
+    // Special handling for resources with policy: "pass_through"
+    if(rConf->mPolicy == Policy::PASS_THROUGH) {
+        // straightaway apply the action
+        dlm->mRank++;
+        this->fastPathApply(resource);
+        return true;
+    }
 
     // Unlikely
     if(dlm == nullptr) {
@@ -425,12 +421,6 @@ int8_t CocoTable::removeRequest(Request* request) {
 
         Resource* resource = (Resource*) resIter->mData;
 
-        ResConfInfo* resourceConfig = this->mResourceRegistry->getResConf(resource->getResCode());
-        if(resourceConfig->mPolicy == Policy::PASS_THROUGH) {
-            this->fastPathReset(resource);
-            continue;
-        }
-
         int8_t priority = request->getPriority();
         int32_t primaryIndex = this->getCocoTablePrimaryIndex(resource->getResCode());
         int32_t secondaryIndex = this->getCocoTableSecondaryIndex(resource, priority);
@@ -443,6 +433,15 @@ int8_t CocoTable::removeRequest(Request* request) {
 
         DLManager* dlm = this->mCocoTable[primaryIndex][secondaryIndex];
         if(dlm == nullptr) continue;
+
+        ResConfInfo* resourceConfig = this->mResourceRegistry->getResConf(resource->getResCode());
+        if(resourceConfig->mPolicy == Policy::PASS_THROUGH) {
+            if(--dlm->mRank == 0) {
+                this->fastPathReset(resource);
+            }
+            continue;
+        }
+
         int8_t nodeIsHead = dlm->isNodeNth(0, iter);
 
         // Proceed with removal of the node from CocoTable

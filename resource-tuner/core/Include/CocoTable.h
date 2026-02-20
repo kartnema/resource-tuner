@@ -126,7 +126,6 @@ private:
 
     void fastPathApply(Resource* resource);
     void fastPathReset(Resource* resource);
-    int8_t needsAllocation(Resource* res);
 
 public:
     ~CocoTable();
