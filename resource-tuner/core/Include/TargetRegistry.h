@@ -220,4 +220,8 @@ public:
     CacheInfo* build();
 };
 
+uint64_t getTargetInfo(int32_t option,
+                       int32_t cluster,
+                       int32_t coreCount);
+
 #endif
