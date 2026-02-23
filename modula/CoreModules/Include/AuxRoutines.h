@@ -4,19 +4,21 @@
 #ifndef AUX_ROUTINES_H
 #define AUX_ROUTINES_H
 
+#include <mutex>
+#include <queue>
 #include <string>
 #include <cstring>
 #include <sstream>
 #include <fstream>
 #include <unistd.h>
 #include <getopt.h>
-#include <mutex>
 #include <dirent.h>
 #include <algorithm>
+#include <unordered_set>
 
 #include "Logger.h"
-#include "Request.h"
 #include "Signal.h"
+#include "Request.h"
 #include "UrmSettings.h"
 #include "ClientEndpoint.h"
 
@@ -40,6 +42,7 @@ public:
 
     static int64_t generateUniqueHandle();
     static int64_t getCurrentTimeInMilliseconds();
+    static std::string toLowerCase(const std::string& str);
 };
 
 // Following are some client-lib centric utilities
@@ -96,6 +99,19 @@ public:
             this->connection->closeConnection();
         }
     }
+};
+
+class MinLRUCache {
+private:
+    size_t mMaxSize;
+    std::unordered_set<int64_t> mDataSet;
+    std::queue<int64_t> mRecencyQueue;
+
+public:
+    MinLRUCache(int32_t maxSize = 30);
+
+    void insert(int64_t data);
+    int8_t isPresent(int64_t data);
 };
 
 #endif

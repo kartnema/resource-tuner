@@ -326,7 +326,12 @@ int32_t ContextualClassifier::HandleProcEv() {
             case CC_APP_OPEN:
                 if(!this->shouldProcBeIgnored(ev.type, ev.pid)) {
                     const std::lock_guard<std::mutex> lock(mQueueMutex);
+                    if(this->mClassifierPidCache.isPresent(ev.pid)) {
+                        // Duplicate Notification, skip.
+                        break;
+                    }
                     this->mPendingEv.push(ev);
+                    this->mClassifierPidCache.insert(ev.pid);
                     if(this->mPendingEv.size() > pendingQueueControlSize) {
                         this->mPendingEv.pop();
                     }
@@ -384,7 +389,8 @@ void ContextualClassifier::ApplyActions(uint32_t sigId,
                                         uint32_t sigType,
                                         pid_t incomingPID,
                                         pid_t incomingTID) {
-    Request* request = createTuneRequestFromSignal(sigId, sigType, incomingPID, incomingTID);
+    Request* request =
+        createTuneRequestFromSignal(sigId, sigType, incomingPID, incomingTID);
     if(request != nullptr) {
         if(request->getResourcesCount() > 0) {
             // Record:
