@@ -31,6 +31,14 @@
 #define ONLINE_CPU_FILE_PATH "/sys/devices/system/cpu/online"
 #define CPU_CAPACITY_FILE_PATH "/sys/devices/system/cpu/cpu%d/cpu_capacity"
 
+enum TargetQueries {
+    GET_MASK,
+    GET_CLUSTER_COUNT,
+    GET_CORE_COUNT,
+    GET_PHYSICAL_CLUSTER_ID,
+    GET_PHYSICAL_CORE_ID,
+};
+
 /**
  * @struct CGroupConfigInfo
  * @brief Representation of a single CGroup Configuration Info

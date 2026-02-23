@@ -819,28 +819,42 @@ CacheInfo* CacheInfoBuilder::build() {
 uint64_t getTargetInfo(int32_t option,
                        int32_t cluster,
                        int32_t coreCount) {
-    // Additional Information can be supported via options
-    // For now only mask retrieval is supported
-    // Can be broadened later.
-    (void)option;
-
     std::shared_ptr<TargetRegistry> targetRegistry = TargetRegistry::getInstance();
-    int32_t physicalClusterId = targetRegistry->getPhysicalClusterId(cluster);
-    uint64_t mask = 0;
 
-    ClusterInfo* clusInfo = targetRegistry->getClusterInfo(physicalClusterId);
-    if(clusInfo == nullptr) {
-        return 0;
+    switch(option) {
+        case GET_MASK: {
+            int32_t physicalClusterId = targetRegistry->getPhysicalClusterId(cluster);
+            uint64_t mask = 0;
+
+            ClusterInfo* clusInfo = targetRegistry->getClusterInfo(physicalClusterId);
+            if(clusInfo == nullptr) {
+                return 0;
+            }
+
+            if(coreCount == 0) {
+                // Iterate over all the cores in the cluster
+                coreCount = clusInfo->mNumCpus;
+            }
+
+            for(int32_t i = clusInfo->mStartCpu; i < (clusInfo->mStartCpu + coreCount); i++) {
+                mask |= (1UL << i);
+            }
+
+            return mask;
+        }
+
+        case GET_CLUSTER_COUNT:
+            return UrmSettings::targetConfigs.mTotalClusterCount;
+
+        case GET_CORE_COUNT:
+            return UrmSettings::targetConfigs.mTotalCoreCount;
+
+        case GET_PHYSICAL_CLUSTER_ID:
+            return targetRegistry->getPhysicalClusterId(cluster);
+
+        case GET_PHYSICAL_CORE_ID:
+            return targetRegistry->getPhysicalCoreId(cluster, coreCount);
     }
 
-    if(coreCount == 0) {
-        // Iterate over all the cores in the cluster
-        coreCount = clusInfo->mNumCpus;
-    }
-
-    for(int32_t i = clusInfo->mStartCpu; i < (clusInfo->mStartCpu + coreCount); i++) {
-        mask |= (1UL << i);
-    }
-
-    return mask;
+    return 0;
 }
