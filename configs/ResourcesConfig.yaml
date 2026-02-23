@@ -170,7 +170,7 @@ ResourceConfigs:
     Supported: true
     Permissions: "system"
     Modes: ["display_on"]
-    Policy: "pass_through"
+    Policy: "pass_through_append"
     ApplyType: "cgroup"
 
   - ResType: "0x09"
@@ -180,7 +180,7 @@ ResourceConfigs:
     Supported: true
     Permissions: "system"
     Modes: ["display_on"]
-    Policy: "pass_through"
+    Policy: "pass_through_append"
     ApplyType: "cgroup"
 
   - ResType: "0x09"

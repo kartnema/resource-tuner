@@ -71,7 +71,8 @@ enum Policy {
     HIGHER_BETTER, //!< This policy first applies the request writing the highest value to the node.
     LOWER_BETTER, //!< Self-explanatory. Works exactly opposite of the higher is better policy.
     LAZY_APPLY, //!< The requests are applied in a first-in-first-out manner.
-    PASS_THROUGH
+    PASS_THROUGH,  //!< Request Ordering is immaterial
+    PASS_THROUGH_APPEND, //!< Request Ordering is immaterial, however multiple values can co-exist
 };
 
 enum TranslationUnit {

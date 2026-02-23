@@ -459,6 +459,8 @@ ErrCode ResourceConfigInfoBuilder::setPolicy(const std::string& policyString) {
         policy = INSTANT_APPLY;
     } else if(policyString == "pass_through") {
         policy = PASS_THROUGH;
+    } else if(policyString == "pass_through_append") {
+        policy = PASS_THROUGH_APPEND;
     } else {
         if(policyString.length() != 0) {
             return RC_INVALID_VALUE;
