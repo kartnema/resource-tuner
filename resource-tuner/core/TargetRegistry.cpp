@@ -841,6 +841,9 @@ uint64_t getTargetInfo(int32_t option,
             if(coreCount == 0) {
                 // Iterate over all the cores in the cluster
                 coreCount = clusInfo->mNumCpus;
+            } else {
+                // Bound the count to the number of cores in the cluster
+                coreCount = std::min(coreCount, clusInfo->mNumCpus);
             }
 
             for(int32_t i = clusInfo->mStartCpu; i < (clusInfo->mStartCpu + coreCount); i++) {
