@@ -1730,7 +1730,7 @@ URM_TEST(TestInfiniteDurationTuneRequestAndInValidUntuning, {
     int32_t rc = fork();
     if(rc == 0) {
         // Child Process
-        untuneResources(handle);
+        (void)untuneResources(handle);
 
         exit(EXIT_SUCCESS);
 

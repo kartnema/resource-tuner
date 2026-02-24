@@ -3,9 +3,9 @@ configure_file(
   ${CMAKE_CURRENT_BINARY_DIR}/CoreModules/Include/Config.h
 @ONLY)
 
-file(GLOB SOURCES "Components/*.cpp"
-                  "Common/*.cpp"
-                  "CoreModules/*.cpp")
+file(GLOB SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/Components/*.cpp"
+                  "${CMAKE_CURRENT_SOURCE_DIR}/Common/*.cpp"
+                  "${CMAKE_CURRENT_SOURCE_DIR}/CoreModules/*.cpp")
 
 add_library(UrmAuxUtils ${SOURCES})
 set_target_properties(UrmAuxUtils PROPERTIES VERSION 1.0.0 SOVERSION 1)

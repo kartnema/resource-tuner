@@ -4,8 +4,8 @@
 #ifndef TEST_BASELINE_H
 #define TEST_BASELINE_H
 
-#include <unordered_map>
 #include <stack>
+#include <unordered_map>
 
 #include "YamlParser.h"
 #include "UrmSettings.h"
