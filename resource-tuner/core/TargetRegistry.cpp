@@ -817,14 +817,21 @@ CacheInfo* CacheInfoBuilder::build() {
 }
 
 uint64_t getTargetInfo(int32_t option,
-                       int32_t cluster,
-                       int32_t coreCount) {
+                       int32_t numArgs,
+                       int32_t* args) {
     std::shared_ptr<TargetRegistry> targetRegistry = TargetRegistry::getInstance();
 
     switch(option) {
         case GET_MASK: {
-            int32_t physicalClusterId = targetRegistry->getPhysicalClusterId(cluster);
+            if(numArgs < 2) {
+                return 0;
+            }
+
             uint64_t mask = 0;
+
+            int32_t cluster = args[0];
+            int32_t coreCount = args[1];
+            int32_t physicalClusterId = targetRegistry->getPhysicalClusterId(cluster);
 
             ClusterInfo* clusInfo = targetRegistry->getClusterInfo(physicalClusterId);
             if(clusInfo == nullptr) {
@@ -850,10 +857,16 @@ uint64_t getTargetInfo(int32_t option,
             return UrmSettings::targetConfigs.mTotalCoreCount;
 
         case GET_PHYSICAL_CLUSTER_ID:
-            return targetRegistry->getPhysicalClusterId(cluster);
+            if(numArgs < 1) {
+                return 0;
+            }
+            return targetRegistry->getPhysicalClusterId(args[0]);
 
         case GET_PHYSICAL_CORE_ID:
-            return targetRegistry->getPhysicalCoreId(cluster, coreCount);
+            if(numArgs < 2) {
+                return 0;
+            }
+            return targetRegistry->getPhysicalCoreId(args[0], args[1]);
     }
 
     return 0;

@@ -229,7 +229,7 @@ public:
 };
 
 uint64_t getTargetInfo(int32_t option,
-                       int32_t cluster,
-                       int32_t coreCount);
+                       int32_t numArgs,
+                       int32_t* args);
 
 #endif

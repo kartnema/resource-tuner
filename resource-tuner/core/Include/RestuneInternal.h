@@ -43,7 +43,9 @@ void submitResProvisionRequest(Request* request, int8_t isVerified);
 
 size_t submitPropGetRequest(void* request, std::string& result);
 
-size_t submitPropGetRequest(const std::string& propName, std::string& result, const std::string& defVal);
+size_t submitPropGetRequest(const std::string& propName,
+                            std::string& result,
+                            const std::string& defVal);
 
 ErrCode translateToPhysicalIDs(Resource* resource);
 
