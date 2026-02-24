@@ -107,7 +107,7 @@ int32_t NetLinkComm::setListen(int8_t enable) {
 
     nlcn_msg.cn_mcast = enable ? PROC_CN_MCAST_LISTEN : PROC_CN_MCAST_IGNORE;
 
-    if(send(mNlSock, &nlcn_msg, sizeof(nlcn_msg), 0) == -1) {
+    if(send(this->mNlSock, &nlcn_msg, sizeof(nlcn_msg), 0) == -1) {
         TYPELOGV(ERRNO_LOG, "netlink send", strerror(errno));
         return -1;
     }
@@ -125,11 +125,12 @@ int32_t NetLinkComm::recvEvent(ProcEvent &ev) {
         };
     } nlcn_msg;
 
-    rc = recv(mNlSock, &nlcn_msg, sizeof(nlcn_msg), 0);
+    rc = recv(this->mNlSock, &nlcn_msg, sizeof(nlcn_msg), 0);
     if(rc == 0) {
         // Socket shutdown or no more data.
         return 0;
     }
+
     if(rc == -1) {
         if(errno == EINTR) {
             // Caller (ContextualClassifier::HandleProcEv) will handle EINTR.

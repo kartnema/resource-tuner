@@ -815,3 +815,62 @@ ErrCode CacheInfoBuilder::setPriorityAware(const std::string& isPriorityAwareStr
 CacheInfo* CacheInfoBuilder::build() {
     return this->mCacheInfo;
 }
+
+uint64_t getTargetInfo(int32_t option,
+                       int32_t numArgs,
+                       int32_t* args) {
+    std::shared_ptr<TargetRegistry> targetRegistry = TargetRegistry::getInstance();
+
+    switch(option) {
+        case GET_MASK: {
+            if(numArgs < 2) {
+                return 0;
+            }
+
+            uint64_t mask = 0;
+
+            int32_t cluster = args[0];
+            int32_t coreCount = args[1];
+            int32_t physicalClusterId = targetRegistry->getPhysicalClusterId(cluster);
+
+            ClusterInfo* clusInfo = targetRegistry->getClusterInfo(physicalClusterId);
+            if(clusInfo == nullptr) {
+                return 0;
+            }
+
+            if(coreCount == 0) {
+                // Iterate over all the cores in the cluster
+                coreCount = clusInfo->mNumCpus;
+            } else {
+                // Bound the count to the number of cores in the cluster
+                coreCount = std::min(coreCount, clusInfo->mNumCpus);
+            }
+
+            for(int32_t i = clusInfo->mStartCpu; i < (clusInfo->mStartCpu + coreCount); i++) {
+                mask |= (1UL << i);
+            }
+
+            return mask;
+        }
+
+        case GET_CLUSTER_COUNT:
+            return UrmSettings::targetConfigs.mTotalClusterCount;
+
+        case GET_CORE_COUNT:
+            return UrmSettings::targetConfigs.mTotalCoreCount;
+
+        case GET_PHYSICAL_CLUSTER_ID:
+            if(numArgs < 1) {
+                return 0;
+            }
+            return targetRegistry->getPhysicalClusterId(args[0]);
+
+        case GET_PHYSICAL_CORE_ID:
+            if(numArgs < 2) {
+                return 0;
+            }
+            return targetRegistry->getPhysicalCoreId(args[0], args[1]);
+    }
+
+    return 0;
+}
