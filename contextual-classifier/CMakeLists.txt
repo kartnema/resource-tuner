@@ -77,7 +77,9 @@ endif()
 install(TARGETS ContextualClassifier DESTINATION ${CMAKE_INSTALL_LIBDIR})
 if(FLORET_FOUND)
     install(TARGETS ml_inference_lib DESTINATION ${CMAKE_INSTALL_LIBDIR})
-    install(FILES ${CMAKE_SOURCE_DIR}/contextual-classifier/Artifacts/floret_model_supervised.bin DESTINATION ${CMAKE_INSTALL_SYSCONFDIR}/urm/classifier)
+    install(
+        FILES ${CMAKE_SOURCE_DIR}/contextual-classifier/Artifacts/floret_model_supervised.bin
+        DESTINATION ${CMAKE_INSTALL_SYSCONFDIR}/urm/classifier)
 endif()
 
 install(

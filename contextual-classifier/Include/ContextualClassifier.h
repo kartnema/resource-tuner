@@ -27,17 +27,6 @@ typedef enum : int8_t {
     CC_APP_CLOSE = 0x02
 } EventType;
 
-enum {
-    CC_BROWSER_APP_OPEN = 0x03,
-    CC_GAME_APP_OPEN = 0x04,
-    CC_MULTIMEDIA_APP_OPEN = 0x05
-};
-
-enum {
-    DEFAULT_CONFIG = 0,
-    PER_APP_CONFIG
-};
-
 typedef enum CC_TYPE {
     CC_APP = 0x01,
     CC_BROWSER = 0x02,
@@ -51,19 +40,13 @@ struct ProcEvent {
     int32_t type; // CC_APP_OPEN / CC_APP_CLOSE / CC_IGNORE
 };
 
-typedef struct {
-    int64_t mCurHandle;
-    pid_t mCurReqPid;
-    pid_t mCurReqTid;
-} RestuneHandleInfo;
-
 class ContextualClassifier {
 private:
     int8_t mDebugMode = false;
     volatile int8_t mNeedExit = false;
 
     NetLinkComm mNetLinkComm;
-    Inference *mInference;
+    Inference* mInference;
     std::vector<int64_t> mCurrRestuneHandles;
 
     // PID cache to check for duplicates

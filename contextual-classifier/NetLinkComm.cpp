@@ -153,7 +153,7 @@ int32_t NetLinkComm::recvEvent(ProcEvent &ev) {
         }
 
         case PROC_EVENT_EXEC:
-            ev.pid = nlcn_msg.proc_ev.event_data.exec.process_pid;
+            ev.pid = nlcn_msg.proc_ev.event_data.exec.processPid;
             ev.tgid = nlcn_msg.proc_ev.event_data.exec.process_tgid;
             ev.type = CC_APP_OPEN;
 
@@ -164,7 +164,7 @@ int32_t NetLinkComm::recvEvent(ProcEvent &ev) {
             break;
 
         case PROC_EVENT_EXIT:
-            ev.pid = nlcn_msg.proc_ev.event_data.exit.process_pid;
+            ev.pid = nlcn_msg.proc_ev.event_data.exit.processPid;
             ev.tgid = nlcn_msg.proc_ev.event_data.exit.process_tgid;
             ev.type = CC_APP_CLOSE;
 
