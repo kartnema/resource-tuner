@@ -8,18 +8,17 @@
  * \file  TargetRegistry.h
  */
 
-#include <memory>
-#include <unordered_map>
-#include <vector>
-#include <dirent.h>
-#include <fstream>
-#include <sstream>
-#include <algorithm>
-#include <cstring>
-#include <cstdlib>
-#include <sys/stat.h>
 #include <regex>
 #include <memory>
+#include <vector>
+#include <cstring>
+#include <sstream>
+#include <fstream>
+#include <cstdlib>
+#include <dirent.h>
+#include <algorithm>
+#include <sys/stat.h>
+#include <unordered_map>
 
 #include "Logger.h"
 #include "ErrCodes.h"
