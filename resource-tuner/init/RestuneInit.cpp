@@ -494,7 +494,7 @@ static ErrCode init(void* arg) {
     UrmSettings::metaConfigs.mPluginCount = (uint32_t)std::stol(resultBuffer);
 
     uint32_t pluginCount = UrmSettings::metaConfigs.mPluginCount;
-    extensionLibHandles = (void**) malloc(pluginCount * sizeof(void*));
+    extensionLibHandles = (void**) calloc(pluginCount, sizeof(void*));
     if(extensionLibHandles == nullptr) {
         return RC_MODULE_INIT_FAILURE;
     }
