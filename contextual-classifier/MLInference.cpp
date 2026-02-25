@@ -15,7 +15,7 @@
 #include <syslog.h>
 #include <vector>
 
-#define CLASSIFIER_TAG "MLInference"
+#define CLASSIFIER_TAG "CLASSIFIER_INFERENCE"
 
 static std::string format_string(const char *fmt, ...) {
     char buffer[1024];
@@ -27,7 +27,6 @@ static std::string format_string(const char *fmt, ...) {
 }
 
 MLInference::MLInference(const std::string &ft_model_path) : Inference(ft_model_path) {
-    
     text_cols_ = {
         "attr",                                                  // 1x weight
         "cgroup",                                                // 1x weight
@@ -73,11 +72,11 @@ std::string MLInference::CleanTextPython(const std::string &input) {
     if (input.empty()) {
         return "";
     }
-    
+
     // Step 1: Convert to lowercase
     std::string line = input;
     line = AuxRoutines::toLowerCase(line);
-    
+
     // Step 2: Replace commas with spaces
     std::replace(line.begin(), line.end(), ',', ' ');
 
@@ -87,7 +86,7 @@ std::string MLInference::CleanTextPython(const std::string &input) {
             c = ' ';
         }
     }
-    
+
     // Step 3: Split into tokens
     std::istringstream iss(line);
     std::vector<std::string> tokens;
@@ -95,53 +94,53 @@ std::string MLInference::CleanTextPython(const std::string &input) {
     while (iss >> token) {
         tokens.push_back(token);
     }
-    
+
     // Step 4: Clean tokens (Python logic)
     std::vector<std::string> clean_tokens;
     std::set<std::string> seen;  // Track duplicates
-    
+
     for (const auto& tok : tokens) {
         std::string t = tok;
-        
+
         // Trim whitespace
         t.erase(0, t.find_first_not_of(" \t\n\r"));
         t.erase(t.find_last_not_of(" \t\n\r") + 1);
-        
+
         if (t.empty()) {
             continue;
         }
-        
+
         // Skip if in REMOVE_KEYWORDS
         if (REMOVE_KEYWORDS.find(t) != REMOVE_KEYWORDS.end()) {
             continue;
         }
-        
+
         // Skip if matches user-N.slice pattern
         if (std::regex_match(t, user_slice_pattern_)) {
             continue;
         }
-        
+
         // Skip if matches user@N.service pattern
         if (std::regex_match(t, user_service_pattern_)) {
             continue;
         }
-        
+
         // Skip if matches vte-spawn-*.scope pattern
         if (std::regex_match(t, vte_spawn_pattern_)) {
             continue;
         }
-        
+
         // Skip if it's just a number (integer or decimal)
         if (std::regex_match(t, decimal_pattern_)) {
             continue;
         }
-        
+
         // Replace hex values with <hex>
         t = std::regex_replace(t, hex_pattern_, "<hex>");
-        
+
         // Replace long numbers (4+ digits) with <num>
         t = std::regex_replace(t, long_number_pattern_, "<num>");
-        
+
         // Keep important browser-related terms (even if duplicate)
         int8_t is_browser_term = false;
         for (const auto& browser_term : BROWSER_TERMS) {
@@ -150,7 +149,7 @@ std::string MLInference::CleanTextPython(const std::string &input) {
                 break;
             }
         }
-        
+
         if (is_browser_term) {
             clean_tokens.push_back(t);
             continue;  // Skip duplicate check for browser terms
@@ -159,7 +158,7 @@ std::string MLInference::CleanTextPython(const std::string &input) {
             clean_tokens.push_back(t);
         }
     }
-    
+
     // Step 5: Join tokens with spaces
     std::ostringstream result;
     for (size_t i = 0; i < clean_tokens.size(); ++i) {
@@ -168,22 +167,22 @@ std::string MLInference::CleanTextPython(const std::string &input) {
         }
         result << clean_tokens[i];
     }
-    
+
     return result.str();
 }
 
-CC_TYPE MLInference::Classify(int process_pid) {
+CC_TYPE MLInference::Classify(pid_t processPid) {
     LOGD(CLASSIFIER_TAG,
-         format_string("Starting classification for PID:%d", process_pid));
+         format_string("Starting classification for PID:%d", processPid));
 
-    const std::string proc_path = "/proc/" + std::to_string(process_pid);
+    const std::string proc_path = "/proc/" + std::to_string(processPid);
     CC_TYPE contextType = CC_APP;
-    std::map<std::string, std::string> raw_data;
+    std::map<std::string, std::string> rawData;
     std::string predicted_label;
 
     auto start_collect = std::chrono::high_resolution_clock::now();
-    int collect_rc     = FeatureExtractor::CollectAndStoreData(process_pid,
-                                                               raw_data,
+    int collect_rc     = FeatureExtractor::CollectAndStoreData(processPid,
+                                                               rawData,
                                                                false);
 
     auto end_collect = std::chrono::high_resolution_clock::now();
@@ -196,14 +195,14 @@ CC_TYPE MLInference::Classify(int process_pid) {
     }
 
     LOGD(CLASSIFIER_TAG,
-         format_string("Text features collected for PID:%d", process_pid));
+         format_string("Text features collected for PID:%d", processPid));
 
     if (!AuxRoutines::fileExists(proc_path)) {
         return contextType;
     }
 
     bool has_sufficient_features = false;
-    for (const auto &kv : raw_data) {
+    for (const auto &kv : rawData) {
         if (!kv.second.empty()) {
             has_sufficient_features = true;
             break;
@@ -216,15 +215,15 @@ CC_TYPE MLInference::Classify(int process_pid) {
         }
 
         LOGD(CLASSIFIER_TAG,
-             format_string("Invoking ML inference for PID:%d", process_pid));
+             format_string("Invoking ML inference for PID:%d", processPid));
 
         auto start_inference = std::chrono::high_resolution_clock::now();
 
-        uint32_t rc = Predict(process_pid, raw_data, predicted_label);
+        uint32_t rc = Predict(processPid, rawData, predicted_label);
         auto end_inference = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double, std::milli> elapsed_inference = end_inference - start_inference;
         LOGD(CLASSIFIER_TAG, format_string("Inference for PID:%d took %f ms (rc=%u)",
-                            process_pid, elapsed_inference.count(), rc));
+                            processPid, elapsed_inference.count(), rc));
         if (rc != 0) {
             // Inference failed, keep contextType as UNKNOWN.
             predicted_label.clear();
@@ -250,16 +249,16 @@ CC_TYPE MLInference::Classify(int process_pid) {
         LOGD(CLASSIFIER_TAG,
              format_string("Skipping ML inference for PID:%d due to "
                            "insufficient features.",
-                           process_pid));
+                           processPid));
     }
 
     return contextType;
 }
 
 uint32_t MLInference::Predict(int pid,
-                              const std::map<std::string, std::string> &raw_data,
+                              const std::map<std::string, std::string> &rawData,
                               std::string &cat) {
-    
+
     std::lock_guard<std::mutex> lock(predict_mutex_);
 
     LOGD(CLASSIFIER_TAG,
@@ -268,14 +267,14 @@ uint32_t MLInference::Predict(int pid,
     // Build concatenated text
     std::string concatenated_text;
     for (const auto &col : text_cols_) {
-        auto it = raw_data.find(col);
-        if (it != raw_data.end()) {
+        auto it = rawData.find(col);
+        if (it != rawData.end()) {
             concatenated_text += it->second + " ";
         } else {
             concatenated_text += " ";
         }
     }
-    
+
     if (!concatenated_text.empty() && concatenated_text.back() == ' ') {
         concatenated_text.pop_back();
     }
@@ -286,7 +285,6 @@ uint32_t MLInference::Predict(int pid,
         cat = "Unknown";
         return 1;
     }
-    
 
     // Apply cleaning same what we did during building model
     std::string cleaned_text = CleanTextPython(concatenated_text);
@@ -304,14 +302,14 @@ uint32_t MLInference::Predict(int pid,
 
     // Use fasttext types (provided by Floret)
     std::vector<std::pair<fasttext::real, int32_t>> predictions;
-    
+
     std::vector<int32_t> words, labels;
     words.reserve(100);
     labels.reserve(10);
 
     // Convert text to word IDs
     ft_model_.getDictionary()->getLine(iss, words, labels);
-    
+
     if (words.empty()) {
         LOGW(CLASSIFIER_TAG,
              format_string("No words extracted from text for PID: %d", pid));
@@ -332,7 +330,7 @@ uint32_t MLInference::Predict(int pid,
 
     // Extract top prediction
     fasttext::real probability = predictions[0].first;
-    
+
     // Convert log probability to actual probability
     if (probability < 0) {
         probability = std::exp(probability);
@@ -350,8 +348,8 @@ uint32_t MLInference::Predict(int pid,
 
     // Get comm for logging
     std::string comm = "unknown";
-    auto comm_it = raw_data.find("comm");
-    if (comm_it != raw_data.end()) {
+    auto comm_it = rawData.find("comm");
+    if (comm_it != rawData.end()) {
         comm = comm_it->second;
     }
 
