@@ -233,6 +233,7 @@ ErrCode RestuneParser::parseResourceConfigYamlNode(const std::string& filePath) 
         // None of the nodes exsit, no need to parse these configs
         return RC_SUCCESS;
     }
+
     SETUP_LIBYAML_PARSING(filePath);
 
     ErrCode rc = RC_SUCCESS;
