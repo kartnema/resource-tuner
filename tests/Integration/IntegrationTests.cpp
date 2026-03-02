@@ -12,6 +12,7 @@
 #include "UrmAPIs.h"
 
 #define TEST_CLASS "INTEGRATION"
+#define TEST_SUBCAT "INTEGRATION"
 
 static TestBaseline baseline;
 

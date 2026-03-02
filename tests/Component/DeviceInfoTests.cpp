@@ -10,6 +10,7 @@
 #include "URMTests.h"
 
 #define TEST_CLASS "COMPONENT"
+#define TEST_SUBCAT "DEVICE_INFO_FETCH"
 
 static TestBaseline baseline;
 
