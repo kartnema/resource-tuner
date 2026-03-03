@@ -5,6 +5,7 @@
 #include <cstdarg>
 #include <cstring>
 #include <unistd.h>
+#include <iostream>
 
 #include "Logger.h"
 #include "AuxRoutines.h"
@@ -12,7 +13,6 @@
 #include "ContextualClassifier.h"
 
 #define CLASSIFIER_TAG "CLASSIFIER_NETLINK"
-#define PROCP_THRESH 50
 
 static int8_t procHasControlTerminal(pid_t pid) {
     std::string procStatPath = STAT(pid);
@@ -44,6 +44,24 @@ static int8_t procHasControlTerminal(pid_t pid) {
 
     // For daemon / system services, tty number (controlling terminal) will be 0.
     return (ttyNr != 0);
+}
+
+static int8_t procEnvironChecks(pid_t pid) {
+    std::string environ = "/proc/" + std::to_string(pid) + "/environ";
+    std::string envData = AuxRoutines::readFromFile(environ);
+    return (envData.find("DISPLAY") != std::string::npos);
+}
+
+static int8_t procPreliminaryChecks(pid_t pid) {
+    if(procHasControlTerminal(pid)) {
+        return true;
+    }
+
+    // Check environ data
+    if(procEnvironChecks(pid)) {
+        return true;
+    }
+    return false;
 }
 
 NetLinkComm::NetLinkComm() {
@@ -145,34 +163,31 @@ int32_t NetLinkComm::recvEvent(ProcEvent &ev) {
     ev.type = CC_IGNORE;
 
     switch(nlcn_msg.proc_ev.what) {
-        case PROC_EVENT_NONE:
-        case PROC_EVENT_FORK:
-        case PROC_EVENT_UID:
-        case PROC_EVENT_GID: {
+        case proc_event::PROC_EVENT_NONE:
+        case proc_event::PROC_EVENT_FORK:
+        case proc_event::PROC_EVENT_UID:
+        case proc_event::PROC_EVENT_GID: {
             // No actionable item.
             break;
         }
 
-        case PROC_EVENT_EXEC:
+        case proc_event::PROC_EVENT_EXEC:
             ev.pid = nlcn_msg.proc_ev.event_data.exec.process_pid;
             ev.tgid = nlcn_msg.proc_ev.event_data.exec.process_tgid;
             ev.type = CC_APP_OPEN;
 
             rc = CC_APP_OPEN;
-            if(!AuxRoutines::fileExists(COMM(ev.pid)) || !procHasControlTerminal(ev.pid)) {
+            if(!AuxRoutines::fileExists(COMM(ev.pid)) || !procPreliminaryChecks(ev.pid)) {
                 rc = ev.type = CC_IGNORE;
             }
             break;
 
-        case PROC_EVENT_EXIT:
+        case proc_event::PROC_EVENT_EXIT:
             ev.pid = nlcn_msg.proc_ev.event_data.exit.process_pid;
             ev.tgid = nlcn_msg.proc_ev.event_data.exit.process_tgid;
             ev.type = CC_APP_CLOSE;
 
             rc = CC_APP_CLOSE;
-            if(!AuxRoutines::fileExists(COMM(ev.pid)) || !procHasControlTerminal(ev.pid)) {
-                rc = ev.type = CC_IGNORE;
-            }
             break;
 
         default:
