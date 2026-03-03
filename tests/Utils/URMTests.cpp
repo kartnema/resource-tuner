@@ -51,6 +51,8 @@ void TestAggregator::addSkip(const std::string& name,
 
 int32_t TestAggregator::runAll(const std::string& name) {
     mPassCount = mFailCount = mSkipCount = 0;
+
+    // Run all the test cases in the given class.
     for(std::pair<std::string, URMTest> test: mTests) {
         mTestsCount++;
         if(test.second.classLabel == name) {
@@ -100,7 +102,7 @@ int32_t TestAggregator::runAll(const std::string& name) {
             if(test.second.status == TestStatus::FAILED) {
                 fileStream<<"<td style=\"padding: 5px; color:red\">Failed</td>"<<std::endl;
             } else if(test.second.status == TestStatus::SKIPPED) {
-                fileStream<<"<td style=\"padding: 5px; color:yellow\">Skipped</td>"<<std::endl;
+                fileStream<<"<td style=\"padding: 5px; color:orange\">Skipped</td>"<<std::endl;
             } else {
                 fileStream<<"<td style=\"padding: 5px; color:green\">Passed</td>"<<std::endl;
             }
@@ -110,6 +112,13 @@ int32_t TestAggregator::runAll(const std::string& name) {
         fileStream<<"</table>"<<std::endl;
         fileStream.close();
     }
+
+    // Log essential information to console as well
+    std::cout<<"\nSummary:"<<std::endl;
+    std::cout<<"Ran "<<mTestsCount<<" Test Cases"<<std::endl;
+    std::cout<<"Pass: "<<mPassCount<<std::endl;
+    std::cout<<"Fail: "<<mFailCount<<std::endl;
+    std::cout<<"Skip: "<<mSkipCount<<std::endl;
 
     if(mFailCount > 0) {
         return 1;

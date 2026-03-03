@@ -18,7 +18,6 @@ static void Init() {
     static int8_t initDone = false;
     if(!initDone) {
         initDone = true;
-        baseline.fetchBaseline();
         TargetRegistry::getInstance()->readTargetInfo();
     }
 }

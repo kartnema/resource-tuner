@@ -432,7 +432,7 @@ URM_TEST(ResourceLogicalToPhysicalTranslationVerification3, {
     int32_t physicalClusterID = baseline.getExpectedPhysicalCluster(0);
     if(physicalClusterID == -1) {
         LOG_SKIP("Logical Cluster: 0 not found on test device, Skipping Test Case")
-        return;
+        SKIP
     }
 
     std::string testResourceName = "/etc/urm/tests/nodes/target_test_resource2.txt";
@@ -2296,7 +2296,7 @@ URM_TEST(TestClusterTypeResourceTuneRequest1, {
     int32_t physicalClusterID = baseline.getExpectedPhysicalCluster(0);
     if(physicalClusterID == -1) {
         LOG_SKIP("Logical Cluster: 0 not found on test device, Skipping Test Case")
-        return;
+        SKIP
     }
 
     std::string nodePath = "/etc/urm/tests/nodes/cluster_type_resource_%d_cluster_id.txt";
@@ -2345,7 +2345,7 @@ URM_TEST(ClusterTypeResourceTuneRequest2, {
     int32_t physicalClusterID = baseline.getExpectedPhysicalCluster(2);
     if(physicalClusterID == -1) {
         LOG_SKIP("Logical Cluster: 2 not found on test device, Skipping Test Case")
-        return;
+        SKIP
     }
 
     std::string nodePath = "/etc/urm/tests/nodes/cluster_type_resource_%d_cluster_id.txt";
@@ -2823,7 +2823,7 @@ URM_TEST(TestWriteTo_scaling_min_freq_Node1, {
 
     if(physicalClusterID == -1) {
         LOG_SKIP("Logical Cluster: 0 not found on test device, Skipping Test Case")
-        return;
+        SKIP
     }
 
     char path[128];
@@ -2888,7 +2888,7 @@ URM_TEST(TestWriteTo_scaling_min_freq_Node2, {
 
     if(physicalClusterID == -1) {
         LOG_SKIP("Logical Cluster: 1 not found on test device, Skipping Test Case")
-        return;
+        SKIP
     }
 
     char path[128];
@@ -2960,7 +2960,7 @@ URM_TEST(TestConcurrentWriteTo_scaling_min_freq_Node3, {
 
     if(physicalClusterID == -1) {
         LOG_SKIP("Logical Cluster: 1 not found on test device, Skipping Test Case")
-        return;
+        SKIP
     }
 
     char path[128];
@@ -3344,7 +3344,7 @@ URM_TEST(TestWriteTo_pm_qos_resume_latency_us1, {
 
     if(physicalClusterID == -1) {
         LOG_SKIP("Logical Cluster: 0 not found on test device, Skipping Test Case")
-        return;
+        SKIP
     }
 
     std::string nodePath = "/sys/devices/system/cpu/cpu%d/power/pm_qos_resume_latency_us";
@@ -3399,7 +3399,7 @@ URM_TEST(TestWriteTo_pm_qos_resume_latency_us2, {
     int32_t physicalClusterID = baseline.getExpectedPhysicalCluster(1);
     if(physicalClusterID == -1) {
         LOG_SKIP("Logical Cluster: 1 not found on test device, Skipping Test Case")
-        return;
+        SKIP
     }
 
     std::string nodePath = "/sys/devices/system/cpu/cpu%d/power/pm_qos_resume_latency_us";
