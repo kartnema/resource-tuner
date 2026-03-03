@@ -296,7 +296,7 @@ URM_TEST(TestInvalidResourceTuning, {
  * - Verify that the Resource Node's value remains unchanged.
  * Cross-Reference id: [F]
  */
-URM_TEST(OutOfBoundsResourceTuning, {
+URM_TEST(TestOutOfBoundsResourceTuning, {
     std::string testResourceName = "/etc/urm/tests/nodes/scaling_min_freq.txt";
     int32_t testResourceOriginalValue = 107;
 
@@ -1967,7 +1967,7 @@ URM_TEST(TestPriorityBasedResourceAcquisition1, {
  * - Verify that the Sysfs Node is reset, once the Request Expires.
  * Cross-Reference id: ['H']
  */
-URM_TEST(PriorityBasedResourceAcquisition2, {
+URM_TEST(TestPriorityBasedResourceAcquisition2, {
     std::string testResourceName = "/etc/urm/tests/nodes/scaling_min_freq.txt";
     int32_t testResourceOriginalValue = 107;
     int64_t handle;
@@ -2239,7 +2239,7 @@ URM_TEST(TestRequestInvalidRetuning1, {
  *   should be rejected.
  * Cross-Reference id: ['R3']
  */
-URM_TEST(RequestInvalidRetuning2, {
+URM_TEST(TestRequestInvalidRetuning2, {
     std::string testResourceName = "/etc/urm/tests/nodes/sched_util_clamp_min.txt";
     int32_t testResourceOriginalValue = 300;
 
@@ -2341,7 +2341,7 @@ URM_TEST(TestClusterTypeResourceTuneRequest1, {
     delete[] resourceList;
 })
 
-URM_TEST(ClusterTypeResourceTuneRequest2, {
+URM_TEST(TestClusterTypeResourceTuneRequest2, {
     int32_t physicalClusterID = baseline.getExpectedPhysicalCluster(2);
     if(physicalClusterID == -1) {
         LOG_SKIP("Logical Cluster: 2 not found on test device, Skipping Test Case")
