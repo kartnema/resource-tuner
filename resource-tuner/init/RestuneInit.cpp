@@ -147,6 +147,12 @@ static ErrCode fetchMetaConfigs() {
         submitPropGetRequest(MAX_RESOURCES_PER_REQUEST, resultBuffer, "5");
         UrmSettings::metaConfigs.mMaxResourcesPerRequest = (uint32_t)std::stol(resultBuffer);
 
+        submitPropGetRequest(THREAD_POOL_DESIRED_CAPACITY, resultBuffer, "5");
+        UrmSettings::metaConfigs.mDesiredThreadCount = (uint32_t)std::stol(resultBuffer);
+
+        submitPropGetRequest(THREAD_POOL_MAX_SCALING_CAPACITY, resultBuffer, "10");
+        UrmSettings::metaConfigs.mMaxScalingCapacity = (uint32_t)std::stol(resultBuffer);
+
         submitPropGetRequest(PULSE_MONITOR_DURATION, resultBuffer, "60000");
         UrmSettings::metaConfigs.mPulseDuration = (uint32_t)std::stol(resultBuffer);
 
@@ -164,6 +170,17 @@ static ErrCode fetchMetaConfigs() {
 
         submitPropGetRequest(RATE_LIMITER_REWARD_FACTOR, resultBuffer, "0.4");
         UrmSettings::metaConfigs.mRewardFactor = std::stod(resultBuffer);
+
+        submitPropGetRequest(URM_MAX_PLUGIN_COUNT, resultBuffer, "3");
+        UrmSettings::metaConfigs.mPluginCount = (uint32_t)std::stol(resultBuffer);
+
+        if(UrmSettings::metaConfigs.mDesiredThreadCount < 1) {
+            UrmSettings::metaConfigs.mDesiredThreadCount = 5; // Reset to default
+        }
+
+        if(UrmSettings::metaConfigs.mMaxScalingCapacity > 100) {
+            UrmSettings::metaConfigs.mMaxScalingCapacity = 100;
+        }
 
     } catch(const std::invalid_argument& e) {
         TYPELOGV(META_CONFIG_PARSE_FAILURE, e.what());
@@ -406,8 +423,8 @@ static ErrCode fetchPerAppConfigs() {
 
 // Initialize Request and Timer ThreadPools
 static ErrCode preAllocateWorkers() {
-    int32_t desiredThreadCapacity = UrmSettings::desiredThreadCount;
-    int32_t maxScalingCapacity = UrmSettings::maxScalingCapacity;
+    uint32_t desiredThreadCapacity = UrmSettings::metaConfigs.mDesiredThreadCount;
+    uint32_t maxScalingCapacity = UrmSettings::metaConfigs.mMaxScalingCapacity;
 
     try {
         RequestReceiver::mRequestsThreadPool = new ThreadPool(desiredThreadCapacity,
