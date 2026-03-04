@@ -81,7 +81,7 @@ std::vector<TestAppConfig> loadAppConfigs(const std::string& configPath) {
 
     std::string line;
     TestAppConfig currentApp;
-    bool inApp = false;
+    int8_t inApp = false;
 
     // Parse line by line
     while (std::getline(file, line)) {
@@ -374,7 +374,7 @@ URM_TEST(TestApplicationClassification, {
             std::cout << LOG_BASE << "Category: " << categoryName << std::endl;
 
             // Compare predicted label with expected label
-            bool correct = (predictedLabel == app.expectedLabel);
+            int8_t correct = (predictedLabel == app.expectedLabel);
             std::cout << LOG_BASE << "Match: " << (correct ? "YES" : "NO") << std::endl;
 
             // Cleanup: terminate spawned process
