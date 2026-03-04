@@ -252,7 +252,7 @@ void ContextualClassifier::ClassifierMain() {
                 // Untune any Configurations from the last proc-invocation
                 for(int64_t handle: this->mCurrRestuneHandles) {
                     if(handle > 0) {
-                        untuneRequestHelper(handle);
+                        this->untuneRequestHelper(handle);
                     }
                 }
                 this->mCurrRestuneHandles.clear();

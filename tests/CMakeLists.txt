@@ -67,7 +67,7 @@ if(BUILD_TESTS)
                 set(FLORET_FOUND TRUE)
                 set(FLORET_LIBRARIES ${PC_FLORET_LIBRARIES})
                 set(FLORET_INCLUDE_DIRS ${PC_FLORET_INCLUDE_DIRS})
-                endif()
+            endif()
          endif()
 
         if(FLORET_FOUND)
@@ -75,22 +75,26 @@ if(BUILD_TESTS)
             add_definitions(-DUSE_FLORET=1)
 
             target_sources(UrmComponentTests PRIVATE
-                ${CMAKE_CURRENT_SOURCE_DIR}/Component/ContextClassificationTest.cpp)
+                ${CMAKE_CURRENT_SOURCE_DIR}/Component/ContextClassificationTest.cpp
+            )
 
-            target_link_libraries(UrmComponentTests PUBLIC ContextualClassifier
-                                                           ml_inference_lib)
+            target_link_libraries(UrmComponentTests PUBLIC
+                ContextualClassifier
+                ml_inference_lib
+            )
 
             target_include_directories(UrmComponentTests PRIVATE
-                ${CMAKE_SOURCE_DIR}/contextual-classifier/Include)
+                ${CMAKE_SOURCE_DIR}/contextual-classifier/Include
+            )
         else()
             message(STATUS "floret not found")
         endif()
     endif()
 
+    # Install
     install(TARGETS UrmComponentTests DESTINATION ${CMAKE_INSTALL_BINDIR})
 
     add_executable(UrmIntegrationTests Integration/IntegrationTests.cpp)
-
     target_link_libraries(UrmIntegrationTests PUBLIC UrmAuxUtils
                                                      UrmClient
                                                      RestuneTestUtils
@@ -98,10 +102,13 @@ if(BUILD_TESTS)
     target_include_directories(UrmIntegrationTests PRIVATE ${LIBYAML_INCLUDE_DIRS})
 
     if(BUILD_CLASSIFIER)
-        target_sources(UrmIntegrationTests PRIVATE
-            ${CMAKE_CURRENT_SOURCE_DIR}/Integration/CCIntegrationTest.cpp)
+        target_sources(
+            UrmIntegrationTests PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}/Integration/CCIntegrationTests.cpp
+        )
     endif()
 
+    # Install
     install(TARGETS UrmIntegrationTests RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 endif()

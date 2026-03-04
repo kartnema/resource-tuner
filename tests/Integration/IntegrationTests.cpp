@@ -3,13 +3,13 @@
 
 #include <thread>
 
-#include "ErrCodes.h"
-#include "UrmPlatformAL.h"
 #include "Utils.h"
+#include "UrmAPIs.h"
+#include "ErrCodes.h"
+#include "URMTests.h"
 #include "TestUtils.h"
 #include "TestBaseline.h"
-#include "URMTests.h"
-#include "UrmAPIs.h"
+#include "UrmPlatformAL.h"
 
 #define TEST_CLASS "INTEGRATION"
 #define TEST_SUBCAT "INTEGRATION"
@@ -529,7 +529,7 @@ URM_TEST(ResourceLogicalToPhysicalTranslationVerification4, {
  * - Verify that the Resource Node's value remains unchanged.
  * Cross-Reference id: [H]
  */
-URM_TEST(UnSupportedResourceTuningVerification, {
+URM_TEST(TestUnSupportedResourceTuningVerification, {
     std::string testResourceName = "/etc/urm/tests/nodes/target_test_resource4.txt";
     int32_t testResourceOriginalValue = 516;
 
@@ -3668,6 +3668,12 @@ static std::string encodeCluster(const std::string& nodePath, int32_t physicalCl
 }
 
 URM_TEST(TestMultiResourceSignal, {
+    int32_t physicalClusterID = baseline.getExpectedPhysicalCluster(2);
+    if(physicalClusterID == -1) {
+        LOG_SKIP("Logical Cluster: 2 not found on test device, Skipping Test Case")
+        SKIP
+    }
+
     std::string clusResource = "/etc/urm/tests/nodes/cluster_type_resource_%d_cluster_id.txt";
     int32_t physicalClusterID0 = baseline.getExpectedPhysicalCluster(0);
     int32_t physicalClusterID1 = baseline.getExpectedPhysicalCluster(1);
