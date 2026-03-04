@@ -1130,7 +1130,7 @@ URM_TEST(TestMultipleClientsHigherIsBetterPolicy2, {
         exit(EXIT_SUCCESS);
 
     } else if(rc1 > 0) {
-        wait(nullptr);
+        waitpid(rc1, nullptr, 0);
         SysResource* resourceList = new SysResource[1];
         memset(&resourceList[0], 0, sizeof(SysResource));
         resourceList[0].mResCode = CONSTRUCT_RES_CODE(0xff, 0x0003);
@@ -1473,7 +1473,7 @@ URM_TEST(TestSimplePassThroughConcurrentApplication, {
         exit(EXIT_SUCCESS);
 
     } else if(rc1 > 0) {
-        wait(nullptr);
+        waitpid(rc1, nullptr, 0);
     
         SysResource* resourceList = new SysResource[1];
         memset(&resourceList[0], 0, sizeof(SysResource));
@@ -2955,17 +2955,7 @@ URM_TEST(TestWriteTo_scaling_min_freq_Node2, {
 URM_TEST(TestConcurrentWriteTo_scaling_min_freq_Node3, {
     // Apply a value to scaling_min_freq for the Gold Cluster
     // i.e. logical cluster id = 1
-    int32_t physicalClusterID = baseline.getExpectedPhysicalCluster(1);
-    std::string nodePath = "/sys/devices/system/cpu/cpufreq/policy%d/scaling_min_freq";
-
-    if(physicalClusterID == -1) {
-        LOG_SKIP("Logical Cluster: 1 not found on test device, Skipping Test Case")
-        SKIP
-    }
-
-    char path[128];
-    snprintf(path, sizeof(path), nodePath.c_str(), physicalClusterID);
-    std::string testResourceName = std::string(path);
+    std::string testResourceName = "/etc/urm/tests/nodes/scaling_min_freq.txt";
 
     std::string originalValueString = AuxRoutines::readFromFile(testResourceName);
     int32_t originalValue = C_STOI(originalValueString);
@@ -2981,12 +2971,13 @@ URM_TEST(TestConcurrentWriteTo_scaling_min_freq_Node3, {
     if(rc == 0) {
         SysResource* resourceList = new SysResource[1];
         memset(&resourceList[0], 0, sizeof(SysResource));
-        resourceList[0].mResCode = CONSTRUCT_RES_CODE(0x04, 0x0000);
+        resourceList[0].mResCode = CONSTRUCT_RES_CODE(0xff, 0x0002);
         resourceList[0].mNumValues = 1;
         resourceList[0].mResInfo = 0;
+
         // Valid Translation
-        resourceList[0].mResInfo = SET_RESOURCE_CLUSTER_VALUE(resourceList[0].mResInfo, 1);
-        resourceList[0].mResValue.value = 1554613;
+        resourceList[0].mResInfo = 0;
+        resourceList[0].mResValue.value = 613;
 
         int64_t handle = tuneResources(10000, RequestPriority::REQ_PRIORITY_HIGH, 1, resourceList);
         std::cout<<LOG_BASE<<"Handle Returned: "<<handle<<std::endl;
@@ -3000,12 +2991,12 @@ URM_TEST(TestConcurrentWriteTo_scaling_min_freq_Node3, {
         if(rc1 == 0) {
             SysResource* resourceList = new SysResource[1];
             memset(&resourceList[0], 0, sizeof(SysResource));
-            resourceList[0].mResCode = CONSTRUCT_RES_CODE(0x04, 0x0000);
+            resourceList[0].mResCode = CONSTRUCT_RES_CODE(0xff, 0x0002);
             resourceList[0].mNumValues = 1;
             resourceList[0].mResInfo = 0;
-            // Valid Translation
-            resourceList[0].mResInfo = SET_RESOURCE_CLUSTER_VALUE(resourceList[0].mResInfo, 1);
-            resourceList[0].mResValue.value = 1656608;
+
+            resourceList[0].mResInfo = 0;
+            resourceList[0].mResValue.value = 654;
 
             int64_t handle = tuneResources(30000, RequestPriority::REQ_PRIORITY_HIGH, 1, resourceList);
             std::cout<<LOG_BASE<<"Handle Returned: "<<handle<<std::endl;
@@ -3017,13 +3008,12 @@ URM_TEST(TestConcurrentWriteTo_scaling_min_freq_Node3, {
         } else {
             SysResource* resourceList = new SysResource[1];
             memset(&resourceList[0], 0, sizeof(SysResource));
-            resourceList[0].mResCode = CONSTRUCT_RES_CODE(0x04, 0x0000);
+            resourceList[0].mResCode = CONSTRUCT_RES_CODE(0xff, 0x0002);
             resourceList[0].mNumValues = 1;
             resourceList[0].mResInfo = 0;
 
-            // Valid Translation
-            resourceList[0].mResInfo = SET_RESOURCE_CLUSTER_VALUE(resourceList[0].mResInfo, 1);
-            resourceList[0].mResValue.value = 1771209;
+            resourceList[0].mResInfo = 0;
+            resourceList[0].mResValue.value = 709;
 
             int64_t handle = tuneResources(60000, RequestPriority::REQ_PRIORITY_HIGH, 1, resourceList);
             std::cout<<LOG_BASE<<"Handle Returned: "<<handle<<std::endl;
@@ -3034,14 +3024,14 @@ URM_TEST(TestConcurrentWriteTo_scaling_min_freq_Node3, {
             std::string value = AuxRoutines::readFromFile(testResourceName);
             int32_t newValue = C_STOI(value);
             std::cout<<LOG_BASE<<testResourceName<<" Configured Value: "<<newValue<<std::endl;
-            E_ASSERT((newValue >= 1554613));
+            E_ASSERT((newValue == 613));
 
             std::this_thread::sleep_for(std::chrono::seconds(10));
 
             value = AuxRoutines::readFromFile(testResourceName);
             newValue = C_STOI(value);
             std::cout<<LOG_BASE<<testResourceName<<" Configured Value: "<<newValue<<std::endl;
-            E_ASSERT((newValue >= 1656608));
+            E_ASSERT((newValue == 654));
 
             std::this_thread::sleep_for(std::chrono::seconds(40));
 
@@ -3049,16 +3039,18 @@ URM_TEST(TestConcurrentWriteTo_scaling_min_freq_Node3, {
             value = AuxRoutines::readFromFile(testResourceName);
             newValue = C_STOI(value);
             std::cout<<LOG_BASE<<testResourceName<<" Configured Value: "<<newValue<<std::endl;
-            E_ASSERT((newValue >= 1771209));
+            E_ASSERT((newValue == 709));
 
             // Wait for the Request to expire, check if the value resets
+            std::this_thread::sleep_for(std::chrono::seconds(40));
             value = AuxRoutines::readFromFile(testResourceName);
             newValue = C_STOI(value);
             std::cout<<LOG_BASE<<testResourceName<<" Reset Value: "<<newValue<<std::endl;
             E_ASSERT((newValue == originalValue));
 
             delete[] resourceList;
-
+            waitpid(rc, nullptr, 0);
+            waitpid(rc1, nullptr, 0);
         }
     }
 })

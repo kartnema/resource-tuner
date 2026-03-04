@@ -89,10 +89,6 @@ int8_t AuxRoutines::fileExists(const std::string& filePath) {
     return access(filePath.c_str(), F_OK) == 0;
 }
 
-int32_t AuxRoutines::createProcess() {
-    return fork();
-}
-
 std::string AuxRoutines::getMachineName() {
     return AuxRoutines::readFromFile(UrmSettings::mDeviceNamePath);
 }
