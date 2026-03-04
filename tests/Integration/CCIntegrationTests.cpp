@@ -1,13 +1,14 @@
 // Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
 // SPDX-License-Identifier: BSD-3-Clause-Clear
 
-#include "ErrCodes.h"
-#include "UrmPlatformAL.h"
-#include "Utils.h"
-#include "TestUtils.h"
-#include "URMTests.h"
-#include "UrmAPIs.h"
 #include <thread>
+
+#include "Utils.h"
+#include "UrmAPIs.h"
+#include "ErrCodes.h"
+#include "URMTests.h"
+#include "TestUtils.h"
+#include "UrmPlatformAL.h"
 
 // Test configuration and paths
 #define TEST_CLASS "INTEGRATION"
@@ -16,7 +17,6 @@
 
 // Path to the Floret supervised learning model binary
 static const std::string FT_MODEL_PATH = CLASSIFIER_CONFIGS_DIR "floret_model_supervised.bin";
-
 
 /**
  * API under test: Tune / Untune
@@ -45,8 +45,8 @@ URM_TEST(TestGstreamerPerAppConfigValidated, {
 
     // Verify executable exists before attempting spawn
     if (!AuxRoutines::fileExists("/usr/bin/gst-launch-1.0")) {
-        std::cout << LOG_BASE << "Executable not found: /usr/bin/gst-launch-1.0" << std::endl;
-        std::cout << LOG_BASE << "Status: SKIPPED" << std::endl;
+        LOG_SKIP("Executable not found: /usr/bin/gst-launch-1.0");
+        SKIP;
         return;
     }
 
@@ -54,7 +54,7 @@ URM_TEST(TestGstreamerPerAppConfigValidated, {
     pid_t pid = fork();
     if (pid == 0) {
         // Child process: redirect output to suppress application noise
-        int devNull = open("/dev/null", O_WRONLY);
+        int32_t devNull = open("/dev/null", O_WRONLY);
         if (devNull != -1) {
             dup2(devNull, STDERR_FILENO);
             dup2(devNull, STDOUT_FILENO);
@@ -128,18 +128,15 @@ URM_TEST(TestViPerAppConfigValidated, {
 
     // Verify executable exists before attempting spawn
     if (!AuxRoutines::fileExists("/usr/bin/vi")) {
-        std::cout << LOG_BASE << "Executable not found: " <<"/usr/bin/vi"<< std::endl;
-        std::cout << LOG_BASE << "Status: SKIPPED" << std::endl;
-
-        // return from this Test case if not .exe not exist
-        return;
+        LOG_SKIP("Executable not found: /usr/bin/vi");
+        SKIP;
     }
 
     // Spawn vi
     pid_t pid = fork();
     if (pid == 0) {
         // Child process: redirect output to suppress application noise
-        int devNull = open("/dev/null", O_WRONLY);
+        int32_t devNull = open("/dev/null", O_WRONLY);
         if (devNull != -1) {
             dup2(devNull, STDERR_FILENO);
             dup2(devNull, STDOUT_FILENO);
