@@ -32,7 +32,7 @@ URM_TEST(TestDeviceClusterCount, {
 
     if(expectedClusterCount == -1) {
         LOG_SKIP("Baseline Could not be fetched for the Target, skipping");
-        return;
+        SKIP;
     }
 
     E_ASSERT((clusterCount == expectedClusterCount));
@@ -48,7 +48,7 @@ URM_TEST(TestDeviceCoreCount, {
 
     if(expectedCoreCount == -1) {
         LOG_SKIP("Baseline Could not be fetched for the Target, skipping");
-        return;
+        SKIP;
     }
 
     E_ASSERT((coreCount == expectedCoreCount));

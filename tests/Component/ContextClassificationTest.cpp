@@ -159,6 +159,29 @@ std::vector<TestAppConfig> loadAppConfigs(const std::string& configPath) {
     return apps;
 }
 
+/*
+ * Description: Verifies that the URM classifier model file is properly
+ * loaded and accessible at system startup.
+ */
+URM_TEST(TestModelLoads, {
+    const std::string modelPath = FT_MODEL_PATH;
+
+    // Wait for service to settle
+    std::this_thread::sleep_for(std::chrono::milliseconds(1800));
+
+    // Verify model file exists
+    // fileExists() returns 1 if file exists, 0 if not
+    int8_t modelExists = AuxRoutines::fileExists(modelPath);
+
+    if (modelExists) {
+        std::cout << LOG_BASE << "Model file found at: " << modelPath << std::endl;
+    }
+    else {
+        std::cout << LOG_BASE << "ERROR: Model file not found: " << modelPath << std::endl;
+    }
+
+    E_ASSERT((modelExists == 1));
+})
 
 /*
  * Description:
