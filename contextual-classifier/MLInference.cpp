@@ -201,7 +201,7 @@ CC_TYPE MLInference::Classify(pid_t processPid) {
         return contextType;
     }
 
-    bool has_sufficient_features = false;
+    int8_t has_sufficient_features = false;
     for (const auto &kv : rawData) {
         if (!kv.second.empty()) {
             has_sufficient_features = true;
