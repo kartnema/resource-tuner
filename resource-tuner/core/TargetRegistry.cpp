@@ -818,9 +818,9 @@ CacheInfo* CacheInfoBuilder::build() {
     return this->mCacheInfo;
 }
 
-uint64_t getTargetInfo(int32_t option,
-                       int32_t numArgs,
-                       int32_t* args) {
+uint64_t GET_TARGET_INFO(int32_t option,
+                         int32_t numArgs,
+                         int32_t* args) {
     std::shared_ptr<TargetRegistry> targetRegistry = TargetRegistry::getInstance();
 
     switch(option) {
