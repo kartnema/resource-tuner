@@ -68,10 +68,9 @@ if(BUILD_TESTS)
                 set(FLORET_LIBRARIES ${PC_FLORET_LIBRARIES})
                 set(FLORET_INCLUDE_DIRS ${PC_FLORET_INCLUDE_DIRS})
             endif()
-         endif()
+        endif()
 
         if(FLORET_FOUND)
-            message(STATUS "floret found, building MLInference with USE_FLORET=1")
             add_definitions(-DUSE_FLORET=1)
 
             target_sources(UrmComponentTests PRIVATE
@@ -86,8 +85,6 @@ if(BUILD_TESTS)
             target_include_directories(UrmComponentTests PRIVATE
                 ${CMAKE_SOURCE_DIR}/contextual-classifier/Include
             )
-        else()
-            message(STATUS "floret not found")
         endif()
     endif()
 

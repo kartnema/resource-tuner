@@ -229,6 +229,7 @@ URM_TEST(TestClientPriorityAcquisitionVerification, {
     // Invalid Priority Value = 2
     int64_t handle = tuneResources(-1, 2, 1, resourceList);
     std::cout<<LOG_BASE<<"Handle Returned: "<<handle<<std::endl;
+    E_ASSERT((handle > 0));
 
     std::this_thread::sleep_for(std::chrono::seconds(2));
 
@@ -276,6 +277,7 @@ URM_TEST(TestInvalidResourceTuning, {
 
     int64_t handle = tuneResources(-1, RequestPriority::REQ_PRIORITY_HIGH, 2, resourceList);
     std::cout<<LOG_BASE<<"Handle Returned: "<<handle<<std::endl;
+    E_ASSERT((handle > 0));
 
     std::this_thread::sleep_for(std::chrono::seconds(2));
 
@@ -315,6 +317,7 @@ URM_TEST(TestOutOfBoundsResourceTuning, {
 
     int64_t handle = tuneResources(-1, RequestPriority::REQ_PRIORITY_HIGH, 1, resourceList);
     std::cout<<LOG_BASE<<"Handle Returned: "<<handle<<std::endl;
+    E_ASSERT((handle > 0));
 
     std::this_thread::sleep_for(std::chrono::seconds(2));
 
@@ -360,6 +363,7 @@ URM_TEST(ResourceLogicalToPhysicalTranslationVerification1, {
 
     int64_t handle = tuneResources(-1, RequestPriority::REQ_PRIORITY_HIGH, 1, resourceList);
     std::cout<<LOG_BASE<<"Handle Returned: "<<handle<<std::endl;
+    E_ASSERT((handle > 0));
 
     std::this_thread::sleep_for(std::chrono::seconds(2));
 
@@ -405,6 +409,7 @@ URM_TEST(ResourceLogicalToPhysicalTranslationVerification2, {
 
     int64_t handle = tuneResources(-1, RequestPriority::REQ_PRIORITY_HIGH, 1, resourceList);
     std::cout<<LOG_BASE<<"Handle Returned: "<<handle<<std::endl;
+    E_ASSERT((handle > 0));
 
     std::this_thread::sleep_for(std::chrono::seconds(2));
 
@@ -458,6 +463,7 @@ URM_TEST(ResourceLogicalToPhysicalTranslationVerification3, {
 
     int64_t handle = tuneResources(5000, RequestPriority::REQ_PRIORITY_HIGH, 1, resourceList);
     std::cout<<LOG_BASE<<"Handle Returned: "<<handle<<std::endl;
+    E_ASSERT((handle > 0));
 
     std::this_thread::sleep_for(std::chrono::seconds(2));
 
@@ -510,6 +516,7 @@ URM_TEST(ResourceLogicalToPhysicalTranslationVerification4, {
 
     int64_t handle = tuneResources(-1, RequestPriority::REQ_PRIORITY_HIGH, 1, resourceList);
     std::cout<<LOG_BASE<<"Handle Returned: "<<handle<<std::endl;
+    E_ASSERT((handle > 0));
 
     std::this_thread::sleep_for(std::chrono::seconds(2));
 
@@ -548,6 +555,7 @@ URM_TEST(TestUnSupportedResourceTuningVerification, {
 
     int64_t handle = tuneResources(-1, RequestPriority::REQ_PRIORITY_HIGH, 1, resourceList);
     std::cout<<LOG_BASE<<"Handle Returned: "<<handle<<std::endl;
+    E_ASSERT((handle > 0));
 
     std::this_thread::sleep_for(std::chrono::seconds(2));
 
@@ -585,6 +593,7 @@ URM_TEST(ResourceOperationModeVerification, {
 
     int64_t handle = tuneResources(-1, RequestPriority::REQ_PRIORITY_HIGH, 1, resourceList);
     std::cout<<LOG_BASE<<"Handle Returned: "<<handle<<std::endl;
+    E_ASSERT((handle > 0));
 
     std::this_thread::sleep_for(std::chrono::seconds(2));
 
@@ -608,7 +617,6 @@ URM_TEST(ResourceOperationModeVerification, {
  * Cross-Reference id: [J]
  */
 URM_TEST(ClientPermissionsVerification, {
-
     std::string testResourceName = "/etc/urm/tests/nodes/target_test_resource1.txt";
     int32_t testResourceOriginalValue = 240;
 
@@ -627,6 +635,7 @@ URM_TEST(ClientPermissionsVerification, {
 
     int64_t handle = tuneResources(-1, RequestPriority::REQ_PRIORITY_HIGH, 1, resourceList);
     std::cout<<LOG_BASE<<"Handle Returned: "<<handle<<std::endl;
+    E_ASSERT((handle > 0));
 
     std::this_thread::sleep_for(std::chrono::seconds(2));
 
@@ -718,6 +727,7 @@ URM_TEST(SignalClientPermissionChecksVerification, {
             0, nullptr);
 
     std::cout<<LOG_BASE<<"Handle Returned: "<<handle<<std::endl;
+    E_ASSERT((handle > 0));
 
     std::this_thread::sleep_for(std::chrono::seconds(2));
 
@@ -757,6 +767,7 @@ URM_TEST(SignalOutOfBoundsResourceTuning, {
             0, nullptr);
 
     std::cout<<LOG_BASE<<"Handle Returned: "<<handle<<std::endl;
+    E_ASSERT((handle > 0));
 
     std::this_thread::sleep_for(std::chrono::seconds(2));
 
@@ -797,6 +808,7 @@ URM_TEST(SignalTargetCompatabilityVerificationChecks, {
         0, nullptr);
 
     std::cout<<LOG_BASE<<"Handle Returned: "<<handle<<std::endl;
+    E_ASSERT((handle > 0));
 
     std::this_thread::sleep_for(std::chrono::seconds(2));
 
@@ -833,6 +845,7 @@ URM_TEST(SignalNonSupportedSignalProvisioningVerification, {
         0, nullptr);
 
     std::cout<<LOG_BASE<<"Handle Returned: "<<handle<<std::endl;
+    E_ASSERT((handle > 0));
 
     std::this_thread::sleep_for(std::chrono::seconds(2));
 
@@ -1739,7 +1752,15 @@ URM_TEST(MultipleClientTIDsConcurrentRequests, {
     value = AuxRoutines::readFromFile(testResourceName);
     newValue = C_STOI(value);
     std::cout<<LOG_BASE<<testResourceName<<" Configured Value: "<<newValue<<std::endl;
-    E_ASSERT((newValue == 702));
+
+    try {
+        E_ASSERT((newValue == 702));
+
+    } catch(const std::exception& e) {
+        th.join();
+        delete[] resourceList2;
+        throw;
+    }
 
     std::this_thread::sleep_for(std::chrono::seconds(6));
 
@@ -1749,7 +1770,6 @@ URM_TEST(MultipleClientTIDsConcurrentRequests, {
     E_ASSERT((newValue == testResourceOriginalValue));
 
     th.join();
-
     delete[] resourceList2;
 })
 
