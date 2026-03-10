@@ -483,8 +483,9 @@ static void configureFocusedSlice() {
         {"cgroup.max.descendants", "10"},
     };
 
+    std::string cGroupPath = UrmSettings::focusedCgroup;
     for(size_t i = 0; i < sizeof(cgroupParam) / sizeof(cgroupParam[0]); i++) {
-        setCgroupParam(UrmSettings::focusedCgroup.c_str(), cgroupParam[i][0], cgroupParam[i][1]);
+        setCgroupParam(cGroupPath, cgroupParam[i][0], cgroupParam[i][1]);
     }
 }
 
@@ -597,7 +598,7 @@ static ErrCode init(void* arg) {
     // Initialize external features
     ExtFeaturesRegistry::getInstance()->initializeFeatures();
 
-    // Configure focused.slice parameters
+    // Configure urm.slice parameters
     configureFocusedSlice();
 
     // Create the Processor thread:
@@ -611,7 +612,7 @@ static ErrCode init(void* arg) {
     // Wait for the thread to initialize
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
 
-     // Start the Pulse Monitor and Garbage Collector Daemon Threads
+    // Start the Pulse Monitor and Garbage Collector Daemon Threads
     if(RC_IS_NOTOK(startPulseMonitorDaemon())) {
         TYPELOGD(PULSE_MONITOR_INIT_FAILED);
         return RC_MODULE_INIT_FAILURE;
