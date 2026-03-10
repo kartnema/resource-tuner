@@ -321,7 +321,7 @@ Logical IDs for cgroups. Configs of cgroups map in InitConfigs->CgroupsInfo sect
 |      1      |  "init.scope"    |
 |      2      |  "system.slice"  |
 |      3      |  "user.slice"    |
-|      4      |  "focused.slice" |
+|      4      |  "urm.slice" |
 
 **Mpam Groups Map**
 Logical IDs for MPAM groups. Configs of MPAM group map in InitConfigs->MpamGroupsInfo section
@@ -805,7 +805,7 @@ InitConfigs:
     - Name: "user.slice"
       Create: false
       ID: 3
-    - Name: "focused.slice/app.slice"
+    - Name: "urm.slice/focused.apps"
       Create: true
       ID: 4
 ```
