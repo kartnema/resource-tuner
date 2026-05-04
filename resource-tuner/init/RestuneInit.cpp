@@ -138,8 +138,7 @@ static ErrCode fetchMetaConfigs() {
 
     try {
         // Fetch target Name
-        UrmSettings::targetConfigs.targetName = "QCS9075";
-        // AuxRoutines::getMachineName();
+        UrmSettings::targetConfigs.targetName = AuxRoutines::getMachineName();
         AuxRoutines::toLowerCase(UrmSettings::targetConfigs.targetName);
         TYPELOGV(NOTIFY_CURRENT_TARGET_NAME, UrmSettings::targetConfigs.targetName.c_str());
 
