@@ -288,9 +288,7 @@ int8_t MinLRUCache::isPresent(int64_t data) {
     return (this->mDataSet.find(data) != this->mDataSet.end());
 }
 
-std::string AuxRoutines::toLowerCase(const std::string& str) {
-    std::string result = str;
-    std::transform(result.begin(), result.end(), result.begin(),
+void AuxRoutines::toLowerCase(std::string& str) {
+    std::transform(str.begin(), str.end(), str.begin(),
                    [](unsigned char c) { return std::tolower(c); });
-    return result;
 }
