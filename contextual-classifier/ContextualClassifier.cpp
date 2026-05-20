@@ -24,7 +24,7 @@
 #include "ContextualClassifier.h"
 #include "ClientGarbageCollector.h"
 
-#define CLASSIFIER_TAG "CONTEXTUAL_CLASSIFIER"
+#define FILE_TAG "CONTEXTUAL_CLASSIFIER"
 #define CLASSIFIER_CONFIGS_DIR "/etc/urm/classifier/"
 
 static const std::string FT_MODEL_PATH =
@@ -40,22 +40,30 @@ static const std::string ALLOW_LIST_PATH =
 #include "FeaturePruner.h"
 
 // MLInference
-Inference *ContextualClassifier::GetInferenceObject() {
+Inference *ContextualClassifier::getInferenceObject() {
     return (new MLInference(FT_MODEL_PATH));
 }
 #else
 
 // Generic / Stub Inference Object
-Inference *ContextualClassifier::GetInferenceObject() {
+Inference *ContextualClassifier::getInferenceObject() {
     return (new Inference(FT_MODEL_PATH));
 }
 #endif
 
+typedef struct {
+    pid_t mPid;
+    pid_t mTgid;
+} AppLaunchInfo;
+
 static ContextualClassifier *gClassifier = nullptr;
 static const int32_t pendingQueueControlSize = 30;
+static const int32_t classifierPoolSize = 3;
 
 ContextualClassifier::ContextualClassifier() {
-    this->mInference = GetInferenceObject();
+    this->mCurInvalidateTag = 0;
+    this->mInference = this->getInferenceObject();
+    this->mClassifierPool = new ThreadPool(classifierPoolSize, classifierPoolSize);
 }
 
 void ContextualClassifier::untuneRequestHelper(int64_t handle) {
@@ -108,7 +116,6 @@ static Request* fillSignal(uint32_t sigId,
 
         // Check if a Signal with the given ID exists in the Registry
         SignalInfo* signalInfo = sigRegistry->getSignalConfigById(sigId, sigType);
-
         if(signalInfo == nullptr) return nullptr;
 
         Request* request = MPLACED(Request);
@@ -191,6 +198,7 @@ ErrCode ContextualClassifier::Terminate() {
 
     std::unique_lock<std::mutex> lock(this->mQueueMutex);
     this->mNeedExit = true;
+
     // Clear any pending PIDs so the worker doesn't see stale entries
     while(!this->mPendingEv.empty()) {
         this->mPendingEv.pop();
@@ -210,9 +218,12 @@ ErrCode ContextualClassifier::Terminate() {
     return RC_SUCCESS;
 }
 
-void ContextualClassifier::classifyAndProvision(pid_t pid) {
-    pid_t pid = carryBlock->mPid;
-    pid_t tgid = carryBlock->mTgid;
+void ContextualClassifier::classifyAndProvision(void* context) {
+    if(context == nullptr) return;
+    AppLaunchInfo* appLaunchInfo = static_cast<AppLaunchInfo*>(context);
+
+    pid_t pid = appLaunchInfo->mPid;
+    pid_t tgid = appLaunchInfo->mTgid;
 
     if(AuxRoutines::fetchComm(pid) != 0) {
         return;
@@ -236,8 +247,8 @@ void ContextualClassifier::classifyAndProvision(pid_t pid) {
     }
 
     // Step 3: Figure out workload type
-    int32_t contextType =
-        this->ClassifyProcess(pid, tgid, comm, ctxDetails);
+    TYPELOGV(NOTIFY_CLASSIFICATION_START, processPid, comm.c_str());
+    int32_t contextType = mInference->Classify(processPid);
     if(contextType == CC_IGNORE) {
         // Ignore and wait for next event
         return;
@@ -262,11 +273,6 @@ void ContextualClassifier::classifyAndProvision(pid_t pid) {
             .mArgs = args,
         };
         postCb((void*)&postProcessData);
-
-        sigId = postProcessData.mSigId;
-        sigType = postProcessData.mSigType;
-        numArgs = postProcessData.mNumArgs;
-        args = postProcessData.mArgs;
     }
 
     // Step 5: Perform the needed configurations
@@ -286,6 +292,9 @@ void ContextualClassifier::classifyAndProvision(pid_t pid) {
             }
         }
     }
+
+    // Clean Up
+    FreeBlock<AppLaunchInfo>(appLaunchInfo);
 }
 
 void ContextualClassifier::ClassifierMain() {
@@ -310,27 +319,27 @@ void ContextualClassifier::ClassifierMain() {
 
         if(ev.type == CC_APP_OPEN) {
             std::string comm;
-            if(ev.pid != -1) {
-                // Step 1: Untune any Configurations from the last proc-invocation
-                if(UrmSettings::metaConfigs.mAcceptMode & ACCEPT_AND_REPLACE) {
-                    for(int64_t handle: this->mCurrRestuneHandles) {
-                        if(handle > 0) {
-                            this->untuneRequestHelper(handle);
-                        }
-                    }
-                    this->mCurrRestuneHandles.clear();
+            if(ev.pid == -1) {
+                continue;
+            }
 
-                } else if(UrmSettings::metaConfigs.mAcceptMode & ACCEPT_AND_PERSIST) {
-                    // Tie to Signal
-                    // Time to App Kill
+            // Untune any Configurations from the last proc-invocation
+            if(UrmSettings::metaConfigs.mAcceptMode & ACCEPT_AND_REPLACE) {
+                ClientGarbageCollector::getInstance()->batchHandleCleanup(this->mCurInvalidateTag);
+                this->mCurInvalidateTag++;
+            }
+
+            try {
+                AppLaunchInfo* appLaunchInfo = MPLACED(AppLaunchInfo);
+                appLaunchInfo->mPid = ev.pid;
+                appLaunchInfo->mTgid = ev.tgid;
+
+                if(!this->mClassifierPool->enqueueTask(classifyAndProvision, appLaunchInfo)) {
+                    TYPELOGD(THREAD_POOL_ENQUEUE_FAILURE);
+                    FreeBlock<AppLaunchInfo>(appLaunchInfo);
                 }
-
-                carryBlock->mPid = ev.pid;
-                carryBlock->mTgid = ev.tgid;
-
-                if(!this->mRequestsThreadPool->enqueueTask(classifyAndProvision, carryBlock)) {
-                    LOGE("URM_SERVER_ENDPOINT", "Failed to enqueue the Request to the Thread Pool");
-                }
+            } catch(const std::exception& e) {
+                continue;
             }
         } else if(ev.type == CC_APP_CLOSE) {
             // No Action Needed, Pulse Monitor to take care of cleanup
@@ -346,11 +355,7 @@ int32_t ContextualClassifier::HandleProcEv() {
 
     while(!this->mNeedExit) {
         ProcEvent ev{};
-        rc = mNetLinkComm.recvEvent(ev);
-        if(rc == CC_IGNORE) {
-            continue;
-        }
-        if(rc == -1) {
+        if((rc = mNetLinkComm.recvEvent(ev)) == -1) {
             if(errno == EINTR) {
                 continue;
             }
@@ -361,6 +366,10 @@ int32_t ContextualClassifier::HandleProcEv() {
 
             // Error would have already been logged by this point.
             return -1;
+        }
+
+        if(rc == CC_IGNORE) {
+            continue;
         }
 
         // Process still up?
@@ -406,31 +415,6 @@ int32_t ContextualClassifier::HandleProcEv() {
     return 0;
 }
 
-int32_t ContextualClassifier::ClassifyProcess(pid_t processPid,
-                                              pid_t processTgid,
-                                              const std::string &comm,
-                                              uint32_t &ctxDetails) {
-    (void)processTgid;
-    (void)ctxDetails;
-
-    CC_TYPE context = CC_APP;
-
-    // Check if the process is still alive
-    if(!AuxRoutines::fileExists(COMM(processPid))) {
-        LOGD(CLASSIFIER_TAG,
-             "Skipping inference, process is dead: " + comm);
-        return CC_IGNORE;
-    }
-
-    LOGD(CLASSIFIER_TAG,
-         "Starting classification for PID: "
-            + std::to_string(processPid)
-            + ", " + comm
-        );
-    context = mInference->Classify(processPid);
-    return context;
-}
-
 uint32_t ContextualClassifier::GetSignalIDForWorkload(int32_t contextType) {
     switch(contextType) {
         case CC_MULTIMEDIA:
@@ -458,8 +442,7 @@ void ContextualClassifier::LoadIgnoredProcesses() {
 
     std::ifstream file(filePath);
     if(!file.is_open()) {
-        LOGW(CLASSIFIER_TAG,
-             "Could not open process filter file: " + filePath);
+        TYPELOGV(FILE_OPEN_FAIL, filePath.c_str(), strerror(errno));
         return;
     }
 
@@ -484,7 +467,6 @@ void ContextualClassifier::LoadIgnoredProcesses() {
             }
         }
     }
-    LOGI(CLASSIFIER_TAG, "Loaded filter processes");
 }
 
 int8_t ContextualClassifier::shouldProcBeIgnored(int32_t evType, pid_t pid) {
@@ -563,12 +545,16 @@ void ContextualClassifier::MoveAppThreadsToCGroup(pid_t incomingPID,
         }
 
     } catch(const std::exception& e) {
-        LOGE(CLASSIFIER_TAG,
-             "Failed to move per-app threads to cgroup, Error: " + std::string(e.what()));
+        TYPELOGV(MOV_TASK_CGRP_FAILURE, std::string(e.what()));
     }
 }
 
 ContextualClassifier::~ContextualClassifier() {
+    if(this->mClassifierPool != nullptr) {
+        delete this->mClassifierPool;
+        this->mClassifierPool = nullptr;
+    }
+
     this->Terminate();
     if(this->mInference) {
 		delete this->mInference;
