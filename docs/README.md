@@ -784,7 +784,9 @@ URM utilises YAML files for configuration. This includes the resources, signal c
 
 ### 4.3.1. Initialization Configs
 
-Initialisation configs are mentioned in InitConfig.yaml file. Common initialization configs are defined in /etc/urm/common/InitConfig.yaml. This config enables URM to setup the required settings at the time of initialisation before any request processing happens. This also defines logical layer for clusters, cgroup ids, mpam partitions, etc for configs and apps to use, which promotes portability across targets and segments.
+Initialisation configs are mentioned in InitConfig.yaml file. Common initialization configs are defined in /etc/urm/common/InitConfig.yaml.
+
+This config enables URM to setup the required settings at the time of initialisation before any request processing happens. This also defines logical layer for clusters, cgroup ids, mpam partitions, etc for configs and apps to use, which promotes portability across targets and segments.
 
 ```yaml
 InitConfigs:
@@ -823,7 +825,7 @@ InitConfigs:
 
 **Other settings controlled through InitConfig**
 Init Config supports other parameters to customize system behaviour, these include:
-- ***AffineIRQ / AffineIRQToCluster***: Affines one or all IRQs to a particular set of cores or to an entire cluster    respectively.
+- ***AffineIRQ / AffineIRQToCluster*** - Affines one or all IRQs to a particular set of cores or to an entire cluster    respectively.
 
   For example, the following config affines IRQ to cores 0-6 (-1 represents all available IRQs)
 
@@ -844,7 +846,7 @@ Init Config supports other parameters to customize system behaviour, these inclu
       - AffineIRQToCluster: [373, 1]
   ```
 
-- ***LogLevel***: Controls the level of logging, configures journald conf as well as printk. To minimize logging, set LogLevel to "minimal" as follows:
+- ***LogLevel*** - Controls the level of logging, configures journald conf as well as printk. To minimize logging, set LogLevel to "minimal" as follows:
 ```yaml
 LogLevel: ["minimal"]
 ```
@@ -858,7 +860,7 @@ The "minimal" log profile is defined as:
   {"MaxLevelSyslog": "notice"},
   {"MaxLevelKMsg": "notice"},
   {"MaxLevelConsole": "notice"},
-  {"ForwardToSyslog": "no"}
+  {"ForwardToSyslog": "no"},
   {"/proc/sys/kernel/printk": "3 4 1 3"}, // kernel printk configuration
 }
 ```
