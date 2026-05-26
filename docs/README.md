@@ -784,7 +784,7 @@ URM utilises YAML files for configuration. This includes the resources, signal c
 
 ### 4.3.1. Initialization Configs
 
-Initialisation configs are mentioned in InitConfig.yaml file. This config enables URM to setup the required settings at the time of initialisation before any request processing happens. This also defines logical layer for clusters, cgroup ids, mpam partitions, etc for configs and apps to use, which promotes portability across targets and segments.
+Initialisation configs are mentioned in InitConfig.yaml file. Common initialization configs are defined in /etc/urm/common/InitConfig.yaml. This config enables URM to setup the required settings at the time of initialisation before any request processing happens. This also defines logical layer for clusters, cgroup ids, mpam partitions, etc for configs and apps to use, which promotes portability across targets and segments.
 
 ```yaml
 InitConfigs:
@@ -821,7 +821,49 @@ InitConfigs:
 | `Name`       | `string` (Optional) | Descriptive name for the CGroup           | `Empty String` |
 ```
 
-Common initialization configs are defined in /etc/urm/common/InitConfig.yaml
+**Other settings controlled through InitConfig**
+Init Config supports other parameters to customize system behaviour, these include:
+- ***AffineIRQ / AffineIRQToCluster***: Affines one or all IRQs to a particular set of cores or to an entire cluster    respectively.
+
+  For example, the following config affines IRQ to cores 0-6 (-1 represents all available IRQs)
+
+  ```yaml
+    - IRQConfigs:
+      - AffineIRQ: [-1, 1, 2, 3, 4, 5, 6]
+  ```
+
+  To affine all IRQs to a certain cluster, say the one with logical ID 0 (cluster with lowest capacity)
+  ```yaml
+    - IRQConfigs:
+      - AffineIRQToCluster: [-1, 0]
+  ```
+
+  On the other, if you need to affine a certain IRQ, then use that IRQLine as the first parameter in the list rather than -1. For example, the following lines affines IRQ: 373 to cluster with logical ID 1.
+  ```yaml
+    - IRQConfigs:
+      - AffineIRQToCluster: [373, 1]
+  ```
+
+- ***LogLevel***: Controls the level of logging, configures journald conf as well as printk. To minimize logging, set LogLevel to "minimal" as follows:
+```yaml
+LogLevel: ["minimal"]
+```
+
+The "minimal" log profile is defined as:
+```json
+{
+  {"RuntimeMaxUse": "20M"},
+  {"RuntimeMaxFileSize": "128K"},
+  {"MaxLevelStore": "notice"},
+  {"MaxLevelSyslog": "notice"},
+  {"MaxLevelKMsg": "notice"},
+  {"MaxLevelConsole": "notice"},
+  {"ForwardToSyslog": "no"}
+  {"/proc/sys/kernel/printk": "3 4 1 3"}, // kernel printk configuration
+}
+```
+
+To reset the logging to system-default, modify LogLevel to "default" and restart URM (This is required since initialization configs are only actuated during URM service bringup).
 
 ### 4.3.2. Resource Configs
 
@@ -1199,7 +1241,7 @@ InitConfigs:
     - Type: L3
       NumCacheBlocks: 1
       PriorityAware: 1
-```  
+```
 
 Fields Description for Mpam Group Config
 | Field     | Type                | Description                | Default Value  |
