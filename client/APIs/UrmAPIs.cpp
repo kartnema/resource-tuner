@@ -14,16 +14,16 @@
 #define CONN_SEND_FAIL "Failed to send Request to Server"
 #define CONN_INIT_FAIL "Failed to initialize Connection to resource-tuner Server"
 
-class ClientInfo {
+class ClientMgr {
 public:
     int8_t isUrmCli;
     std::string mClientComm;
     std::shared_ptr<ClientEndpoint> conn;
 
-    ClientInfo() {
+    ClientMgr() {
         this->isUrmCli = false;
         this->mClientComm = "";
-        if(AuxRoutines::fetchComm(getpid(), this->mClientComm) != 0) {
+        if(AuxRoutines::fetchComm(getpid(), this->mClientComm) == 0) {
             if(this->mClientComm == "urmCli") {
                 this->isUrmCli = true;
             }
@@ -49,7 +49,7 @@ static std::mutex apiLock;
 // as a byte-buffer of size REQ_BUFFER_SIZE.
 static const int32_t maxResPerReq = 20;
 
-static ClientInfo urmClientInfo;
+static ClientMgr urmClientInfo;
 
 static int8_t sendMsgHelper(char* buf) {
     if(urmClientInfo.conn == nullptr || RC_IS_NOTOK(urmClientInfo.conn->initiateConnection())) {
