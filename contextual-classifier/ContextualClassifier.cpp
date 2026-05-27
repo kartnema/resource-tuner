@@ -491,7 +491,6 @@ void ContextualClassifier::LoadIgnoredProcesses() {
 }
 
 int8_t ContextualClassifier::shouldProcBeIgnored(int32_t evType, pid_t pid) {
-    // For context close, see if pid is in ignored list and remove it.
     if(evType == CC_APP_CLOSE) {
         return false;
     }

@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: BSD-3-Clause-Clear
 
 TestConfigs:
-  - TargetName: ["SA8775P", "QCS9100"]
+  - TargetName: ["SA8775P", "QCS9100", "QCS9075"]
     # Lemans
     # Total Core Count - 8
     # Total cluster count - 2

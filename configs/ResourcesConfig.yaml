@@ -338,16 +338,6 @@ ResourceConfigs:
     ApplyType: "cgroup"
 
   - ResType: "0x09"
-    ResID: "0x0010"
-    Name: "RES_CGRP_BFQ_IO_WEIGHT"
-    Path: "/sys/fs/cgroup/%s/io.bfq.weight"
-    Supported: true
-    Permissions: "system"
-    Modes: ["display_on"]
-    Policy: "instant_apply"
-    ApplyType: "cgroup"
-
-  - ResType: "0x09"
     ResID: "0x0011"
     Name: "RES_CGRP_CPU_LATENCY"
     Path: "/sys/fs/cgroup/%s/cpu.weight.nice"
