@@ -171,3 +171,12 @@ SignalConfigs:
     Timeout: 10000
     Resources:
       - {ResCode: "0x00ff0004", ResInfo: "0x00000000", Values: [231]}
+
+  - SigId: "0x000c"
+    Category: "0x0d"
+    Name: TEST_SIGNAL_10
+    Enable: true
+    Permissions: ["third_party", "system"]
+    Timeout: 10000
+    Resources:
+      - {ResCode: "0x00ff0004", ResInfo: "0x00000000", Values: [231]}

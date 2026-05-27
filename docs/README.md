@@ -300,7 +300,7 @@ The above mentioned list of enums are available in the interface file "UrmPlatfo
 
 ## 4.1. Platform Abstraction Layer
 
-This section defines logical layer to improve code and config portability across different targets and segments. 
+This section defines logical layer to improve code and config portability across different targets and segments.
 
 Some logical maps are present in init config, these can not be changed.
 
@@ -338,7 +338,7 @@ Logical IDs for MPAM groups. Configs of MPAM group map in InitConfigs->MpamGroup
 |-------------|-------|-------------|-------|
 | Cpu Lpm     |   0   | Memory Qos  |  7    |
 | Cache Mgmt  |   1   | Mpam Qos    |  8    |
-| Cpu Sched   |   3   | Cgroup Ops  |  9    | 
+| Cpu Sched   |   3   | Cgroup Ops  |  9    |
 | Cpu Freq    |   4   | Storage IO  |  10   |
 | Gpu Opp     |   5   | Custom      |  128+ |
 | Npu         |   6   |             |       |
@@ -1311,7 +1311,7 @@ Properties config yaml file can be given in one of the below ways
 <div style="page-break-after: always;"></div>
 
 ### 6.2.4. Signal Configs
-Custom signal configs can be added to signals config yaml. New signal configs can be defined. For example "URM_SIG_VIDEO_DECODE" is defined in the example below, you can use custom signal category, Id, and resources. 
+Custom signal configs can be added to signals config yaml. New signal configs can be defined. For example "URM_SIG_VIDEO_DECODE" is defined in the example below, you can use custom signal category, Id, and resources.
 
 ```yaml
 SignalConfigs:
@@ -1636,7 +1636,19 @@ However when multiplexed with client-level permissions, effetive request level p
 - Third Party High (or Regular High) [TPH]
 - Third Party Low (or Regular Low) [TPL]
 
+Client-Level Permissions are derived from the UID (effective user-id) value for the process. Where UID == 0, corresponds to the root user and hence the client is treated as a system client.
+
 Requests with a higher priority will always be prioritized, over another request with a lower priority. Note, the request priorities are related to the client permissions. A client with system permission is allowed to acquire any priority level it wants, however a client with third party permissions can only acquire either third party high (TPH) or third party low (TPL) level of priorities. If a client with third party permissions tries to acquire a System High or System Low level of priority, then the request will not be honoured.
+
+To set the Reuqest Priority, modify the properties parameter to the tuneResources API as follows:
+```cpp
+  int32_t properties = 0;
+  properties = SET_REQUEST_PRIORITY(properties, REQ_PRIORITY_HIGH);
+  // OR: properties = SET_REQUEST_PRIORITY(properties, REQ_PRIORITY_LOW);
+
+  // ...
+  // Call to tuneResources
+```
 
 ## 7.6. Pulse Monitor: Detection of Dead Clients and Subsequent Cleanup
 
@@ -1685,6 +1697,21 @@ URM reads machine topology and prepares logical to physical table dynamically in
 ## 7.10. Display-Aware Operational Modes
 
 The system's operational modes are influenced by the state of the device's display. To conserve power, certain system resources are optimized only when the display is active. However, for critical components that require consistent performance—such as during background processing or time-sensitive tasks, resource tuning can still be applied even when the display is off, including during low-power states like doze mode. This ensures that essential operations maintain responsiveness without compromising overall energy efficiency.
+
+To mark a request as eligible for background processing under display_off / doze operating modes, modify the
+properties parameter to the tuneResources API as follows:
+
+```cpp
+  int32_t properties = 0;
+  properties = ADD_ALLOWED_MODE(properties, MODE_RESUME); // Optional, since MODE_RESUME is enabled by default
+  properties = ADD_ALLOWED_MODE(properties, MODE_SUSPEND); // Corresponds to display_off
+  properties = ADD_ALLOWED_MODE(properties, MODE_DOZE); // Corresponds to doze
+
+  // Pass to tuneResources
+  int64_t handle = tuneResources(<duration>, properties, <numRes>, <resourceList>);
+```
+
+The properties param holds a bitmask, specifying the modes in which the request is eligible for processing.
 
 ## 7.11. Crash Recovery
 
