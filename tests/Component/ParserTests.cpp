@@ -699,15 +699,34 @@ URM_TEST(AppConfigParserTests, {
     E_ASSERT((parsingStatus == RC_SUCCESS));
 
     {
-        AppConfig* appConfigInfo = AppConfigs::getInstance()->getAppConfig("gst-launch-");
+        AppConfig* appConfigInfo = AppConfigs::getInstance()->getAppConfig("chrome");
+        E_ASSERT((appConfigInfo != nullptr));
 
-        E_ASSERT((appConfigInfo->mAppName == "gst-launch-"));
+        E_ASSERT((appConfigInfo->mAppName == "chrome"));
         E_ASSERT((appConfigInfo->mNumThreads == 2));
 
         E_ASSERT((appConfigInfo->mThreadNameList != nullptr));
         E_ASSERT((appConfigInfo->mCGroupIds != nullptr));
 
-        E_ASSERT((appConfigInfo->mNumSignals == 0));
-        E_ASSERT((appConfigInfo->mSignalCodes == nullptr));
+        E_ASSERT((appConfigInfo->mNumSignals == 1));
+        E_ASSERT((appConfigInfo->mSignalCodes != nullptr));
+
+        E_ASSERT((appConfigInfo->mSignalCodes[0] == 0x80034aab));
+    }
+
+    {
+        AppConfig* appConfigInfo = AppConfigs::getInstance()->getAppConfig("vi");
+        E_ASSERT((appConfigInfo != nullptr));
+
+        E_ASSERT((appConfigInfo->mAppName == "vi"));
+        E_ASSERT((appConfigInfo->mNumThreads == 0));
+
+        E_ASSERT((appConfigInfo->mThreadNameList == nullptr));
+        E_ASSERT((appConfigInfo->mCGroupIds == nullptr));
+
+        E_ASSERT((appConfigInfo->mNumSignals == 1));
+        E_ASSERT((appConfigInfo->mSignalCodes != nullptr));
+
+        E_ASSERT((appConfigInfo->mSignalCodes[0] == 0x000d000c));
     }
 })
