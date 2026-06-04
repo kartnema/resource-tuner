@@ -496,7 +496,7 @@ int8_t ContextualClassifier::shouldProcBeIgnored(int32_t evType, pid_t pid) {
     }
 
     std::string procName = "";
-    if(!AuxRoutines::getProcName(pid, procName)) {
+    if(AuxRoutines::fetchComm(pid, procName) != 0) {
         return true;
     }
 
