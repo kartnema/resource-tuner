@@ -87,6 +87,14 @@ enum TranslationUnit {
     U_GHz = 1000 * 1000 * 1000,
 };
 
+/**
+ * @enum ClassifierOpMode
+ */
+enum ClassifierOpMode {
+    ACCEPT_AND_PERSIST = 0x01,
+    ACCEPT_AND_REPLACE = 0x02,
+};
+
 typedef struct {
     int8_t mModuleID;
     int8_t mRequestType;

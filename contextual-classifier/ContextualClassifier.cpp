@@ -266,9 +266,11 @@ void ContextualClassifier::ClassifierMain() {
 
                 // Step 2:
                 // Untune any Configurations from the last proc-invocation
-                for(int64_t handle: this->mCurrRestuneHandles) {
-                    if(handle > 0) {
-                        this->untuneRequestHelper(handle);
+                if(UrmSettings::metaConfigs.mAcceptMode & ACCEPT_AND_REPLACE) {
+                    for(int64_t handle: this->mCurrRestuneHandles) {
+                        if(handle > 0) {
+                            this->untuneRequestHelper(handle);
+                        }
                     }
                 }
                 this->mCurrRestuneHandles.clear();
