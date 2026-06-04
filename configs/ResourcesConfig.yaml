@@ -142,6 +142,16 @@ ResourceConfigs:
     Policy: "lower_is_better"
     ApplyType: "cluster"
 
+  - ResType: "0x04"
+    ResID: "0x0003"
+    Name: "RES_CPU_ONLINE_PER_CORE"
+    Path: "/sys/devices/system/cpu/cpu%d/online"
+    Supported: true
+    Permissions: "third_party"
+    Modes: ["display_on", "doze"]
+    Policy: "instant_apply"
+    ApplyType: "core"
+
   - ResType: "0x05"
     ResID: "0x0000"
     Name: "RES_DEVFREQ_GPU_MAX"
