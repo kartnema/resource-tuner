@@ -175,6 +175,9 @@ static ErrCode fetchMetaConfigs() {
         submitPropGetRequest(URM_MAX_PLUGIN_COUNT, resultBuffer, "3");
         UrmSettings::metaConfigs.mPluginCount = (uint32_t)std::stol(resultBuffer);
 
+        // Start classifier in multi-app mode
+        UrmSettings::metaConfigs.mAcceptMode = ACCEPT_AND_PERSIST;
+
         if(UrmSettings::metaConfigs.mDesiredThreadCount < 1) {
             UrmSettings::metaConfigs.mDesiredThreadCount = 5; // Reset to default
         }
