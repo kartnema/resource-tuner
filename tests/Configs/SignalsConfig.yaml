@@ -178,5 +178,23 @@ SignalConfigs:
     Enable: true
     Permissions: ["third_party", "system"]
     Timeout: 10000
+    ExtraAttrs:
+      - Fps: 60
+      - Height: 1080
+      - Width: 1920
     Resources:
       - {ResCode: "0x00ff0004", ResInfo: "0x00000000", Values: [231]}
+
+  - SigId: "0x000d"
+    Category: "0x0d"
+    Name: TEST_SIGNAL_11
+    Enable: true
+    Permissions: ["third_party", "system"]
+    Timeout: 8000
+    ExtraAttrs:
+      - Fps: 30
+      - Height: 720
+      - Width: 1280
+    Resources:
+      - {ResCode: "0x00ff0004", ResInfo: "0x00000000", Values: [115]}
+      - {ResCode: "0x00ff0000", ResInfo: "0x00000000", Values: [512]}

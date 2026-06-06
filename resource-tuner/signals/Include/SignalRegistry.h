@@ -10,11 +10,22 @@
 #include <unordered_set>
 
 #include "Utils.h"
-#include "UrmPlatformAL.h"
 #include "Logger.h"
 #include "Resource.h"
+#include "DLManager.h"
 #include "MemoryPool.h"
 #include "UrmSettings.h"
+#include "UrmPlatformAL.h"
+
+/**
+ * @brief Named indices into SignalInfo::mExtraAttrs.
+ */
+enum SignalExtraAttrIndex {
+    SIGNAL_EXTRA_ATTR_FPS    = 0, //!< Frames per second
+    SIGNAL_EXTRA_ATTR_HEIGHT = 1, //!< Frame height in pixels
+    SIGNAL_EXTRA_ATTR_WIDTH  = 2, //!< Frame width in pixels
+    SIGNAL_EXTRA_ATTRS_COUNT = 3  //!< Total number of extra attributes (must remain last)
+};
 
 /**
  * @struct SignalInfo
@@ -57,11 +68,33 @@ typedef struct {
     std::vector<std::string>* mDerivatives;
 
     /**
+     * @brief Array of optional extra attributes associated with the Signal.
+     *        Each index corresponds to a named attribute (see SIGNAL_EXTRA_ATTR_* constants).
+     *        A value of 0 at any index indicates that attribute is not set.
+     *        Index layout:
+     *          [SIGNAL_EXTRA_ATTR_FPS]    = frames per second
+     *          [SIGNAL_EXTRA_ATTR_HEIGHT] = frame height in pixels
+     *          [SIGNAL_EXTRA_ATTR_WIDTH]  = frame width in pixels
+     */
+    uint32_t mExtraAttrs[SIGNAL_EXTRA_ATTRS_COUNT];
+
+    /**
+     * @brief Indicates whether any ExtraAttrs were present in the Signal config.
+     *        Set to true if an ExtraAttrs block was parsed; false otherwise.
+     */
+    int8_t mHasExtraAttrs;
+
+    /**
      * @brief List of Actual Resource which will be Provisioned and the
      *        Values to be configured for the Resources.
      */
     std::vector<Resource*>* mSignalResources;
 } SignalInfo;
+
+typedef struct {
+    SignalInfo* signalInfo;
+    DLManager* signalListMgr;
+} SignalConf;
 
 /**
  * @brief SignalRegistry
@@ -73,10 +106,11 @@ private:
     static std::shared_ptr<SignalRegistry> signalRegistryInstance;
 
     int32_t mTotalSignals;
-    std::vector<SignalInfo*> mSignalsConfigs;
-    std::unordered_map<uint64_t, int32_t> mSILMap;
+    std::unordered_map<uint64_t, SignalConf> mSignalsConfigs;
 
     SignalRegistry();
+
+    SignalInfo* findBestExtraAttrsMatch(DLManager* dlm, const uint32_t* extraAttrs) const;
 
 public:
     ~SignalRegistry();
@@ -91,20 +125,30 @@ public:
 
     int8_t isSignalConfigMalformed(SignalInfo* sConf);
 
-    std::vector<SignalInfo*> getSignalConfigs();
+   /**
+    * @brief Get the SignalInfo object corresponding to the given Signal code.
+    * @param sigID      A 64-bit signal code.
+    * @param extraAttrs Optional caller-provided array of size SIGNAL_EXTRA_ATTRS_COUNT,
+    *                   indexed via SignalExtraAttrIndex, carrying Fps/Height/Width values.
+    *                   Pass nullptr (default) for signals without extra attributes.
+    *                   A non-null pointer selects the extra-attrs storage path.
+    * @return SignalInfo* or nullptr if not found.
+    */
+    SignalInfo* getSignalConfigById(uint64_t sigID, const uint32_t* extraAttrs = nullptr);
 
    /**
-    * @brief Get the SignalInfo object corresponding to the given Resource ID.
-    * @param resourceId An unsigned 32 bit integer, representing the Signal ID.
-    * @return SignalInfo*:\n
-    *          - A pointer to the SignalInfo object
-    *          - nullptr, if no SignalInfo object with the given Signal ID exists.
+    * @brief Get the SignalInfo object corresponding to the given Signal ID and type.
+    * @param sigCode    An unsigned 32-bit signal code.
+    * @param sigType    An unsigned 32-bit signal sub-type.
+    * @param extraAttrs Optional caller-provided array of size SIGNAL_EXTRA_ATTRS_COUNT,
+    *                   indexed via SignalExtraAttrIndex, carrying Fps/Height/Width values.
+    *                   Pass nullptr (default) for signals without extra attributes.
+    *                   A non-null pointer selects the extra-attrs storage path.
+    * @return SignalInfo* or nullptr if not found.
     */
-    SignalInfo* getSignalConfigById(uint64_t sigID);
-    SignalInfo* getSignalConfigById(uint32_t sigCode, uint32_t sigType);
+    SignalInfo* getSignalConfigById(uint32_t sigCode, uint32_t sigType, const uint32_t* extraAttrs = nullptr);
 
     int32_t getSignalsConfigCount();
-    int32_t getSignalTableIndex(uint64_t signalID);
 
     static std::shared_ptr<SignalRegistry> getInstance() {
         if(signalRegistryInstance == nullptr) {
@@ -141,6 +185,10 @@ public:
     ErrCode addPermission(const std::string& permissionString);
     ErrCode addDerivative(const std::string& derivative);
     ErrCode addResource(Resource* resource);
+    ErrCode setFps(const std::string& fpsString);
+    ErrCode setHeight(const std::string& heightString);
+    ErrCode setWidth(const std::string& widthString);
+    void markExtraAttrsPresent();
 
     SignalInfo* build();
 };
@@ -159,5 +207,7 @@ public:
 
     Resource* build();
 };
+
+typedef Iterable<SignalInfo*> SigIterable;
 
 #endif

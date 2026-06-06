@@ -120,9 +120,13 @@ static int8_t isKey(const std::string& keyName) {
         SIGNAL_CONFIGS_ELEM_TARGETS_DISABLED,
         SIGNAL_CONFIGS_ELEM_RESOURCES,
         SIGNAL_CONFIGS_ELEM_DERIVATIVES,
+        SIGNAL_CONFIGS_ELEM_EXTRA_ATTRS,
         SIGNAL_CONFIGS_ELEM_RESOURCE_CODE,
         SIGNAL_CONFIGS_ELEM_RESOURCE_RESINFO,
         SIGNAL_CONFIGS_ELEM_RESOURCE_VALUES,
+        SIGNAL_CONFIGS_ELEM_FPS,
+        SIGNAL_CONFIGS_ELEM_HEIGHT,
+        SIGNAL_CONFIGS_ELEM_WIDTH,
         EXT_FEATURE_CONFIGS_ROOT,
         EXT_FEATURE_CONFIGS_ELEM_ID,
         EXT_FEATURE_CONFIGS_ELEM_LIB,
@@ -167,6 +171,7 @@ static int8_t isKeyTypeList(const std::string& keyName) {
     if(keyName == SIGNAL_CONFIGS_ELEM_PERMISSIONS) return true;
     if(keyName == SIGNAL_CONFIGS_ELEM_DERIVATIVES) return true;
     if(keyName == SIGNAL_CONFIGS_ELEM_RESOURCES) return true;
+    if(keyName == SIGNAL_CONFIGS_ELEM_EXTRA_ATTRS) return true;
     if(keyName == SIGNAL_CONFIGS_ELEM_RESOURCE_VALUES) return true;
 
     if(keyName == EXT_FEATURE_CONFIGS_ELEM_SUBSCRIBER_LIST) return true;
@@ -678,6 +683,7 @@ ErrCode RestuneParser::parseSignalConfigYamlNode(const std::string& filePath) {
     int8_t docMarker = false;
     int8_t parsingSignal = false;
     int8_t inResourcesMap = false;
+    int8_t parsingExtraAttr = false;
 
     std::string value;
     std::string topKey;
@@ -716,7 +722,13 @@ ErrCode RestuneParser::parseSignalConfigYamlNode(const std::string& filePath) {
                             return RC_YAML_PARSING_ERROR;
                         }
 
-                    } else {
+                    } else if(topKey == SIGNAL_CONFIGS_ELEM_EXTRA_ATTRS) {
+                        parsingExtraAttr = true;
+                        if(signalInfoBuilder != nullptr) {
+                            signalInfoBuilder->markExtraAttrsPresent();
+                        }
+
+                    } else if(topKey == SIGNAL_CONFIGS_ROOT) {
                         parsingSignal = true;
                         signalInfoBuilder = new(std::nothrow) SignalInfoBuilder;
                         if(signalInfoBuilder == nullptr) {
@@ -735,6 +747,9 @@ ErrCode RestuneParser::parseSignalConfigYamlNode(const std::string& filePath) {
                         delete(resourceBuilder);
                         resourceBuilder = nullptr;
                     }
+
+                } else if(parsingExtraAttr) {
+                    parsingExtraAttr = false;
 
                 } else if(parsingSignal) {
                     parsingSignal = false;
@@ -810,6 +825,10 @@ ErrCode RestuneParser::parseSignalConfigYamlNode(const std::string& filePath) {
                 ADD_TO_SIGNAL_BUILDER(SIGNAL_CONFIGS_ELEM_NAME, setName);
                 ADD_TO_SIGNAL_BUILDER(SIGNAL_CONFIGS_ELEM_TIMEOUT, setTimeout);
                 ADD_TO_SIGNAL_BUILDER(SIGNAL_CONFIGS_ELEM_ENABLE, setIsEnabled);
+                ADD_TO_SIGNAL_BUILDER(SIGNAL_CONFIGS_ELEM_FPS, setFps);
+                ADD_TO_SIGNAL_BUILDER(SIGNAL_CONFIGS_ELEM_HEIGHT, setHeight);
+                ADD_TO_SIGNAL_BUILDER(SIGNAL_CONFIGS_ELEM_WIDTH, setWidth);
+
 
                 ADD_RES_TO_SIGNAL_BUILDER(SIGNAL_CONFIGS_ELEM_RESOURCE_CODE, setResCode);
                 ADD_RES_TO_SIGNAL_BUILDER(SIGNAL_CONFIGS_ELEM_RESOURCE_RESINFO, setResInfo);
