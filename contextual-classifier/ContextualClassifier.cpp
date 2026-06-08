@@ -102,12 +102,12 @@ static Request* createTuneRequestFromSignal(uint32_t sigId,
                                             pid_t incomingPID,
                                             pid_t incomingTID,
                                             int32_t numArgs,
-                                            int32_t* args) {
+                                            uint32_t* args) {
     try {
         std::shared_ptr<SignalRegistry> sigRegistry = SignalRegistry::getInstance();
 
         // Check if a Signal with the given ID exists in the Registry
-        SignalInfo* signalInfo = sigRegistry->getSignalConfigById(sigId, sigType);
+        SignalInfo* signalInfo = sigRegistry->getSignalConfigById(sigId, sigType, nullptr);
 
         if(signalInfo == nullptr) return nullptr;
 
@@ -243,7 +243,7 @@ void ContextualClassifier::ClassifierMain() {
             uint32_t sigId = URM_SIG_APP_OPEN;
             uint32_t sigType = DEFAULT_SIGNAL_TYPE;
             int32_t numArgs = 0;
-            int32_t* args = nullptr;
+            uint32_t* args = nullptr;
             uint32_t ctxDetails = 0U;
 
             if(ev.pid != -1) {
@@ -304,7 +304,7 @@ void ContextualClassifier::ClassifierMain() {
                 }
 
                 // Apply actions, call tuneSignal
-                this->ApplyActions(sigId, sigType, ev.pid, ev.tgid, numArgs, args);
+                // this->ApplyActions(sigId, sigType, ev.pid, ev.tgid, numArgs, args);
             }
         } else if(ev.type == CC_APP_CLOSE) {
             // No Action Needed, Pulse Monitor to take care of cleanup
@@ -410,7 +410,7 @@ void ContextualClassifier::ApplyActions(uint32_t sigId,
                                         pid_t incomingPID,
                                         pid_t incomingTID,
                                         int32_t numArgs,
-                                        int32_t* args) {
+                                        uint32_t* args) {
     Request* request =
         createTuneRequestFromSignal(sigId, sigType, incomingPID, incomingTID, numArgs, args);
     if(request != nullptr) {

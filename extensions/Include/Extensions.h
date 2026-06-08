@@ -24,7 +24,7 @@ typedef struct {
     uint32_t mSigId;
     uint32_t mSigType;
     int32_t mNumArgs;
-    int32_t* mArgs;
+    uint32_t* mArgs;
 } PostProcessCBData;
 
 /**

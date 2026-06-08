@@ -17,6 +17,8 @@ public:
     virtual DLRootNode* getPrevPtr(int32_t linker) = 0;
     virtual void setNextLinkage(int32_t linker, DLRootNode* node) = 0;
     virtual void setPrevLinkage(int32_t linker, DLRootNode* node) = 0;
+
+    virtual ~DLRootNode() = default;
 };
 
 template <typename T>

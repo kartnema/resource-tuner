@@ -80,7 +80,7 @@ private:
                       pid_t incomingPID,
                       pid_t incomingTID,
                       int32_t numArgs,
-                      int32_t* arg);
+                      uint32_t* arg);
     void RemoveActions(pid_t pid, int32_t tgid);
 
     // blacklisting mechanism

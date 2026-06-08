@@ -30,6 +30,35 @@ static void freeSignalConfig(SignalInfo* signalInfo) {
     }
 }
 
+
+SignalInfo* SignalRegistry::findBestExtraAttrsMatch(std::vector<SignalInfo*>& dlm,
+                                                    const uint32_t* extraAttrs) const {
+    if(extraAttrs == nullptr) {
+        return nullptr;
+    }
+
+    int32_t bestScore = -1;
+    SignalInfo* bestMatch = nullptr;
+
+    for(int32_t i = 0; i < (int32_t)dlm.size(); i++) {
+        SignalInfo* candidate = dlm[i];
+
+        int32_t score = 0;
+        for(int32_t i = 0; i < SIGNAL_EXTRA_ATTRS_COUNT; i++) {
+            if(candidate->mExtraAttrs[i] == extraAttrs[i]) {
+                score++;
+            }
+        }
+
+        if(score > bestScore) {
+            bestScore = score;
+            bestMatch = candidate;
+        }
+    }
+
+    return bestMatch;
+}
+
 std::shared_ptr<SignalRegistry> SignalRegistry::signalRegistryInstance = nullptr;
 
 SignalRegistry::SignalRegistry() {
@@ -49,6 +78,7 @@ void SignalRegistry::registerSignal(SignalInfo* signalInfo) {
         return;
     }
 
+    int8_t isOverride = false;
     uint64_t signalBitmap = 0;
     signalBitmap |= ((uint32_t)signalInfo->mSignalID);
     signalBitmap |= ((uint32_t)signalInfo->mSignalCategory << 16);
@@ -58,39 +88,34 @@ void SignalRegistry::registerSignal(SignalInfo* signalInfo) {
     signalBitmap |= ((uint32_t)signalInfo->mSigType);
 
     // Check for any conflict
-    if(this->mSILMap.find(signalBitmap) != this->mSILMap.end()) {
-
-        // Signal with the specified Category and SigID already exists
-        // Overwrite it.
-        int32_t signalTableIndex = this->getSignalTableIndex(signalBitmap);
-        this->mSignalsConfigs[signalTableIndex] = signalInfo;
-
-        this->mSILMap.erase(signalBitmap);
-        this->mSILMap[signalBitmap] = signalTableIndex;
-
+    if(this->mSignalsConfigs.find(signalBitmap) == this->mSignalsConfigs.end()) {
+        this->mSignalsConfigs[signalBitmap] = {signalInfo};
     } else {
-        this->mSILMap[signalBitmap] = this->mTotalSignals;
-        this->mSignalsConfigs.push_back(signalInfo);
-
-        this->mTotalSignals++;
+        this->mSignalsConfigs[signalBitmap].push_back(signalInfo);
     }
+
+    this->mTotalSignals++;
 }
 
-std::vector<SignalInfo*> SignalRegistry::getSignalConfigs() {
-    return this->mSignalsConfigs;
-}
-
-SignalInfo* SignalRegistry::getSignalConfigById(uint64_t sigCode) {
-    if(this->mSILMap.find(sigCode) == this->mSILMap.end()) {
-        TYPELOGV(SIGNAL_REGISTRY_SIGNAL_NOT_FOUND, GET_SIGNAL_ID(sigCode), GET_SIGNAL_TYPE(sigCode));
+SignalInfo* SignalRegistry::getSignalConfigById(uint64_t sigCode,
+                                                const uint32_t* extraAttrs) {
+    if(this->mSignalsConfigs.find(sigCode) == this->mSignalsConfigs.end()) {
+        TYPELOGV(SIGNAL_REGISTRY_SIGNAL_NOT_FOUND,
+                 GET_SIGNAL_ID(sigCode),
+                 GET_SIGNAL_TYPE(sigCode));
         return nullptr;
     }
 
-    int32_t mResourceTableIndex = this->mSILMap[sigCode];
-    return this->mSignalsConfigs[mResourceTableIndex];
+    if(extraAttrs == nullptr) {
+        return this->mSignalsConfigs[sigCode].back();
+    }
+
+    return findBestExtraAttrsMatch(this->mSignalsConfigs[sigCode], extraAttrs);
 }
 
-SignalInfo* SignalRegistry::getSignalConfigById(uint32_t sigId, uint32_t sigType) {
+SignalInfo* SignalRegistry::getSignalConfigById(uint32_t sigId,
+                                                uint32_t sigType,
+                                                const uint32_t* extraAttrs) {
     // Create the 64-bit index
     uint64_t signalBitmap = (uint64_t)sigId;
 
@@ -98,32 +123,23 @@ SignalInfo* SignalRegistry::getSignalConfigById(uint32_t sigId, uint32_t sigType
     signalBitmap <<= 32; // Make Room
     signalBitmap |= sigType;
 
-    if(this->mSILMap.find(signalBitmap) == this->mSILMap.end()) {
+    if(this->mSignalsConfigs.find(signalBitmap) == this->mSignalsConfigs.end()) {
         TYPELOGV(SIGNAL_REGISTRY_SIGNAL_NOT_FOUND, sigId, sigType);
         return nullptr;
     }
 
-    int32_t mResourceTableIndex = this->mSILMap[signalBitmap];
-    return this->mSignalsConfigs[mResourceTableIndex];
+    if(extraAttrs == nullptr) {
+        return this->mSignalsConfigs[signalBitmap].back();
+    }
+
+    return findBestExtraAttrsMatch(this->mSignalsConfigs[signalBitmap], extraAttrs);
 }
 
 int32_t SignalRegistry::getSignalsConfigCount() {
     return this->mTotalSignals;
 }
 
-int32_t SignalRegistry::getSignalTableIndex(uint64_t signalCode) {
-    if(this->mSILMap.find(signalCode) == this->mSILMap.end()) {
-        return -1;
-    }
-
-    return this->mSILMap[signalCode];
-}
-
-SignalRegistry::~SignalRegistry() {
-    for(int32_t i = 0; i < this->mTotalSignals; i++) {
-        freeSignalConfig(this->mSignalsConfigs[i]);
-    }
-}
+SignalRegistry::~SignalRegistry() {}
 
 SignalInfoBuilder::SignalInfoBuilder() {
     this->mTargetRefCount = 0;
@@ -137,6 +153,11 @@ SignalInfoBuilder::SignalInfoBuilder() {
     this->mSignalInfo->mSigType = 0;
     this->mSignalInfo->mSignalName = "";
     this->mSignalInfo->mTimeout = 1;
+
+    for(int32_t i = 0; i < SIGNAL_EXTRA_ATTRS_COUNT; i++) {
+        this->mSignalInfo->mExtraAttrs[i] = 0;
+    }
+    this->mSignalInfo->mHasExtraAttrs = false;
 
     this->mSignalInfo->mDerivatives = nullptr;
     this->mSignalInfo->mPermissions = nullptr;
@@ -152,11 +173,7 @@ ErrCode SignalInfoBuilder::setSignalID(const std::string& signalIdString) {
     try {
         this->mSignalInfo->mSignalID = (uint16_t)stoi(signalIdString, nullptr, 0);
 
-    } catch(const std::invalid_argument& e) {
-        TYPELOGV(SIGNAL_REGISTRY_PARSING_FAILURE, e.what());
-        return RC_INVALID_VALUE;
-
-    } catch(const std::out_of_range& e) {
+    } catch(const std::exception& e) {
         TYPELOGV(SIGNAL_REGISTRY_PARSING_FAILURE, e.what());
         return RC_INVALID_VALUE;
     }
@@ -173,11 +190,7 @@ ErrCode SignalInfoBuilder::setSignalCategory(const std::string& categoryString) 
     try {
         this->mSignalInfo->mSignalCategory = (uint8_t)stoi(categoryString, nullptr, 0);
 
-    } catch(const std::invalid_argument& e) {
-        TYPELOGV(SIGNAL_REGISTRY_PARSING_FAILURE, e.what());
-        return RC_INVALID_VALUE;
-
-    } catch(const std::out_of_range& e) {
+    } catch(const std::exception& e) {
         TYPELOGV(SIGNAL_REGISTRY_PARSING_FAILURE, e.what());
         return RC_INVALID_VALUE;
     }
@@ -195,11 +208,7 @@ ErrCode SignalInfoBuilder::setSignalType(const std::string& typeString) {
     try {
         this->mSignalInfo->mSigType = (uint32_t)stol(typeString, nullptr, 0);
 
-    } catch(const std::invalid_argument& e) {
-        TYPELOGV(SIGNAL_REGISTRY_PARSING_FAILURE, e.what());
-        return RC_INVALID_VALUE;
-
-    } catch(const std::out_of_range& e) {
+    } catch(const std::exception& e) {
         TYPELOGV(SIGNAL_REGISTRY_PARSING_FAILURE, e.what());
         return RC_INVALID_VALUE;
     }
@@ -447,4 +456,64 @@ ErrCode ResourceBuilder::addValue(int32_t index, const std::string& valueString)
 
 Resource* ResourceBuilder::build() {
     return this->mResource;
+}
+
+void SignalInfoBuilder::markExtraAttrsPresent() {
+    if(this->mSignalInfo != nullptr) {
+        this->mSignalInfo->mHasExtraAttrs = true;
+    }
+}
+
+ErrCode SignalInfoBuilder::setFps(const std::string& fpsString) {
+    if(this->mSignalInfo == nullptr) {
+        return RC_MEMORY_ALLOCATION_FAILURE;
+    }
+
+    try {
+        this->mSignalInfo->mExtraAttrs[SIGNAL_EXTRA_ATTR_FPS] = (uint32_t)stoul(fpsString, nullptr, 0);
+        return RC_SUCCESS;
+
+    } catch(const std::exception& e) {
+        printf("massive crashfps\n");
+        TYPELOGV(SIGNAL_REGISTRY_PARSING_FAILURE, e.what());
+        return RC_INVALID_VALUE;
+    }
+
+    return RC_INVALID_VALUE;
+}
+
+ErrCode SignalInfoBuilder::setHeight(const std::string& heightString) {
+    if(this->mSignalInfo == nullptr) {
+        return RC_MEMORY_ALLOCATION_FAILURE;
+    }
+
+    try {
+        this->mSignalInfo->mExtraAttrs[SIGNAL_EXTRA_ATTR_HEIGHT] = (uint32_t)stoul(heightString, nullptr, 0);
+        return RC_SUCCESS;
+
+    } catch(const std::exception& e) {
+        printf("massive crash\n");
+        TYPELOGV(SIGNAL_REGISTRY_PARSING_FAILURE, e.what());
+        return RC_INVALID_VALUE;
+    }
+
+    return RC_INVALID_VALUE;
+}
+
+ErrCode SignalInfoBuilder::setWidth(const std::string& widthString) {
+    if(this->mSignalInfo == nullptr) {
+        return RC_MEMORY_ALLOCATION_FAILURE;
+    }
+
+    try {
+        this->mSignalInfo->mExtraAttrs[SIGNAL_EXTRA_ATTR_WIDTH] = (uint32_t)stoul(widthString, nullptr, 0);
+        return RC_SUCCESS;
+
+    } catch(const std::exception& e) {
+        printf("massive craseeh\n");
+        TYPELOGV(SIGNAL_REGISTRY_PARSING_FAILURE, e.what());
+        return RC_INVALID_VALUE;
+    }
+
+    return RC_INVALID_VALUE;
 }
