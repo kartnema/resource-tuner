@@ -6,7 +6,7 @@
 #include "UrmSettings.h"
 #include "TargetRegistry.h"
 
-static const int32_t unsupportedResoure = -2;
+static const int32_t unsupportedResoure = -180;
 
 std::shared_ptr<ResourceRegistry> ResourceRegistry::resourceRegistryInstance = nullptr;
 
