@@ -474,7 +474,6 @@ ErrCode SignalInfoBuilder::setFps(const std::string& fpsString) {
         return RC_SUCCESS;
 
     } catch(const std::exception& e) {
-        printf("massive crashfps\n");
         TYPELOGV(SIGNAL_REGISTRY_PARSING_FAILURE, e.what());
         return RC_INVALID_VALUE;
     }
@@ -492,7 +491,6 @@ ErrCode SignalInfoBuilder::setHeight(const std::string& heightString) {
         return RC_SUCCESS;
 
     } catch(const std::exception& e) {
-        printf("massive crash\n");
         TYPELOGV(SIGNAL_REGISTRY_PARSING_FAILURE, e.what());
         return RC_INVALID_VALUE;
     }
@@ -510,7 +508,6 @@ ErrCode SignalInfoBuilder::setWidth(const std::string& widthString) {
         return RC_SUCCESS;
 
     } catch(const std::exception& e) {
-        printf("massive craseeh\n");
         TYPELOGV(SIGNAL_REGISTRY_PARSING_FAILURE, e.what());
         return RC_INVALID_VALUE;
     }

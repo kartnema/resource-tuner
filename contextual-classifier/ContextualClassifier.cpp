@@ -107,7 +107,7 @@ static Request* createTuneRequestFromSignal(uint32_t sigId,
         std::shared_ptr<SignalRegistry> sigRegistry = SignalRegistry::getInstance();
 
         // Check if a Signal with the given ID exists in the Registry
-        SignalInfo* signalInfo = sigRegistry->getSignalConfigById(sigId, sigType, nullptr);
+        SignalInfo* signalInfo = sigRegistry->getSignalConfigById(sigId, sigType, args);
 
         if(signalInfo == nullptr) return nullptr;
 
@@ -304,7 +304,7 @@ void ContextualClassifier::ClassifierMain() {
                 }
 
                 // Apply actions, call tuneSignal
-                // this->ApplyActions(sigId, sigType, ev.pid, ev.tgid, numArgs, args);
+                this->ApplyActions(sigId, sigType, ev.pid, ev.tgid, numArgs, args);
             }
         } else if(ev.type == CC_APP_CLOSE) {
             // No Action Needed, Pulse Monitor to take care of cleanup
@@ -411,6 +411,17 @@ void ContextualClassifier::ApplyActions(uint32_t sigId,
                                         pid_t incomingTID,
                                         int32_t numArgs,
                                         uint32_t* args) {
+    LOGI(CLASSIFIER_TAG, "LogBook: sigId=" + std::to_string(sigId));
+    LOGI(CLASSIFIER_TAG, "LogBook: sigType=" + std::to_string(sigType));
+    LOGI(CLASSIFIER_TAG, "LogBook: numArgs=" + std::to_string(numArgs));
+
+    if(numArgs > 0) {
+        LOGI(CLASSIFIER_TAG, "front: Printing Stats");
+        LOGI(CLASSIFIER_TAG, "front: fps=" + std::to_string(args[SIGNAL_EXTRA_ATTR_FPS]));
+        LOGI(CLASSIFIER_TAG, "front: height=" + std::to_string(args[SIGNAL_EXTRA_ATTR_HEIGHT]));
+        LOGI(CLASSIFIER_TAG, "front: width=" + std::to_string(args[SIGNAL_EXTRA_ATTR_WIDTH]));
+    }
+
     Request* request =
         createTuneRequestFromSignal(sigId, sigType, incomingPID, incomingTID, numArgs, args);
     if(request != nullptr) {
