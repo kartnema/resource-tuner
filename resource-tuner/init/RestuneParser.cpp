@@ -826,9 +826,8 @@ ErrCode RestuneParser::parseSignalConfigYamlNode(const std::string& filePath) {
                 ADD_TO_SIGNAL_BUILDER(SIGNAL_CONFIGS_ELEM_TIMEOUT, setTimeout);
                 ADD_TO_SIGNAL_BUILDER(SIGNAL_CONFIGS_ELEM_ENABLE, setIsEnabled);
                 ADD_TO_SIGNAL_BUILDER(SIGNAL_CONFIGS_ELEM_FPS, setFps);
-                ADD_TO_SIGNAL_BUILDER(SIGNAL_CONFIGS_ELEM_HEIGHT, setHeight);
+                ADD_TO_SIGNAL_BUILDER(SIGNAL_CONFIGS_ELEM_HEIGHT,setHeight);
                 ADD_TO_SIGNAL_BUILDER(SIGNAL_CONFIGS_ELEM_WIDTH, setWidth);
-
 
                 ADD_RES_TO_SIGNAL_BUILDER(SIGNAL_CONFIGS_ELEM_RESOURCE_CODE, setResCode);
                 ADD_RES_TO_SIGNAL_BUILDER(SIGNAL_CONFIGS_ELEM_RESOURCE_RESINFO, setResInfo);

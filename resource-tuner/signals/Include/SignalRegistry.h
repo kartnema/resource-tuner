@@ -12,20 +12,9 @@
 #include "Utils.h"
 #include "Logger.h"
 #include "Resource.h"
-#include "DLManager.h"
-#include "MemoryPool.h"
 #include "UrmSettings.h"
 #include "UrmPlatformAL.h"
-
-/**
- * @brief Named indices into SignalInfo::mExtraAttrs.
- */
-enum SignalExtraAttrIndex {
-    SIGNAL_EXTRA_ATTR_FPS    = 0, //!< Frames per second
-    SIGNAL_EXTRA_ATTR_HEIGHT = 1, //!< Frame height in pixels
-    SIGNAL_EXTRA_ATTR_WIDTH  = 2, //!< Frame width in pixels
-    SIGNAL_EXTRA_ATTRS_COUNT = 3  //!< Total number of extra attributes (must remain last)
-};
+#include "SignalInternal.h"
 
 /**
  * @struct SignalInfo
@@ -33,7 +22,7 @@ enum SignalExtraAttrIndex {
  * @details This information is read from the Config files.\n
  *          Note this (SignalInfo) struct is separate from the Signal struct.
  */
-typedef struct {
+typedef struct _signalInfo {
     /**
      * @brief Category of the Signal
      */
@@ -70,17 +59,11 @@ typedef struct {
     /**
      * @brief Array of optional extra attributes associated with the Signal.
      *        Each index corresponds to a named attribute (see SIGNAL_EXTRA_ATTR_* constants).
-     *        A value of 0 at any index indicates that attribute is not set.
-     *        Index layout:
-     *          [SIGNAL_EXTRA_ATTR_FPS]    = frames per second
-     *          [SIGNAL_EXTRA_ATTR_HEIGHT] = frame height in pixels
-     *          [SIGNAL_EXTRA_ATTR_WIDTH]  = frame width in pixels
      */
     uint32_t mExtraAttrs[SIGNAL_EXTRA_ATTRS_COUNT];
 
     /**
-     * @brief Indicates whether any ExtraAttrs were present in the Signal config.
-     *        Set to true if an ExtraAttrs block was parsed; false otherwise.
+     * @brief Indicates whether any ExtraAttrs are present
      */
     int8_t mHasExtraAttrs;
 
@@ -89,7 +72,15 @@ typedef struct {
      *        Values to be configured for the Resources.
      */
     std::vector<Resource*>* mSignalResources;
+
+    _signalInfo* next;
 } SignalInfo;
+
+struct SignalConf {
+    SignalInfo* mSignalInfo;
+    SignalInfo* mFeatureSignals;
+    SignalConf() : mSignalInfo(nullptr), mFeatureSignals(nullptr) {}
+};
 
 /**
  * @brief SignalRegistry
@@ -101,11 +92,17 @@ private:
     static std::shared_ptr<SignalRegistry> signalRegistryInstance;
 
     int32_t mTotalSignals;
-    std::unordered_map<uint64_t, std::vector<SignalInfo*>> mSignalsConfigs;
+    std::unordered_map<uint64_t, SignalConf> mSignalsConfigs;
 
     SignalRegistry();
 
-    SignalInfo* findBestExtraAttrsMatch(std::vector<SignalInfo*>& dlm, const uint32_t* extraAttrs) const;
+    SignalInfo* findBestExtraAttrsMatch(SignalInfo* featureSignalHead,
+                                        int32_t numArgs,
+                                        const uint32_t* extraAttrs);
+    int8_t isDuplicateConfig(SignalInfo* src, SignalInfo* dest);
+    void addToFeaturedSigList(SignalInfo** mFeatureSignals,
+                              SignalInfo* newSignal,
+                              int8_t& isOverriden);
 
 public:
     ~SignalRegistry();
@@ -129,7 +126,9 @@ public:
     *                   A non-null pointer selects the extra-attrs storage path.
     * @return SignalInfo* or nullptr if not found.
     */
-    SignalInfo* getSignalConfigById(uint64_t sigID, const uint32_t* extraAttrs = nullptr);
+    SignalInfo* getSignalConfigById(uint64_t sigID,
+                                    int32_t numArgs = 0,
+                                    const uint32_t* extraAttrs = nullptr);
 
    /**
     * @brief Get the SignalInfo object corresponding to the given Signal ID and type.
@@ -141,7 +140,10 @@ public:
     *                   A non-null pointer selects the extra-attrs storage path.
     * @return SignalInfo* or nullptr if not found.
     */
-    SignalInfo* getSignalConfigById(uint32_t sigCode, uint32_t sigType, const uint32_t* extraAttrs = nullptr);
+    SignalInfo* getSignalConfigByIdAndType(uint32_t sigCode,
+                                           uint32_t sigType,
+                                           int32_t numArgs = 0,
+                                           const uint32_t* extraAttrs = nullptr);
 
     int32_t getSignalsConfigCount();
 
@@ -151,7 +153,8 @@ public:
                 signalRegistryInstance = std::shared_ptr<SignalRegistry>(new SignalRegistry());
             } catch(const std::bad_alloc& e) {
                 LOGE("RESTUNE_SIGNAL_REGISTRY",
-                     "Failed to allocate memory for SignalRegistry instance: " + std::string(e.what()));
+                     "Failed to allocate memory for SignalRegistry: "
+                     + std::string(e.what()));
                 return nullptr;
             }
         }
@@ -202,7 +205,5 @@ public:
 
     Resource* build();
 };
-
-typedef Iterable<SignalInfo*> SigIterable;
 
 #endif

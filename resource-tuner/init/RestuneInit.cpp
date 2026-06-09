@@ -96,7 +96,6 @@ static void preAllocateMemory() {
     MakeAlloc<std::unordered_set<int64_t>> (maxBlockCount);
     MakeAlloc<MsgForwardInfo> (maxBlockCount);
     MakeAlloc<ResIterable> (maxBlockCount);
-    MakeAlloc<SigIterable> (maxBlockCount);
     MakeAlloc<char[REQ_BUFFER_SIZE]> (maxBlockCount);
     MakeAlloc<Signal> (concurrentRequestsUB);
     MakeAlloc<std::vector<Resource*>> (concurrentRequestsUB * resourcesPerRequestUB);

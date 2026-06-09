@@ -30,32 +30,41 @@ static void freeSignalConfig(SignalInfo* signalInfo) {
     }
 }
 
-
-SignalInfo* SignalRegistry::findBestExtraAttrsMatch(std::vector<SignalInfo*>& dlm,
-                                                    const uint32_t* extraAttrs) const {
+SignalInfo* SignalRegistry::findBestExtraAttrsMatch(SignalInfo* featureSignalHead,
+                                                    int32_t numArgs,
+                                                    const uint32_t* extraAttrs) {
     if(extraAttrs == nullptr) {
         return nullptr;
     }
 
     int32_t bestScore = -1;
     SignalInfo* bestMatch = nullptr;
+    SignalInfo* candidate = featureSignalHead;
 
-    for(int32_t i = 0; i < (int32_t)dlm.size(); i++) {
-        SignalInfo* candidate = dlm[i];
-
+    LOGI("CAM_BLOCK", "Picking best signal");
+    while(candidate != nullptr) {
+        LOGI("CAM_BLOCK", "---------------------------------------------");
         int32_t score = 0;
-        for(int32_t i = 0; i < SIGNAL_EXTRA_ATTRS_COUNT; i++) {
+        for(int32_t i = 0; i < std::min(numArgs, (int32_t)SIGNAL_EXTRA_ATTRS_COUNT); i++) {
+            LOGI("CAM_BLOCK", "Src (incoming): "
+                 + std::to_string(extraAttrs[i])
+                 + ", Match Against: "
+                 + std::to_string(candidate->mExtraAttrs[i]));
             if(candidate->mExtraAttrs[i] == extraAttrs[i]) {
                 score++;
             }
         }
 
+        LOGI("CAM_BLOCK", "Cur signal score: " + std::to_string(score));
         if(score > bestScore) {
             bestScore = score;
             bestMatch = candidate;
         }
+        candidate = candidate->next;
     }
 
+    LOGI("CAM_BLOCK", "Best signal score: " + std::to_string(bestScore));
+    delete [] extraAttrs;
     return bestMatch;
 }
 
@@ -71,6 +80,46 @@ int8_t SignalRegistry::isSignalConfigMalformed(SignalInfo* sConf) {
     return false;
 }
 
+int8_t SignalRegistry::isDuplicateConfig(SignalInfo* src, SignalInfo* dest) {
+    // Check for extra attributes
+    int32_t matchCount = 0;
+    for(int32_t i = 0; i < SIGNAL_EXTRA_ATTRS_COUNT; i++) {
+        matchCount += (src->mExtraAttrs[i] == dest->mExtraAttrs[i]);
+    }
+
+    return (matchCount == SIGNAL_EXTRA_ATTRS_COUNT);
+}
+
+void SignalRegistry::addToFeaturedSigList(SignalInfo** featureHead,
+                                          SignalInfo* signalInfo,
+                                          int8_t& isOverriden) {
+    SignalInfo* prevInfo = nullptr;
+    SignalInfo* curInfo = *featureHead;
+    SignalInfo* duplicate = nullptr;
+    while(curInfo != nullptr) {
+        if(this->isDuplicateConfig(curInfo, signalInfo)) {
+            duplicate = curInfo;
+            break;
+        }
+        prevInfo = curInfo;
+        curInfo = curInfo->next;
+    }
+
+    if(duplicate != nullptr) {
+        isOverriden = true;
+        signalInfo->next = duplicate->next;
+        if(prevInfo != nullptr) {
+            prevInfo->next = signalInfo;
+        } else {
+            *featureHead = signalInfo;
+        }
+        freeSignalConfig(duplicate);
+    } else {
+        signalInfo->next = *featureHead;
+        *featureHead = signalInfo;
+    }
+}
+
 void SignalRegistry::registerSignal(SignalInfo* signalInfo) {
     if(this->isSignalConfigMalformed(signalInfo)) {
         freeSignalConfig(signalInfo);
@@ -78,7 +127,7 @@ void SignalRegistry::registerSignal(SignalInfo* signalInfo) {
         return;
     }
 
-    int8_t isOverride = false;
+    int8_t isOveridden = false;
     uint64_t signalBitmap = 0;
     signalBitmap |= ((uint32_t)signalInfo->mSignalID);
     signalBitmap |= ((uint32_t)signalInfo->mSignalCategory << 16);
@@ -87,17 +136,27 @@ void SignalRegistry::registerSignal(SignalInfo* signalInfo) {
     signalBitmap <<= 32; // Make Room
     signalBitmap |= ((uint32_t)signalInfo->mSigType);
 
-    // Check for any conflict
-    if(this->mSignalsConfigs.find(signalBitmap) == this->mSignalsConfigs.end()) {
-        this->mSignalsConfigs[signalBitmap] = {signalInfo};
+    SignalConf& conf = this->mSignalsConfigs[signalBitmap];
+
+    if(signalInfo->mHasExtraAttrs) {
+        if(conf.mFeatureSignals == nullptr) {
+            conf.mFeatureSignals = signalInfo;
+        } else {
+            this->addToFeaturedSigList(&conf.mFeatureSignals, signalInfo, isOveridden);
+        }
     } else {
-        this->mSignalsConfigs[signalBitmap].push_back(signalInfo);
+        isOveridden = (conf.mSignalInfo != nullptr);
+        freeSignalConfig(conf.mSignalInfo);
+        conf.mSignalInfo = signalInfo;
     }
 
-    this->mTotalSignals++;
+    if(!isOveridden) {
+        this->mTotalSignals++;
+    }
 }
 
 SignalInfo* SignalRegistry::getSignalConfigById(uint64_t sigCode,
+                                                int32_t numArgs,
                                                 const uint32_t* extraAttrs) {
     if(this->mSignalsConfigs.find(sigCode) == this->mSignalsConfigs.end()) {
         TYPELOGV(SIGNAL_REGISTRY_SIGNAL_NOT_FOUND,
@@ -107,15 +166,27 @@ SignalInfo* SignalRegistry::getSignalConfigById(uint64_t sigCode,
     }
 
     if(extraAttrs == nullptr) {
-        return this->mSignalsConfigs[sigCode].back();
+        if(this->mSignalsConfigs[sigCode].mSignalInfo != nullptr) {
+            return this->mSignalsConfigs[sigCode].mSignalInfo;
+        } else {
+            if(this->mSignalsConfigs[sigCode].mFeatureSignals != nullptr) {
+                return this->mSignalsConfigs[sigCode].mFeatureSignals;
+            }
+        }
+        return nullptr;
     }
 
-    return findBestExtraAttrsMatch(this->mSignalsConfigs[sigCode], extraAttrs);
+    LOGI("CAM_BLOCK", "extraAttrs is not null");
+    LOGI("CAM_BLOCK", "Starting best match search for sigCode=" + std::to_string(sigCode));
+    return findBestExtraAttrsMatch(
+        this->mSignalsConfigs[sigCode].mFeatureSignals, numArgs, extraAttrs);
 }
 
-SignalInfo* SignalRegistry::getSignalConfigById(uint32_t sigId,
-                                                uint32_t sigType,
-                                                const uint32_t* extraAttrs) {
+SignalInfo* SignalRegistry::getSignalConfigByIdAndType(
+        uint32_t sigId,
+        uint32_t sigType,
+        int32_t numArgs,
+        const uint32_t* extraAttrs) {
     // Create the 64-bit index
     uint64_t signalBitmap = (uint64_t)sigId;
 
@@ -129,17 +200,40 @@ SignalInfo* SignalRegistry::getSignalConfigById(uint32_t sigId,
     }
 
     if(extraAttrs == nullptr) {
-        return this->mSignalsConfigs[signalBitmap].back();
+        if(this->mSignalsConfigs[signalBitmap].mSignalInfo != nullptr) {
+            return this->mSignalsConfigs[signalBitmap].mSignalInfo;
+        } else {
+            if(this->mSignalsConfigs[signalBitmap].mFeatureSignals != nullptr) {
+                return this->mSignalsConfigs[signalBitmap].mFeatureSignals;
+            }
+        }
+        return nullptr;
     }
 
-    return findBestExtraAttrsMatch(this->mSignalsConfigs[signalBitmap], extraAttrs);
+    LOGI("CAM_BLOCK", "extraAttrs is not null");
+    LOGI("CAM_BLOCK", "Starting best match search for sigCode=" + std::to_string(signalBitmap));
+    return findBestExtraAttrsMatch(
+        this->mSignalsConfigs[signalBitmap].mFeatureSignals, numArgs, extraAttrs);
 }
 
 int32_t SignalRegistry::getSignalsConfigCount() {
     return this->mTotalSignals;
 }
 
-SignalRegistry::~SignalRegistry() {}
+SignalRegistry::~SignalRegistry() {
+    for(const auto& entry: this->mSignalsConfigs) {
+        if(entry.second.mSignalInfo != nullptr) {
+            freeSignalConfig(entry.second.mSignalInfo);
+        }
+
+        SignalInfo* cur = entry.second.mFeatureSignals;
+        while(cur != nullptr) {
+            SignalInfo* next = cur->next;
+            freeSignalConfig(cur);
+            cur = next;
+        }
+    }
+}
 
 SignalInfoBuilder::SignalInfoBuilder() {
     this->mTargetRefCount = 0;
@@ -153,6 +247,7 @@ SignalInfoBuilder::SignalInfoBuilder() {
     this->mSignalInfo->mSigType = 0;
     this->mSignalInfo->mSignalName = "";
     this->mSignalInfo->mTimeout = 1;
+    this->mSignalInfo->next = nullptr;
 
     for(int32_t i = 0; i < SIGNAL_EXTRA_ATTRS_COUNT; i++) {
         this->mSignalInfo->mExtraAttrs[i] = 0;
@@ -470,7 +565,8 @@ ErrCode SignalInfoBuilder::setFps(const std::string& fpsString) {
     }
 
     try {
-        this->mSignalInfo->mExtraAttrs[SIGNAL_EXTRA_ATTR_FPS] = (uint32_t)stoul(fpsString, nullptr, 0);
+        this->mSignalInfo->mExtraAttrs[SIGNAL_EXTRA_ATTR_FPS] =
+                (uint32_t)stoul(fpsString, nullptr, 0);
         return RC_SUCCESS;
 
     } catch(const std::exception& e) {
@@ -487,7 +583,8 @@ ErrCode SignalInfoBuilder::setHeight(const std::string& heightString) {
     }
 
     try {
-        this->mSignalInfo->mExtraAttrs[SIGNAL_EXTRA_ATTR_HEIGHT] = (uint32_t)stoul(heightString, nullptr, 0);
+        this->mSignalInfo->mExtraAttrs[SIGNAL_EXTRA_ATTR_HEIGHT] =
+                (uint32_t)stoul(heightString, nullptr, 0);
         return RC_SUCCESS;
 
     } catch(const std::exception& e) {
@@ -504,7 +601,8 @@ ErrCode SignalInfoBuilder::setWidth(const std::string& widthString) {
     }
 
     try {
-        this->mSignalInfo->mExtraAttrs[SIGNAL_EXTRA_ATTR_WIDTH] = (uint32_t)stoul(widthString, nullptr, 0);
+        this->mSignalInfo->mExtraAttrs[SIGNAL_EXTRA_ATTR_WIDTH] =
+                (uint32_t)stoul(widthString, nullptr, 0);
         return RC_SUCCESS;
 
     } catch(const std::exception& e) {
