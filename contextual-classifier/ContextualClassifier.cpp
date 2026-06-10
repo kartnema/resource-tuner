@@ -182,8 +182,6 @@ void ContextualClassifier::ClassifierMain() {
             std::string comm;
             uint32_t sigId = URM_SIG_APP_OPEN;
             uint32_t sigType = DEFAULT_SIGNAL_TYPE;
-            int32_t numArgs = 0;
-            uint32_t* args = nullptr;
             uint32_t ctxDetails = 0U;
 
             if(ev.pid != -1) {
@@ -232,14 +230,15 @@ void ContextualClassifier::ClassifierMain() {
                         .mPid = ev.pid,
                         .mSigId = sigId,
                         .mSigType = sigType,
-                        .mNumArgs = numArgs,
-                        .mArgs = args,
+                        .mNumArgs = 0,
+                        .mArgs = nullptr,
                         .mHandleAcq = -1,
                     };
                     postCb((void*)&postProcessData);
 
                     // Record any Configurations made
                     if(postProcessData.mHandleAcq != - 1) {
+                        LOGI(CLASSIFIER_TAG, "Add handle to track: " + std::to_string(postProcessData.mHandleAcq));
                         this->mCurrRestuneHandles.push_back(postProcessData.mHandleAcq);
                     }
                 }
@@ -491,9 +490,7 @@ void ContextualClassifier::configureAppSignals(pid_t incomingPID,
                 appConfig->mSignalCodes[i],
                 0,
                 incomingPID,
-                incomingTID,
-                0,
-                nullptr
+                incomingTID
             );
 
             if(handle != -1) {

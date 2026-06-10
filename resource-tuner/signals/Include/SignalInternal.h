@@ -36,6 +36,8 @@ int64_t acquireSignal(uint32_t sigId,
                       uint32_t sigType,
                       pid_t incomingPID,
                       pid_t incomingTID,
-                      int32_t numArgs,
-                      uint32_t* args);
+                      int32_t numFilterArgs = 0,
+                      uint32_t* filterArgs = nullptr,
+                      int32_t numArgs = 0,
+                      uint32_t* args = nullptr);
 #endif

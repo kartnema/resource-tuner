@@ -329,6 +329,8 @@ static Request* createTuneRequestFromSignal(uint32_t sigId,
                                             uint32_t sigType,
                                             pid_t incomingPID,
                                             pid_t incomingTID,
+                                            int32_t numFilterArgs,
+                                            uint32_t* filterArgs,
                                             int32_t numArgs,
                                             uint32_t* args) {
     try {
@@ -336,7 +338,7 @@ static Request* createTuneRequestFromSignal(uint32_t sigId,
 
         // Check if a Signal with the given ID exists in the Registry
         SignalInfo* signalInfo =
-            sigRegistry->getSignalConfigByIdAndType(sigId,sigType, numArgs, args);
+            sigRegistry->getSignalConfigByIdAndType(sigId, sigType, numFilterArgs, filterArgs);
 
         if(signalInfo == nullptr) return nullptr;
 
@@ -390,6 +392,8 @@ int64_t acquireSignal(uint32_t sigId,
                       uint32_t sigType,
                       pid_t incomingPID,
                       pid_t incomingTID,
+                      int32_t numFilterArgs,
+                      uint32_t* filterArgs,
                       int32_t numArgs,
                       uint32_t* args) {
     LOGI(CLASSIFIER_TAG, "LogBook: sigId=" + std::to_string(sigId));
@@ -405,7 +409,9 @@ int64_t acquireSignal(uint32_t sigId,
 
     int64_t handle = -1;
     Request* request =
-        createTuneRequestFromSignal(sigId, sigType, incomingPID, incomingTID, numArgs, args);
+        createTuneRequestFromSignal(sigId, sigType, incomingPID,
+                                    incomingTID, numFilterArgs,
+                                    filterArgs, numArgs, args);
     if(request != nullptr) {
         if(request->getResourcesCount() > 0) {
             // Record:
