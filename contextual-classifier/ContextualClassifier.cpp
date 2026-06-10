@@ -238,7 +238,6 @@ void ContextualClassifier::ClassifierMain() {
 
                     // Record any Configurations made
                     if(postProcessData.mHandleAcq != - 1) {
-                        LOGI(CLASSIFIER_TAG, "Add handle to track: " + std::to_string(postProcessData.mHandleAcq));
                         this->mCurrRestuneHandles.push_back(postProcessData.mHandleAcq);
                     }
                 }

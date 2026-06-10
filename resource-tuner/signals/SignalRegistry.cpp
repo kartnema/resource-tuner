@@ -41,21 +41,14 @@ SignalInfo* SignalRegistry::findBestExtraAttrsMatch(SignalInfo* featureSignalHea
     SignalInfo* bestMatch = nullptr;
     SignalInfo* candidate = featureSignalHead;
 
-    LOGI("CAM_BLOCK", "Picking best signal");
     while(candidate != nullptr) {
-        LOGI("CAM_BLOCK", "---------------------------------------------");
         int32_t score = 0;
         for(int32_t i = 0; i < std::min(numArgs, (int32_t)SIGNAL_EXTRA_ATTRS_COUNT); i++) {
-            LOGI("CAM_BLOCK", "Src (incoming): "
-                 + std::to_string(extraAttrs[i])
-                 + ", Match Against: "
-                 + std::to_string(candidate->mExtraAttrs[i]));
             if(candidate->mExtraAttrs[i] == extraAttrs[i]) {
                 score++;
             }
         }
 
-        LOGI("CAM_BLOCK", "Cur signal score: " + std::to_string(score));
         if(score > bestScore) {
             bestScore = score;
             bestMatch = candidate;
@@ -63,7 +56,6 @@ SignalInfo* SignalRegistry::findBestExtraAttrsMatch(SignalInfo* featureSignalHea
         candidate = candidate->next;
     }
 
-    LOGI("CAM_BLOCK", "Best signal score: " + std::to_string(bestScore));
     delete [] extraAttrs;
     return bestMatch;
 }
@@ -176,8 +168,6 @@ SignalInfo* SignalRegistry::getSignalConfigById(uint64_t sigCode,
         return nullptr;
     }
 
-    LOGI("CAM_BLOCK", "extraAttrs is not null");
-    LOGI("CAM_BLOCK", "Starting best match search for sigCode=" + std::to_string(sigCode));
     return findBestExtraAttrsMatch(
         this->mSignalsConfigs[sigCode].mFeatureSignals, numArgs, extraAttrs);
 }
@@ -210,8 +200,6 @@ SignalInfo* SignalRegistry::getSignalConfigByIdAndType(
         return nullptr;
     }
 
-    LOGI("CAM_BLOCK", "extraAttrs is not null");
-    LOGI("CAM_BLOCK", "Starting best match search for sigCode=" + std::to_string(signalBitmap));
     return findBestExtraAttrsMatch(
         this->mSignalsConfigs[signalBitmap].mFeatureSignals, numArgs, extraAttrs);
 }

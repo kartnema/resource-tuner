@@ -396,17 +396,6 @@ int64_t acquireSignal(uint32_t sigId,
                       uint32_t* filterArgs,
                       int32_t numArgs,
                       uint32_t* args) {
-    LOGI(CLASSIFIER_TAG, "LogBook: sigId=" + std::to_string(sigId));
-    LOGI(CLASSIFIER_TAG, "LogBook: sigType=" + std::to_string(sigType));
-    LOGI(CLASSIFIER_TAG, "LogBook: numArgs=" + std::to_string(numArgs));
-
-    if(numArgs > 0) {
-        LOGI(CLASSIFIER_TAG, "front: Printing Stats");
-        LOGI(CLASSIFIER_TAG, "front: fps=" + std::to_string(args[SIGNAL_EXTRA_ATTR_FPS]));
-        LOGI(CLASSIFIER_TAG, "front: height=" + std::to_string(args[SIGNAL_EXTRA_ATTR_HEIGHT]));
-        LOGI(CLASSIFIER_TAG, "front: width=" + std::to_string(args[SIGNAL_EXTRA_ATTR_WIDTH]));
-    }
-
     int64_t handle = -1;
     Request* request =
         createTuneRequestFromSignal(sigId, sigType, incomingPID,
