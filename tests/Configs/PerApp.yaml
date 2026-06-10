@@ -13,3 +13,6 @@ PerAppConfigs:
 
   - App: "vi"
     Configurations: ["0x000d000c"]
+
+  - App: "vlc"
+    Configurations: ["0x000d000c"]
