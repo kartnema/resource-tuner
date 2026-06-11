@@ -46,3 +46,7 @@ PropertyConfigs:
 
   - Name: urm.extensions_lib.count
     Value: "6"
+
+  - Name: urm.classifier.apply_mode
+    # Possible values: ACCEPT_AND_PERSIST, ACCEPT_AND_REPLACE
+    Value: "ACCEPT_AND_PERSIST"

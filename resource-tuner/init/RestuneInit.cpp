@@ -175,8 +175,15 @@ static ErrCode fetchMetaConfigs() {
         submitPropGetRequest(URM_MAX_PLUGIN_COUNT, resultBuffer, "3");
         UrmSettings::metaConfigs.mPluginCount = (uint32_t)std::stol(resultBuffer);
 
-        // Start classifier in multi-app mode
+        // Start classifier in multi-app mode by default
         UrmSettings::metaConfigs.mAcceptMode = ACCEPT_AND_PERSIST;
+        submitPropGetRequest(CLASSIFIER_APPLY_MODE, resultBuffer, "ACCEPT_AND_PERSIST");
+        std::string mode = std::string(resultBuffer);
+
+        // Move to single-app mode if so configured
+        if(mode == "ACCEPT_AND_REPLACE") {
+            UrmSettings::metaConfigs.mAcceptMode = ACCEPT_AND_REPLACE;
+        }
 
         if(UrmSettings::metaConfigs.mDesiredThreadCount < 1) {
             UrmSettings::metaConfigs.mDesiredThreadCount = 5; // Reset to default
