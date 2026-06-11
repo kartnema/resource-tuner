@@ -16,6 +16,8 @@
 #include "UrmPlatformAL.h"
 #include "SignalInternal.h"
 
+#define NSIG_PLACEHOLDER std::numeric_limits<int>::min()
+
 /**
  * @struct SignalInfo
  * @brief Representation of a single Signal Configuration

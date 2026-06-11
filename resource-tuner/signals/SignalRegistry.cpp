@@ -520,7 +520,7 @@ ErrCode ResourceBuilder::addValue(int32_t index, const std::string& valueString)
         return RC_MEMORY_ALLOCATION_FAILURE;
     }
 
-    int32_t value = -1;
+    int32_t value = NSIG_PLACEHOLDER;
 
     // Check if the value is a placeholder, i.e. the actual value will be populated
     // dynamically at runtime via the "list" argument passed to tuneSignal API.

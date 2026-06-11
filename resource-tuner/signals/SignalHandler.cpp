@@ -139,7 +139,7 @@ static Request* createResourceTuningRequest(Signal* signal) {
 
             // fill placeholders if any
             for(int32_t j = 0; j < resource->getValuesCount(); j++) {
-                if(resource->getValueAt(j) == -1) {
+                if(resource->getValueAt(j) == NSIG_PLACEHOLDER) {
                     if(signal->getListArgs() == nullptr) return nullptr;
                     if(listIndex >= 0 && listIndex < signal->getNumArgs()) {
                         resource->setValueAt(j, signal->getListArgAt(listIndex));
@@ -364,7 +364,7 @@ static Request* createTuneRequestFromSignal(uint32_t sigId,
             // fill placeholders if any
             int32_t listIndex = 0;
             for(int32_t j = 0; j < resource->getValuesCount(); j++) {
-                if(resource->getValueAt(j) == -1) {
+                if(resource->getValueAt(j) == NSIG_PLACEHOLDER) {
                     if(args == nullptr) return nullptr;
                     if(listIndex >= 0 && listIndex < numArgs) {
                         resource->setValueAt(j, args[listIndex]);

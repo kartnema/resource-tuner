@@ -180,16 +180,16 @@ URM_TEST(SignalParsingTests, {
         Resource* resource1 = signalInfo->mSignalResources->at(0);
         E_ASSERT((resource1->getResCode() == 0x000900aa));
         E_ASSERT((resource1->getValuesCount() == 3));
-        E_ASSERT((resource1->getValueAt(0) == -1));
-        E_ASSERT((resource1->getValueAt(1) == -1));
+        E_ASSERT((resource1->getValueAt(0) == NSIG_PLACEHOLDER));
+        E_ASSERT((resource1->getValueAt(1) == NSIG_PLACEHOLDER));
         E_ASSERT((resource1->getValueAt(2) == 68));
         E_ASSERT((resource1->getResInfo() == 0));
 
         Resource* resource2 = signalInfo->mSignalResources->at(1);
         E_ASSERT((resource2->getResCode() == 0x000900dc));
         E_ASSERT((resource2->getValuesCount() == 4));
-        E_ASSERT((resource2->getValueAt(0) == -1));
-        E_ASSERT((resource2->getValueAt(1) == -1));
+        E_ASSERT((resource2->getValueAt(0) == NSIG_PLACEHOLDER));
+        E_ASSERT((resource2->getValueAt(1) == NSIG_PLACEHOLDER));
         E_ASSERT((resource2->getValueAt(2) == 50));
         E_ASSERT((resource2->getValueAt(3) == 512));
         E_ASSERT((resource2->getResInfo() == 0));
@@ -781,16 +781,16 @@ URM_TEST(SignalParsingTestsAddOn, {
         Resource* resource1 = signalInfo->mSignalResources->at(0);
         E_ASSERT((resource1->getResCode() == 0x000900aa));
         E_ASSERT((resource1->getValuesCount() == 3));
-        E_ASSERT((resource1->getValueAt(0) == -1));
-        E_ASSERT((resource1->getValueAt(1) == -1));
+        E_ASSERT((resource1->getValueAt(0) == NSIG_PLACEHOLDER));
+        E_ASSERT((resource1->getValueAt(1) == NSIG_PLACEHOLDER));
         E_ASSERT((resource1->getValueAt(2) == 68));
         E_ASSERT((resource1->getResInfo() == 0));
 
         Resource* resource2 = signalInfo->mSignalResources->at(1);
         E_ASSERT((resource2->getResCode() == 0x000900dc));
         E_ASSERT((resource2->getValuesCount() == 4));
-        E_ASSERT((resource2->getValueAt(0) == -1));
-        E_ASSERT((resource2->getValueAt(1) == -1));
+        E_ASSERT((resource2->getValueAt(0) == NSIG_PLACEHOLDER));
+        E_ASSERT((resource2->getValueAt(1) == NSIG_PLACEHOLDER));
         E_ASSERT((resource2->getValueAt(2) == 50));
         E_ASSERT((resource2->getValueAt(3) == 512));
         E_ASSERT((resource2->getResInfo() == 0));
