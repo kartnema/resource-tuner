@@ -57,6 +57,7 @@ static const int32_t pendingQueueControlSize = 30;
 
 ContextualClassifier::ContextualClassifier() {
     this->mClientTracker = 0;
+    this->mActiveClientCount = 0;
     this->mActiveAppThreshold = 1; // single-app mode
 
     // In multi-app mode, at most 3 concurrent apps are supported
@@ -196,23 +197,35 @@ void ContextualClassifier::ClassifierMain() {
                 }
 
                 // Step 1:
-                // Untune any Configurations from the last proc-invocation
-                uint64_t currActiveCount = 0;
-                if(!this->mCurrRestuneHandles.empty()) {
-                    currActiveCount =
-                        this->mClientTracker - this->mCurrRestuneHandles.front().first;
+                // Keep active client count accurate. A client can own multiple
+                // handles, so evict all handles for the oldest client together.
+                if(this->mCurrRestuneHandles.empty()) {
+                    this->mActiveClientCount = 0;
                 }
 
-                if(currActiveCount == this->mActiveAppThreshold) {
+                if(this->mActiveClientCount >= this->mActiveAppThreshold &&
+                   !this->mCurrRestuneHandles.empty()) {
                     uint64_t minClientId = this->mCurrRestuneHandles.front().first;
+                    int8_t evictedClient = false;
                     while(!this->mCurrRestuneHandles.empty()) {
                         if(minClientId == this->mCurrRestuneHandles.front().first) {
+                            int64_t handle = this->mCurrRestuneHandles.front().second;
+                            if(handle > 0) {
+                                this->untuneRequestHelper(handle);
+                            }
                             this->mCurrRestuneHandles.pop();
+                            evictedClient = true;
                         } else {
                             break;
                         }
                     }
+
+                    if(evictedClient && this->mActiveClientCount > 0) {
+                        this->mActiveClientCount--;
+                    }
                 }
+
+                size_t handlesBeforeClient = this->mCurrRestuneHandles.size();
 
                 // Step 2:
                 // - Move the process to focused-cgroup, Also involves removing the process
@@ -249,27 +262,28 @@ void ContextualClassifier::ClassifierMain() {
                     // Figure out workload type
                     int32_t contextType =
                         this->ClassifyProcess(ev.pid, ev.tgid, comm, ctxDetails);
-                    if(contextType == CC_IGNORE) {
-                        // Ignore and wait for next event
-                        continue;
-                    }
-
-                    // Identify if any signal configuration exists
-                    // Will return the sigID based on the workload
-                    // For example: game, browser, multimedia
-                    sigId = this->GetSignalIDForWorkload(contextType);
-    
-                    int64_t handle = acquireSignal(
-                        sigId,
-                        sigType,
-                        ev.pid,
-                        ev.tgid
-                    );
-                    if(handle != -1) {
-                        this->mCurrRestuneHandles.push(
-                            {this->mClientTracker, handle}
+                    if(contextType != CC_IGNORE) {
+                        // Identify if any signal configuration exists
+                        // Will return the sigID based on the workload
+                        // For example: game, browser, multimedia
+                        sigId = this->GetSignalIDForWorkload(contextType);
+        
+                        int64_t handle = acquireSignal(
+                            sigId,
+                            sigType,
+                            ev.pid,
+                            ev.tgid
                         );
+                        if(handle != -1) {
+                            this->mCurrRestuneHandles.push(
+                                {this->mClientTracker, handle}
+                            );
+                        }
                     }
+                }
+
+                if(this->mCurrRestuneHandles.size() > handlesBeforeClient) {
+                    this->mActiveClientCount++;
                 }
             }
 

@@ -46,6 +46,7 @@ private:
     volatile int8_t mNeedExit = false;
 
     uint64_t mClientTracker;
+    uint64_t mActiveClientCount;
     uint64_t mActiveAppThreshold;
     NetLinkComm mNetLinkComm;
     Inference* mInference;
