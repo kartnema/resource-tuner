@@ -26,6 +26,7 @@ typedef struct {
     double mPenaltyFactor;
     double mRewardFactor;
     uint32_t mPluginCount;
+    uint32_t mAcceptMode;
 } MetaConfigs;
 
 typedef struct {

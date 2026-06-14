@@ -56,6 +56,13 @@ static ContextualClassifier *gClassifier = nullptr;
 static const int32_t pendingQueueControlSize = 30;
 
 ContextualClassifier::ContextualClassifier() {
+    this->mClientTracker = 0;
+    this->mActiveAppThreshold = 1; // single-app mode
+
+    // In multi-app mode, at most 3 concurrent apps are supported
+    if(UrmSettings::metaConfigs.mAcceptMode & ACCEPT_AND_PERSIST) {
+        this->mActiveAppThreshold = 3;
+    }
     this->mInference = GetInferenceObject();
 }
 
@@ -179,49 +186,45 @@ void ContextualClassifier::ClassifierMain() {
         this->mPendingEv.pop();
 
         if(ev.type == CC_APP_OPEN) {
-            std::string comm;
-            uint32_t sigId = URM_SIG_APP_OPEN;
-            uint32_t sigType = DEFAULT_SIGNAL_TYPE;
-            uint32_t ctxDetails = 0U;
-
             if(ev.pid != -1) {
+                std::string comm;
+                uint32_t sigId = URM_SIG_APP_OPEN;
+                uint32_t sigType = DEFAULT_SIGNAL_TYPE;
+                uint32_t ctxDetails = 0U;
                 if(AuxRoutines::fetchComm(ev.pid, comm) != 0) {
                     continue;
                 }
 
-                // Step 1: Figure out workload type
-                int32_t contextType =
-                    this->ClassifyProcess(ev.pid, ev.tgid, comm, ctxDetails);
-				if(contextType == CC_IGNORE) {
-					// Ignore and wait for next event
-					continue;
-				}
-
-                // Identify if any signal configuration exists
-                // Will return the sigID based on the workload
-                // For example: game, browser, multimedia
-                sigId = this->GetSignalIDForWorkload(contextType);
-
-                // Step 2:
+                // Step 1:
                 // Untune any Configurations from the last proc-invocation
-                for(int64_t handle: this->mCurrRestuneHandles) {
-                    if(handle > 0) {
-                        this->untuneRequestHelper(handle);
+                uint64_t currActiveCount = 0;
+                if(!this->mCurrRestuneHandles.empty()) {
+                    currActiveCount =
+                        this->mClientTracker - this->mCurrRestuneHandles.front().first;
+                }
+
+                if(currActiveCount == this->mActiveAppThreshold) {
+                    uint64_t minClientId = this->mCurrRestuneHandles.front().first;
+                    while(!this->mCurrRestuneHandles.empty()) {
+                        if(minClientId == this->mCurrRestuneHandles.front().first) {
+                            this->mCurrRestuneHandles.pop();
+                        } else {
+                            break;
+                        }
                     }
                 }
-                this->mCurrRestuneHandles.clear();
 
-                // Step 3:
+                // Step 2:
                 // - Move the process to focused-cgroup, Also involves removing the process
                 //  already there from the cgroup.
                 // - Move the "threads" from per-app config to appropriate cgroups
                 this->MoveAppThreadsToCGroup(ev.pid, ev.tgid, comm, FOCUSED_CGROUP_IDENTIFIER);
 
-                // Step 4:
+                // Step 3:
                 // Configure any per-app config specified signals.
                 this->configureAppSignals(ev.pid, ev.tgid, comm);
 
-                // Step 5: If the post processing block exists, call it
+                // Step 4: If the post processing block exists, call it
                 // It might provide us a more specific sigID or sigType
                 PostProcessingCallback postCb =
                     Extensions::getPostProcessingCallback(comm);
@@ -237,11 +240,43 @@ void ContextualClassifier::ClassifierMain() {
                     postCb((void*)&postProcessData);
 
                     // Record any Configurations made
-                    if(postProcessData.mHandleAcq != - 1) {
-                        this->mCurrRestuneHandles.push_back(postProcessData.mHandleAcq);
+                    if(postProcessData.mHandleAcq != -1) {
+                        this->mCurrRestuneHandles.push(
+                            {this->mClientTracker, postProcessData.mHandleAcq}
+                        );
+                    }
+                } else {
+                    // Figure out workload type
+                    int32_t contextType =
+                        this->ClassifyProcess(ev.pid, ev.tgid, comm, ctxDetails);
+                    if(contextType == CC_IGNORE) {
+                        // Ignore and wait for next event
+                        continue;
+                    }
+
+                    // Identify if any signal configuration exists
+                    // Will return the sigID based on the workload
+                    // For example: game, browser, multimedia
+                    sigId = this->GetSignalIDForWorkload(contextType);
+    
+                    int64_t handle = acquireSignal(
+                        sigId,
+                        sigType,
+                        ev.pid,
+                        ev.tgid
+                    );
+                    if(handle != -1) {
+                        this->mCurrRestuneHandles.push(
+                            {this->mClientTracker, handle}
+                        );
                     }
                 }
             }
+
+            // Increment client count, this helps in tracking older Requests,
+            // which will need to be untuned once the active threshold is hit.
+            this->mClientTracker++;
+
         } else if(ev.type == CC_APP_CLOSE) {
             // No Action Needed, Pulse Monitor to take care of cleanup
             ClientGarbageCollector::getInstance()->submitClientForCleanup(ev.pid);
@@ -462,7 +497,7 @@ void ContextualClassifier::MoveAppThreadsToCGroup(pid_t incomingPID,
         // Anything to issue
         if(request->getResourcesCount() > 0) {
             // Record:
-            this->mCurrRestuneHandles.push_back(request->getHandle());
+            this->mCurrRestuneHandles.push({this->mClientTracker, request->getHandle()});
 
             // fast path to Request Queue
             submitResProvisionRequest(request, true);
@@ -493,7 +528,7 @@ void ContextualClassifier::configureAppSignals(pid_t incomingPID,
             );
 
             if(handle != -1) {
-                this->mCurrRestuneHandles.push_back(handle);
+                this->mCurrRestuneHandles.push({this->mClientTracker, handle});
             }
         }
     }

@@ -45,9 +45,11 @@ private:
     int8_t mDebugMode = false;
     volatile int8_t mNeedExit = false;
 
+    uint64_t mClientTracker;
+    uint64_t mActiveAppThreshold;
     NetLinkComm mNetLinkComm;
     Inference* mInference;
-    std::vector<int64_t> mCurrRestuneHandles;
+    std::queue<std::pair<uint64_t, int64_t>> mCurrRestuneHandles;
 
     // PID cache to check for duplicates
     MinLRUCache mClassifierPidCache;

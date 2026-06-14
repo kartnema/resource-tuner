@@ -87,6 +87,14 @@ enum TranslationUnit {
     U_GHz = 1000 * 1000 * 1000,
 };
 
+/**
+ * @enum ClassifierOpMode
+ */
+enum ClassifierOpMode {
+    ACCEPT_AND_PERSIST = 0x01,
+    ACCEPT_AND_REPLACE = 0x02,
+};
+
 typedef struct {
     int8_t mModuleID;
     int8_t mRequestType;
@@ -124,6 +132,7 @@ typedef void (*MessageReceivedCallback)(int32_t, MsgForwardInfo*);
 #define LOGGER_LOGGING_LEVEL_TYPE "urm.logging.level.exact"
 #define LOGGER_LOGGING_OUTPUT_REDIRECT "urm.logging.redirect_to"
 #define URM_MAX_PLUGIN_COUNT "urm.extensions_lib.count"
+#define CLASSIFIER_APPLY_MODE "urm.classifier.apply_mode"
 
 #define COMM(pid) ("/proc/" + std::to_string(pid) + "/comm")
 #define COMM_S(pidstr) ("/proc/" + pidstr + "/comm")
