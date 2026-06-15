@@ -45,7 +45,7 @@ static std::mutex apiLock;
 
 // Max cap of 20 Resources per Request
 // Note: The actual number eventually allowed might be lower if there are
-// a lot ofmulti-valued resources, as the entire request needs to be encoded
+// a lot of multi-valued resources, as the entire request needs to be encoded
 // as a byte-buffer of size REQ_BUFFER_SIZE.
 static const int32_t maxResPerReq = 20;
 

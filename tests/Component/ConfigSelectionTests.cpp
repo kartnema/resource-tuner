@@ -136,3 +136,35 @@ URM_TEST(TestBestConfigSelection4, {
     E_ASSERT((signalInfo->mExtraAttrs[SIGNAL_EXTRA_ATTR_HEIGHT] == 2160));
     E_ASSERT((signalInfo->mExtraAttrs[SIGNAL_EXTRA_ATTR_WIDTH] == 3840));
 })
+
+URM_TEST(TestBestConfigSelection5, {
+    std::shared_ptr<SignalRegistry> sigRegistry = SignalRegistry::getInstance();
+
+    SignalInfo* signalInfo = nullptr;
+    uint32_t* extraAttrs = new uint32_t[SIGNAL_EXTRA_ATTRS_COUNT];
+    extraAttrs[0] = 60;
+    extraAttrs[1] = 1080;
+    extraAttrs[2] = 1920;
+
+    signalInfo = SignalRegistry::getInstance()->getSignalConfigByIdAndType(
+        CONSTRUCT_SIG_CODE(0x0d, 0x000a), 0, SIGNAL_EXTRA_ATTRS_COUNT, extraAttrs
+    );
+
+    E_ASSERT((signalInfo != nullptr));
+    E_ASSERT((signalInfo->mSignalID == 0x000a));
+    E_ASSERT((signalInfo->mSignalCategory == 0x0d));
+    E_ASSERT((strcmp((const char*)signalInfo->mSignalName.data(), "GENERIC_MULTIRES_SIGNAL") == 0));
+    E_ASSERT((signalInfo->mTimeout == 10000));
+
+    E_ASSERT((signalInfo->mPermissions != nullptr));
+    E_ASSERT((signalInfo->mDerivatives == nullptr));
+    E_ASSERT((signalInfo->mSignalResources != nullptr));
+
+    E_ASSERT((signalInfo->mPermissions->size() == 2));
+    E_ASSERT((signalInfo->mSignalResources->size() == 8));
+
+    E_ASSERT((signalInfo->mPermissions->at(0) == PERMISSION_THIRD_PARTY));
+    E_ASSERT((signalInfo->mPermissions->at(1) == PERMISSION_SYSTEM));
+
+    E_ASSERT((signalInfo->mHasExtraAttrs == false));
+})
