@@ -1,6 +1,7 @@
 [Unit]
 Description=URM Service
 DefaultDependencies=no
+After=sysinit.target
 
 [Service]
 Restart=on-failure
@@ -11,4 +12,4 @@ Delegate=yes
 Slice=urm.slice
 
 [Install]
-WantedBy=sysinit.target multi-user.target
+WantedBy=basic.target multi-user.target

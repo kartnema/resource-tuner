@@ -56,8 +56,27 @@ SignalInfo* SignalRegistry::findBestExtraAttrsMatch(SignalInfo* featureSignalHea
         candidate = candidate->next;
     }
 
+    candidate = featureSignalHead;
+    while(candidate != nullptr) {
+        int32_t score = 0;
+        for(int32_t i = 0; i < std::min(numArgs, (int32_t)SIGNAL_EXTRA_ATTRS_COUNT); i++) {
+            uint64_t lowerBound = (uint64_t)extraAttrs[i] * 80;
+            uint64_t upperBound = (uint64_t)extraAttrs[i] * 120;
+            uint64_t candidateValue = (uint64_t)candidate->mExtraAttrs[i] * 100;
+            if(candidateValue >= lowerBound && candidateValue <= upperBound) {
+                score++;
+            }
+        }
+
+        if(score > bestScore) {
+            bestScore = score;
+            bestMatch = candidate;
+        }
+        candidate = candidate->next;
+    }
+
     delete [] extraAttrs;
-    return bestMatch;
+    return (bestMatch != nullptr) ? bestMatch : featureSignalHead;
 }
 
 std::shared_ptr<SignalRegistry> SignalRegistry::signalRegistryInstance = nullptr;
@@ -168,6 +187,12 @@ SignalInfo* SignalRegistry::getSignalConfigById(uint64_t sigCode,
         return nullptr;
     }
 
+    // Choose the best match based on extra attributes
+    // If there are no signals with extra features, pick the default one.
+    if(this->mSignalsConfigs[sigCode].mFeatureSignals == nullptr) {
+        return this->mSignalsConfigs[sigCode].mSignalInfo;
+    }
+
     return findBestExtraAttrsMatch(
         this->mSignalsConfigs[sigCode].mFeatureSignals, numArgs, extraAttrs);
 }
@@ -198,6 +223,12 @@ SignalInfo* SignalRegistry::getSignalConfigByIdAndType(
             }
         }
         return nullptr;
+    }
+
+    // Choose the best match based on extra attributes
+    // If there are no signals with extra features, pick the default one.
+    if(this->mSignalsConfigs[signalBitmap].mFeatureSignals == nullptr) {
+        return this->mSignalsConfigs[signalBitmap].mSignalInfo;
     }
 
     return findBestExtraAttrsMatch(
