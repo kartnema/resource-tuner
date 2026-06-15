@@ -56,6 +56,10 @@ SignalInfo* SignalRegistry::findBestExtraAttrsMatch(SignalInfo* featureSignalHea
         candidate = candidate->next;
     }
 
+    if(bestScore == std::min(numArgs, (int32_t)SIGNAL_EXTRA_ATTRS_COUNT)) {
+        return bestMatch;
+    }
+
     candidate = featureSignalHead;
     while(candidate != nullptr) {
         int32_t score = 0;
