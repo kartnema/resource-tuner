@@ -34,6 +34,7 @@ URM_TEST(TestBestConfigSelection1, {
     E_ASSERT((signalInfo->mExtraAttrs[SIGNAL_EXTRA_ATTR_FPS] == 120));
     E_ASSERT((signalInfo->mExtraAttrs[SIGNAL_EXTRA_ATTR_HEIGHT] == 2160));
     E_ASSERT((signalInfo->mExtraAttrs[SIGNAL_EXTRA_ATTR_WIDTH] == 3840));
+    E_ASSERT((signalInfo->mExtraAttrs[SIGNAL_EXTRA_ATTR_SRC_ELEMENT] == 1));
 })
 
 URM_TEST(TestBestConfigSelection2, {
@@ -167,4 +168,96 @@ URM_TEST(TestBestConfigSelection5, {
     E_ASSERT((signalInfo->mPermissions->at(1) == PERMISSION_SYSTEM));
 
     E_ASSERT((signalInfo->mHasExtraAttrs == false));
+})
+
+URM_TEST(TestBestConfigSelection6, {
+    std::shared_ptr<SignalRegistry> sigRegistry = SignalRegistry::getInstance();
+
+    SignalInfo* signalInfo = nullptr;
+    uint32_t* extraAttrs = new uint32_t[SIGNAL_EXTRA_ATTRS_COUNT];
+    extraAttrs[SIGNAL_EXTRA_ATTR_FPS] = 120;
+    extraAttrs[SIGNAL_EXTRA_ATTR_HEIGHT] = 2160;
+    extraAttrs[SIGNAL_EXTRA_ATTR_WIDTH] = 3840;
+    extraAttrs[SIGNAL_EXTRA_ATTR_SRC_ELEMENT] = 1; // qtisrc
+
+    signalInfo = SignalRegistry::getInstance()->getSignalConfigByIdAndType(
+        CONSTRUCT_SIG_CODE(0x0d, 0x0012), 0, SIGNAL_EXTRA_ATTRS_COUNT, extraAttrs
+    );
+
+    E_ASSERT((signalInfo != nullptr));
+    E_ASSERT((signalInfo->mSignalID == 0x0012));
+    E_ASSERT((signalInfo->mSignalCategory == 0x0d));
+    E_ASSERT((strcmp((const char*)signalInfo->mSignalName.data(), "TEST_SIGNAL_16_4k30_qtisrc") == 0));
+    E_ASSERT((signalInfo->mTimeout == 8000));
+
+    E_ASSERT((signalInfo->mPermissions != nullptr));
+    E_ASSERT((signalInfo->mDerivatives == nullptr));
+    E_ASSERT((signalInfo->mSignalResources != nullptr));
+
+    E_ASSERT((signalInfo->mPermissions->size() == 2));
+    E_ASSERT((signalInfo->mSignalResources->size() == 1));
+
+    E_ASSERT((signalInfo->mPermissions->at(0) == PERMISSION_THIRD_PARTY));
+    E_ASSERT((signalInfo->mPermissions->at(1) == PERMISSION_SYSTEM));
+
+    Resource* resource1 = signalInfo->mSignalResources->at(0);
+    E_ASSERT((resource1->getResCode() == 0x00ff0000));
+    E_ASSERT((resource1->getValuesCount() == 1));
+    E_ASSERT((resource1->getValueAt(0) == 512));
+    E_ASSERT((resource1->getResInfo() == 0));
+
+    E_ASSERT((signalInfo->mHasExtraAttrs == true));
+    E_ASSERT((signalInfo->mExtraAttrs[SIGNAL_EXTRA_ATTR_FPS] == 120));
+    E_ASSERT((signalInfo->mExtraAttrs[SIGNAL_EXTRA_ATTR_HEIGHT] == 2160));
+    E_ASSERT((signalInfo->mExtraAttrs[SIGNAL_EXTRA_ATTR_WIDTH] == 3840));
+    E_ASSERT((signalInfo->mExtraAttrs[SIGNAL_EXTRA_ATTR_SRC_ELEMENT] == 1));
+})
+
+URM_TEST(TestBestConfigSelection7, {
+    std::shared_ptr<SignalRegistry> sigRegistry = SignalRegistry::getInstance();
+
+    SignalInfo* signalInfo = nullptr;
+    uint32_t* extraAttrs = new uint32_t[SIGNAL_EXTRA_ATTRS_COUNT];
+    extraAttrs[SIGNAL_EXTRA_ATTR_FPS] = 120;
+    extraAttrs[SIGNAL_EXTRA_ATTR_HEIGHT] = 2160;
+    extraAttrs[SIGNAL_EXTRA_ATTR_WIDTH] = 3840;
+    extraAttrs[SIGNAL_EXTRA_ATTR_SRC_ELEMENT] = 2; // libcamerasrc
+
+    signalInfo = SignalRegistry::getInstance()->getSignalConfigByIdAndType(
+        CONSTRUCT_SIG_CODE(0x0d, 0x0012), 0, SIGNAL_EXTRA_ATTRS_COUNT, extraAttrs
+    );
+
+    E_ASSERT((signalInfo != nullptr));
+    E_ASSERT((signalInfo->mSignalID == 0x0012));
+    E_ASSERT((signalInfo->mSignalCategory == 0x0d));
+    E_ASSERT((strcmp((const char*)signalInfo->mSignalName.data(), "TEST_SIGNAL_16_4k30_libcamsrc") == 0));
+    E_ASSERT((signalInfo->mTimeout == 8000));
+
+    E_ASSERT((signalInfo->mPermissions != nullptr));
+    E_ASSERT((signalInfo->mDerivatives == nullptr));
+    E_ASSERT((signalInfo->mSignalResources != nullptr));
+
+    E_ASSERT((signalInfo->mPermissions->size() == 2));
+    E_ASSERT((signalInfo->mSignalResources->size() == 2));
+
+    E_ASSERT((signalInfo->mPermissions->at(0) == PERMISSION_THIRD_PARTY));
+    E_ASSERT((signalInfo->mPermissions->at(1) == PERMISSION_SYSTEM));
+
+    Resource* resource1 = signalInfo->mSignalResources->at(0);
+    E_ASSERT((resource1->getResCode() == 0x00ff0003));
+    E_ASSERT((resource1->getValuesCount() == 1));
+    E_ASSERT((resource1->getValueAt(0) == 971));
+    E_ASSERT((resource1->getResInfo() == 0));
+
+    Resource* resource2 = signalInfo->mSignalResources->at(1);
+    E_ASSERT((resource2->getResCode() == 0x00ff0004));
+    E_ASSERT((resource2->getValuesCount() == 1));
+    E_ASSERT((resource2->getValueAt(0) == 231));
+    E_ASSERT((resource2->getResInfo() == 0));
+
+    E_ASSERT((signalInfo->mHasExtraAttrs == true));
+    E_ASSERT((signalInfo->mExtraAttrs[SIGNAL_EXTRA_ATTR_FPS] == 120));
+    E_ASSERT((signalInfo->mExtraAttrs[SIGNAL_EXTRA_ATTR_HEIGHT] == 2160));
+    E_ASSERT((signalInfo->mExtraAttrs[SIGNAL_EXTRA_ATTR_WIDTH] == 3840));
+    E_ASSERT((signalInfo->mExtraAttrs[SIGNAL_EXTRA_ATTR_SRC_ELEMENT] == 2));
 })

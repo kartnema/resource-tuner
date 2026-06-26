@@ -195,6 +195,7 @@ SignalConfigs:
       - Fps: 30
       - Height: 720
       - Width: 1280
+      - MmSrc: "libcamerasrc"
     Resources:
       - {ResCode: "0x00ff0004", ResInfo: "0x00000000", Values: [115]}
       - {ResCode: "0x00ff0000", ResInfo: "0x00000000", Values: [512]}
@@ -218,6 +219,7 @@ SignalConfigs:
       - Fps: 120
       - Height: 2160
       - Width: 3840
+      - MmSrc: "qtiqmmfsrc"
     Resources:
       - {ResCode: "0x00ff0000", ResInfo: "0x00000000", Values: [512]}
 
@@ -285,3 +287,32 @@ SignalConfigs:
       - Width: 7680
     Resources:
       - {ResCode: "0x00ff0003", ResInfo: "0x00000000", Values: [971]}
+
+  - SigId: "0x0012"
+    Category: "0x0d"
+    Name: TEST_SIGNAL_16_4k30_qtisrc
+    Enable: true
+    Permissions: ["third_party", "system"]
+    Timeout: 8000
+    ExtraAttrs:
+      - Fps: 120
+      - Height: 2160
+      - Width: 3840
+      - MmSrc: "qtiqmmfsrc"
+    Resources:
+      - {ResCode: "0x00ff0000", ResInfo: "0x00000000", Values: [512]}
+
+  - SigId: "0x0012"
+    Category: "0x0d"
+    Name: TEST_SIGNAL_16_4k30_libcamsrc
+    Enable: true
+    Permissions: ["third_party", "system"]
+    Timeout: 8000
+    ExtraAttrs:
+      - Fps: 120
+      - Height: 2160
+      - Width: 3840
+      - MmSrc: "libcamerasrc"
+    Resources:
+      - {ResCode: "0x00ff0003", ResInfo: "0x00000000", Values: [971]}
+      - {ResCode: "0x00ff0004", ResInfo: "0x00000000", Values: [231]}

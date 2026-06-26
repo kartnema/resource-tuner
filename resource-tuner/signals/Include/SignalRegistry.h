@@ -12,6 +12,7 @@
 #include "Utils.h"
 #include "Logger.h"
 #include "Resource.h"
+#include "AuxRoutines.h"
 #include "UrmSettings.h"
 #include "UrmPlatformAL.h"
 #include "SignalInternal.h"
@@ -188,6 +189,7 @@ public:
     ErrCode setFps(const std::string& fpsString);
     ErrCode setHeight(const std::string& heightString);
     ErrCode setWidth(const std::string& widthString);
+    ErrCode setMmSrc(const std::string& srcString);
     void markExtraAttrsPresent();
 
     SignalInfo* build();

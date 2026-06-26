@@ -109,6 +109,7 @@
 #define SIGNAL_CONFIGS_ELEM_FPS "Fps"
 #define SIGNAL_CONFIGS_ELEM_HEIGHT "Height"
 #define SIGNAL_CONFIGS_ELEM_WIDTH "Width"
+#define SIGNAL_CONFIGS_ELEM_SRC_TYPE "MmSrc"
 
 // Ext-Features
 #define EXT_FEATURE_CONFIGS_ROOT "FeatureConfigs"
