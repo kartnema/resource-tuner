@@ -635,3 +635,22 @@ ErrCode SignalInfoBuilder::setWidth(const std::string& widthString) {
 
     return RC_INVALID_VALUE;
 }
+
+ErrCode SignalInfoBuilder::setMmSrc(const std::string& srcString) {
+    if(this->mSignalInfo == nullptr) {
+        return RC_MEMORY_ALLOCATION_FAILURE;
+    }
+
+    std::string lowSrcString = srcString;
+    AuxRoutines::toLowerCase(lowSrcString);
+    if(lowSrcString == "qtiqmmfsrc") {
+        this->mSignalInfo->mExtraAttrs[SIGNAL_EXTRA_ATTR_SRC_ELEMENT] = 1;
+    } else if(lowSrcString == "libcamerasrc") {
+        this->mSignalInfo->mExtraAttrs[SIGNAL_EXTRA_ATTR_SRC_ELEMENT] = 2;
+    } else {
+        // Silently Reject any other values
+        this->mSignalInfo->mExtraAttrs[SIGNAL_EXTRA_ATTR_SRC_ELEMENT] = 0;
+    }
+
+    return RC_SUCCESS;
+}

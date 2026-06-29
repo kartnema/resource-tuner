@@ -308,6 +308,7 @@ URM_TEST(SignalParsingTests, {
         E_ASSERT((signalInfo->mExtraAttrs[SIGNAL_EXTRA_ATTR_FPS] == 30));
         E_ASSERT((signalInfo->mExtraAttrs[SIGNAL_EXTRA_ATTR_HEIGHT] == 720));
         E_ASSERT((signalInfo->mExtraAttrs[SIGNAL_EXTRA_ATTR_WIDTH] == 1280));
+        E_ASSERT((signalInfo->mExtraAttrs[SIGNAL_EXTRA_ATTR_SRC_ELEMENT] == 2));
     }
 
     {

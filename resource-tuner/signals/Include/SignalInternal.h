@@ -14,10 +14,11 @@
  * @brief Named indices into SignalInfo::mExtraAttrs.
  */
 enum SignalExtraAttrIndex {
-    SIGNAL_EXTRA_ATTR_FPS    = 0, //!< Frames per second
-    SIGNAL_EXTRA_ATTR_HEIGHT = 1, //!< Frame height in pixels
-    SIGNAL_EXTRA_ATTR_WIDTH  = 2, //!< Frame width in pixels
-    SIGNAL_EXTRA_ATTRS_COUNT = 3  //!< Total number of extra attributes
+    SIGNAL_EXTRA_ATTR_FPS = 0, //!< Frames per second
+    SIGNAL_EXTRA_ATTR_HEIGHT, //!< Frame height in pixels
+    SIGNAL_EXTRA_ATTR_WIDTH, //!< Frame width in pixels
+    SIGNAL_EXTRA_ATTR_SRC_ELEMENT, //!< Multimedia Source
+    SIGNAL_EXTRA_ATTRS_COUNT  //!< Total number of extra attributes
 };
 
 /**

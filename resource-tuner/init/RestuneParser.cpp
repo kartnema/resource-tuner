@@ -127,6 +127,7 @@ static int8_t isKey(const std::string& keyName) {
         SIGNAL_CONFIGS_ELEM_FPS,
         SIGNAL_CONFIGS_ELEM_HEIGHT,
         SIGNAL_CONFIGS_ELEM_WIDTH,
+        SIGNAL_CONFIGS_ELEM_SRC_TYPE,
         EXT_FEATURE_CONFIGS_ROOT,
         EXT_FEATURE_CONFIGS_ELEM_ID,
         EXT_FEATURE_CONFIGS_ELEM_LIB,
@@ -828,6 +829,7 @@ ErrCode RestuneParser::parseSignalConfigYamlNode(const std::string& filePath) {
                 ADD_TO_SIGNAL_BUILDER(SIGNAL_CONFIGS_ELEM_FPS, setFps);
                 ADD_TO_SIGNAL_BUILDER(SIGNAL_CONFIGS_ELEM_HEIGHT,setHeight);
                 ADD_TO_SIGNAL_BUILDER(SIGNAL_CONFIGS_ELEM_WIDTH, setWidth);
+                ADD_TO_SIGNAL_BUILDER(SIGNAL_CONFIGS_ELEM_SRC_TYPE, setMmSrc);
 
                 ADD_RES_TO_SIGNAL_BUILDER(SIGNAL_CONFIGS_ELEM_RESOURCE_CODE, setResCode);
                 ADD_RES_TO_SIGNAL_BUILDER(SIGNAL_CONFIGS_ELEM_RESOURCE_RESINFO, setResInfo);
