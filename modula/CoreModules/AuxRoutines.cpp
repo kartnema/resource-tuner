@@ -12,12 +12,12 @@ std::string AuxRoutines::readFromFile(const std::string& fileName) {
     std::string value = "";
 
     if(!fileStream.is_open()) {
-        LOGW("URM_AUX_ROUTINE", "Failed to open file: " + fileName + " Error: " + strerror(errno));
+        TYPELOGV(FILE_OPEN_FAILED, fileName.c_str(), strerror(errno));
         return "";
     }
 
     if(!getline(fileStream, value)) {
-        LOGW("URM_AUX_ROUTINE", "Failed to read from file: " + fileName + " Error: " + strerror(errno));
+        TYPELOGV(FILE_READ_FAILED, fileName.c_str(), strerror(errno));
         return "";
     }
 
@@ -30,14 +30,14 @@ void AuxRoutines::writeToFile(const std::string& fileName, const std::string& va
 
     std::ofstream fileStream(fileName, std::ios::out | std::ios::trunc);
     if(!fileStream.is_open()) {
-        LOGE("URM_AUX_ROUTINE", "Failed to open file: " + fileName + " Error: " + strerror(errno));
+        TYPELOGV(FILE_OPEN_FAILED, fileName.c_str(), strerror(errno));
         return;
     }
 
     fileStream<<value;
 
     if(fileStream.fail()) {
-        LOGE("URM_AUX_ROUTINE", "Failed to write to file: "+ fileName + " Error: " + strerror(errno));
+        TYPELOGV(FILE_WRITE_FAILED, fileName.c_str(), strerror(errno));
     }
 
     fileStream.flush();
@@ -50,8 +50,9 @@ void AuxRoutines::writeSysFsDefaults() {
 
     file.open(UrmSettings::mPersistenceFile);
     if(!file.is_open()) {
-        LOGE("RESTUNE_SERVER_INIT",
-             "Failed to open sysfs original values file: " + UrmSettings::mPersistenceFile);
+        TYPELOGV(FILE_OPEN_FAILED,
+                 UrmSettings::mPersistenceFile.c_str(),
+                 strerror(errno));
         return;
     }
 
@@ -94,7 +95,46 @@ int8_t AuxRoutines::fileWritable(const std::string& filePath) {
 }
 
 std::string AuxRoutines::getMachineName() {
-    return AuxRoutines::readFromFile(UrmSettings::mDeviceNamePath);
+    std::string name = AuxRoutines::readFromFile(UrmSettings::mDeviceNamePath);
+    int8_t uniqueName = std::all_of(name.begin(), name.end(), [] (char ch) {
+        return std::isalnum(static_cast<unsigned char>(ch));
+    });
+
+    if(uniqueName && !name.empty()) {
+        return name;
+    }
+
+    std::string devTreeCompatible = "/proc/device-tree/compatible";
+    std::ifstream file(devTreeCompatible, std::ios::binary);
+    if(!file.is_open()) {
+        TYPELOGV(FILE_OPEN_FAILED, devTreeCompatible.c_str(), strerror(errno));
+        return "";
+    }
+
+    std::vector<char> tokens(
+        (std::istreambuf_iterator<char>(file)),
+        std::istreambuf_iterator<char>());
+    file.close();
+
+    for(size_t pos = 0; pos < tokens.size();) {
+        std::string token(&tokens[pos]);
+
+        size_t sep = token.find(',');
+        if (sep != std::string::npos) {
+            name = token.substr(sep + 1);
+
+            std::string filePath = "";
+            filePath.append(UrmSettings::mTargetConfDir);
+            filePath.append(name);
+
+            if(AuxRoutines::fileExists(filePath)) {
+                return name;
+            }    
+        }
+        pos += token.size() + 1;
+    }
+
+    return "";
 }
 
 // Helper to check if a string contains only digits
