@@ -12,6 +12,6 @@ InitConfigs:
     - Name: "user.slice"
       Create: false
       ID: 3
-    - Name: "urm.slice/focused.apps"
+    - Name: "thread-root/nonhot"
       Create: true
       ID: 4

@@ -13,6 +13,7 @@
 #include "AuxRoutines.h"
 #include "RestuneInternal.h"
 #include "SignalInternal.h"
+#include "BoostManager.h"
 #include "ResourceRegistry.h"
 #include "ComponentRegistry.h"
 #include "PulseMonitor.h"
@@ -28,6 +29,7 @@ static void** extensionLibHandles = nullptr;
 // Request Listener and Handler Threads
 static std::thread restuneHandlerThread;
 static std::thread resourceTunerListener;
+static std::thread wlDetectionThread;
 
 static void restoreToSafeState() {
     if(AuxRoutines::fileExists(UrmSettings::mPersistenceFile)) {
@@ -643,15 +645,36 @@ static ErrCode init(void* arg) {
         TYPELOGV(SYSTEM_THREAD_CREATION_FAILURE, "resource-tuner-listener", e.what());
         return RC_MODULE_INIT_FAILURE;
     }
+    
+    // Create the app-tracker
+    LOGE("RESTUNR_INIT", "Creating thread wlDetectionThread");
+    try {
+        wlDetectionThread = std::thread(initWLDetection);
+        TYPELOGD(LISTENER_THREAD_CREATION_SUCCESS);
+
+    } catch(const std::system_error& e) {
+        TYPELOGV(SYSTEM_THREAD_CREATION_FAILURE, "initWLDetection", e.what());
+        return RC_MODULE_INIT_FAILURE;
+    }
 
     // Wait for the thread to initialize
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
-
     return RC_SUCCESS;
 }
 
 static ErrCode tear(void* arg) {
     (void)arg;
+
+    // Ensure workload detection init wrapper has completed before tearing it down.
+    if(wlDetectionThread.joinable()) {
+        wlDetectionThread.join();
+    } else {
+        TYPELOGV(SYSTEM_THREAD_NOT_JOINABLE, "wl-detection-init");
+    }
+
+    // Stop workload detection timer and restore boosted cgroup state.
+    tearWLDetection();
+
     // Check if the thread is joinable, to prevent undefined behaviour
     if(resourceTunerListener.joinable()) {
         resourceTunerListener.join();
