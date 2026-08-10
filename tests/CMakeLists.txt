@@ -10,7 +10,7 @@ if(BUILD_TESTS)
     # Install Custom Resource Nodes
     install(
         DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Configs/ResourceSysFsNodes/
-        DESTINATION ${CMAKE_INSTALL_SYSCONFDIR}/urm/tests/nodes/
+        DESTINATION ${CMAKE_INSTALL_SYSCONFDIR}/urm/tests/nodes
         FILES_MATCHING
         PATTERN "*.txt"
         PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ
