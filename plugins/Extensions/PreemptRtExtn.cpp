@@ -270,6 +270,57 @@ static void workqueueTearCallback(void* /*context*/) {
     gWqApplied = false;
 }
 
+
+// ---------------------------
+// Tracing: apply/tear
+// ---------------------------
+#define TRACING_ON_PATH "/sys/kernel/tracing/tracing_on"
+
+static bool gTracingApplied = false;
+static std::string gTracingBackup;
+
+static void tracingApplierCallback(void* /*context*/) {
+    logLine("enter tracingApplierCallback");
+
+    if (gTracingApplied) return;
+
+    gTracingBackup.clear();
+
+    if (!isWritable(TRACING_ON_PATH)) {
+        logLine("tracing_on not writable, skipping");
+        return;
+    }
+
+    if (readLineFromFile(TRACING_ON_PATH, gTracingBackup)) {
+        logLine("tracing_on old value: " + gTracingBackup);
+        int rc = writeLineToFile(TRACING_ON_PATH, "0");
+        if (rc != 0) {
+            logWriteFailure(TRACING_ON_PATH, rc);
+            gTracingBackup.clear();
+            return;
+        }
+        std::string now;
+        if (readLineFromFile(TRACING_ON_PATH, now)) {
+            logLine("verify " TRACING_ON_PATH " -> " + now);
+        }
+        gTracingApplied = true;
+    }
+}
+
+static void tracingTearCallback(void* /*context*/) {
+    if (!gTracingApplied) return;
+    logLine("enter tracingTearCallback");
+
+    int rc = writeLineToFile(TRACING_ON_PATH, gTracingBackup);
+    if (rc != 0) {
+        logWriteFailure(TRACING_ON_PATH, rc);
+    } else {
+        logLine("restored " TRACING_ON_PATH " -> " + gTracingBackup);
+    }
+    gTracingBackup.clear();
+    gTracingApplied = false;
+}
+
 // ---------------------------
 // URM registrations
 // ---------------------------
@@ -278,6 +329,7 @@ static void workqueueTearCallback(void* /*context*/) {
 //   0x00800001 -> cpufreq
 //   0x00800002 -> irqaffinity
 //   0x00800003 -> workqueue
+//   0x00800004 -> tracing
 
 URM_REGISTER_RES_APPLIER_CB(0x00800001, cpufreqGovApplierCallback)
 URM_REGISTER_RES_TEAR_CB   (0x00800001, cpufreqGovTearCallback)
@@ -287,3 +339,6 @@ URM_REGISTER_RES_TEAR_CB   (0x00800002, irqAffinityTearCallback)
 
 URM_REGISTER_RES_APPLIER_CB(0x00800003, workqueueApplierCallback)
 URM_REGISTER_RES_TEAR_CB   (0x00800003, workqueueTearCallback)
+
+URM_REGISTER_RES_APPLIER_CB(0x00800004, tracingApplierCallback)
+URM_REGISTER_RES_TEAR_CB   (0x00800004, tracingTearCallback)

@@ -168,3 +168,18 @@ SignalConfigs:
       - {ResCode: "RES_CGRP_CPU_LATENCY", Values: [4, -20]}
       - {ResCode: "RES_CGRP_LOW_MEM", Values: [4, 507256]}
       - {ResCode: "RES_CGRP_MIN_MEM", Values: [4, 116631]}
+
+  # Audio Signals
+  # 0x40400000: Power-collapse control, value = 0x1 = 1
+  # 0x40800000: Big-cluster minimum frequency, value = 0x514 = 1300
+  - SigId: "0x1200"
+    Category: "0xea"
+    SigType: 0
+    Name: "URM_SIG_PERFLOCK_Preview"
+    Enable: true
+    TargetsEnabled: ["seraph"]
+    Permissions: ["third_party", "system"]
+    Timeout: -1
+    Resources:
+      - {ResCode: "RES_CPU_DMA_LATENCY", Values: [1]}
+      - {ResCode: "0x008a000e", ResInfo: "0x00000000", Values:[1300]}
