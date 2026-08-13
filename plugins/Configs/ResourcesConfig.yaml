@@ -128,6 +128,16 @@ ResourceConfigs:
     Policy: "pass_through"
     ApplyType: "global"
 
+  - ResType: "0x80"
+    ResID: "0x0004"
+    Name: "RES_TRACING"
+    Path: "/sys/kernel/tracing/tracing_on"
+    Supported: true
+    Permissions: "third_party"
+    Modes: ["display_on", "doze"]
+    Policy: "pass_through"
+    ApplyType: "global"
+
   - ResType: "0xf0"
     ResID: "0x0001"
     Name: "RES_IRQ_AFFINE_ALL"

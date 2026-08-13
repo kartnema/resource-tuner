@@ -56,3 +56,55 @@ void irqAffinityTearCallback(void* context) {
     }
     gIrqAffBackup.clear();
 }
+
+static void setMsmPerfCpuFreq(void* context) {
+    if(context == nullptr) return;
+    Resource* resource = static_cast<Resource*>(context);
+
+    ResConfInfo* rConf = ResourceRegistry::getInstance()->getResConf(resource->getResCode());
+    if(rConf == nullptr) return;
+
+    int32_t clusterID = resource->getClusterValue();
+    std::string resourceNodePath = rConf->mResourcePath;
+
+    // Value to write
+    int32_t valueToBeWritten = resource->getValueAt(0);
+
+    // Read the current node content, e.g. "0:0 1:0 2:0 3:0 4:0"
+    std::string currentContent = AuxRoutines::readFromFile(resourceNodePath);
+
+    // Trim trailing whitespace / newline
+    currentContent.erase(currentContent.find_last_not_of(" \t\r\n") + 1);
+
+    // Parse tokens of the form "cluster:value", update the matching cluster
+    std::istringstream iss(currentContent);
+    std::string token;
+    std::string updatedContent;
+    int8_t clusterFound = false;
+
+    while(iss >> token) {
+        std::size_t colonPos = token.find(':');
+        if(colonPos != std::string::npos) {
+            int32_t tokenCluster = std::stoi(token.substr(0, colonPos));
+            if(tokenCluster == clusterID) {
+                // Replace the value for the matching cluster
+                token = std::to_string(clusterID) + ":" + std::to_string(valueToBeWritten);
+                clusterFound = true;
+            }
+        }
+        if(!updatedContent.empty()) {
+            updatedContent += " ";
+        }
+        updatedContent += token;
+    }
+
+    if(!clusterFound) {
+        return;
+    }
+
+    TYPELOGV(NOTIFY_NODE_WRITE_S, resourceNodePath.c_str(), updatedContent.c_str());
+    AuxRoutines::writeToFile(resourceNodePath, updatedContent);
+}
+
+URM_REGISTER_RES_APPLIER_CB(0x008a000d, setMsmPerfCpuFreq);
+URM_REGISTER_RES_APPLIER_CB(0x008a000e, setMsmPerfCpuFreq);

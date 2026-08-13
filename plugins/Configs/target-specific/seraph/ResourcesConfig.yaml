@@ -162,7 +162,7 @@ ResourceConfigs:
     Permissions: "third_party"
     Modes: ["display_on", "doze"]
     Policy: "pass_through"
-    ApplyType: "global"
+    ApplyType: "cluster"
 
   - ResType: "0x8a"
     ResID: "0x000e"
@@ -172,7 +172,7 @@ ResourceConfigs:
     Permissions: "third_party"
     Modes: ["display_on", "doze"]
     Policy: "pass_through"
-    ApplyType: "global"
+    ApplyType: "cluster"
 
   - ResType: "0x8a"
     ResID: "0x000f"

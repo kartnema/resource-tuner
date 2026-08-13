@@ -173,6 +173,14 @@ SignalConfigs:
       - {ResCode: "0x00040001", ResInfo: "0x00000000", Values: [2361600]}
       - {ResCode: "0x00040000", ResInfo: "0x00000100", Values: [2361600]}
       - {ResCode: "0x00040001", ResInfo: "0x00000100", Values: [2361600]}
+      - {ResCode: "RES_PM_QOS_LATENCY", ResInfo: "0x00000001", Values: [1000]}
+      - {ResCode: "RES_PM_QOS_LATENCY", ResInfo: "0x00000002", Values: [1000]}
+      - {ResCode: "RES_PM_QOS_LATENCY", ResInfo: "0x00000003", Values: [1000]}
+      - {ResCode: "RES_PM_QOS_LATENCY", ResInfo: "0x00000004", Values: [1000]}
+      - {ResCode: "RES_PM_QOS_LATENCY", ResInfo: "0x00000101", Values: [1000]}
+      - {ResCode: "RES_PM_QOS_LATENCY", ResInfo: "0x00000102", Values: [1000]}
+      - {ResCode: "RES_PM_QOS_LATENCY", ResInfo: "0x00000103", Values: [1000]}
+      - {ResCode: "RES_PM_QOS_LATENCY", ResInfo: "0x00000104", Values: [1000]}
 
   # camera close tunings
   # CPU cluster 0 Min Freq 2361600, Max Freq 2361600
@@ -189,3 +197,11 @@ SignalConfigs:
       - {ResCode: "0x00040001", ResInfo: "0x00000000", Values: [2361600]}
       - {ResCode: "0x00040000", ResInfo: "0x00000100", Values: [2361600]}
       - {ResCode: "0x00040001", ResInfo: "0x00000100", Values: [2361600]}
+      - {ResCode: "RES_PM_QOS_LATENCY", ResInfo: "0x00000001", Values: [1000]}
+      - {ResCode: "RES_PM_QOS_LATENCY", ResInfo: "0x00000002", Values: [1000]}
+      - {ResCode: "RES_PM_QOS_LATENCY", ResInfo: "0x00000003", Values: [1000]}
+      - {ResCode: "RES_PM_QOS_LATENCY", ResInfo: "0x00000004", Values: [1000]}
+      - {ResCode: "RES_PM_QOS_LATENCY", ResInfo: "0x00000101", Values: [1000]}
+      - {ResCode: "RES_PM_QOS_LATENCY", ResInfo: "0x00000102", Values: [1000]}
+      - {ResCode: "RES_PM_QOS_LATENCY", ResInfo: "0x00000103", Values: [1000]}
+      - {ResCode: "RES_PM_QOS_LATENCY", ResInfo: "0x00000104", Values: [1000]}
