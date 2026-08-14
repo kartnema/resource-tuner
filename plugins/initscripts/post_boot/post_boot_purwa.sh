@@ -4,8 +4,6 @@
 
 echo 0 > /proc/sys/kernel/sched_util_clamp_min_rt_default
 
-echo "0-3" > /sys/fs/cgroup/system.slice/cpuset.cpus
-
 echo 4 > /proc/sys/kernel/printk
 
 # Disable periodic kcompactd wakeups. We do not use THP, so having many
