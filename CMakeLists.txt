@@ -58,8 +58,8 @@ list(APPEND SERVER_LIBS
 add_executable(urm ${SERVER_EXECUTABLE} ${CMAKE_SOURCE_DIR})
 target_link_libraries(urm PUBLIC ${SERVER_LIBS})
 
-# Install bin
-install(TARGETS urm RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+# Install urm binary to /usr/sbin
+install(TARGETS urm RUNTIME DESTINATION ${CMAKE_INSTALL_SBINDIR})
 
 configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/urm.service.in
