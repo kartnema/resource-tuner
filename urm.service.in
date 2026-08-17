@@ -5,7 +5,7 @@ After=sysinit.target
 
 [Service]
 Restart=on-failure
-ExecStart=@CMAKE_INSTALL_FULL_BINDIR@/urm
+ExecStart=@CMAKE_INSTALL_FULL_SBINDIR@/urm
 ExecStartPre=-/usr/libexec/urm/initscripts/post_boot/post_boot.sh
 TimeoutStopSec=2
 Delegate=yes
