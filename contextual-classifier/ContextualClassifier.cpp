@@ -166,6 +166,47 @@ ErrCode ContextualClassifier::Terminate() {
     return RC_SUCCESS;
 }
 
+void ContextualClassifier:trackClient(int64_t handle) {
+    if(isPriority) {
+        // Don't track long-living priority clients
+        return;
+    }
+
+    if(handle != -1) {
+        this->mCurrRestuneHandles.push(
+            {this->mClientTracker, handle}
+        );
+    }
+}
+
+void ContextualClassifier:reShuffle() {
+    if(this->mCurrRestuneHandles.empty()) {
+        this->mActiveClientCount = 0;
+    }
+
+    if(this->mActiveClientCount >= this->mActiveAppThreshold &&
+        !this->mCurrRestuneHandles.empty()) {
+        uint64_t minClientId = this->mCurrRestuneHandles.front().first;
+        int8_t evictedClient = false;
+        while(!this->mCurrRestuneHandles.empty()) {
+            if(minClientId == this->mCurrRestuneHandles.front().first) {
+                int64_t handle = this->mCurrRestuneHandles.front().second;
+                if(handle > 0) {
+                    this->untuneRequestHelper(handle);
+                }
+                this->mCurrRestuneHandles.pop();
+                evictedClient = true;
+            } else {
+                break;
+            }
+        }
+
+        if(evictedClient && this->mActiveClientCount > 0) {
+            this->mActiveClientCount--;
+        }
+    }
+}
+
 void ContextualClassifier::ClassifierMain() {
     pthread_setname_np(pthread_self(), "urmClassifier");
     while (true) {
@@ -196,33 +237,13 @@ void ContextualClassifier::ClassifierMain() {
                     continue;
                 }
 
+                int8_t isPriorityClient = false; //logic;
+
                 // Step 1:
                 // Keep active client count accurate. A client can own multiple
                 // handles, so evict all handles for the oldest client together.
-                if(this->mCurrRestuneHandles.empty()) {
-                    this->mActiveClientCount = 0;
-                }
-
-                if(this->mActiveClientCount >= this->mActiveAppThreshold &&
-                   !this->mCurrRestuneHandles.empty()) {
-                    uint64_t minClientId = this->mCurrRestuneHandles.front().first;
-                    int8_t evictedClient = false;
-                    while(!this->mCurrRestuneHandles.empty()) {
-                        if(minClientId == this->mCurrRestuneHandles.front().first) {
-                            int64_t handle = this->mCurrRestuneHandles.front().second;
-                            if(handle > 0) {
-                                this->untuneRequestHelper(handle);
-                            }
-                            this->mCurrRestuneHandles.pop();
-                            evictedClient = true;
-                        } else {
-                            break;
-                        }
-                    }
-
-                    if(evictedClient && this->mActiveClientCount > 0) {
-                        this->mActiveClientCount--;
-                    }
+                if(!isPriorityClient) {
+                    this->reShuffle();
                 }
 
                 size_t handlesBeforeClient = this->mCurrRestuneHandles.size();
@@ -253,11 +274,7 @@ void ContextualClassifier::ClassifierMain() {
                     postCb((void*)&postProcessData);
 
                     // Record any Configurations made
-                    if(postProcessData.mHandleAcq != -1) {
-                        this->mCurrRestuneHandles.push(
-                            {this->mClientTracker, postProcessData.mHandleAcq}
-                        );
-                    }
+                    this->trackClient(postProcessData.mHandleAcq);
                 } else {
                     // Figure out workload type
                     int32_t contextType =
@@ -274,11 +291,7 @@ void ContextualClassifier::ClassifierMain() {
                             ev.pid,
                             ev.tgid
                         );
-                        if(handle != -1) {
-                            this->mCurrRestuneHandles.push(
-                                {this->mClientTracker, handle}
-                            );
-                        }
+                        this->trackClient(handle);
                     }
                 }
 
@@ -511,7 +524,7 @@ void ContextualClassifier::MoveAppThreadsToCGroup(pid_t incomingPID,
         // Anything to issue
         if(request->getResourcesCount() > 0) {
             // Record:
-            this->mCurrRestuneHandles.push({this->mClientTracker, request->getHandle()});
+            this->trackClient(request->getHandle());
 
             // fast path to Request Queue
             submitResProvisionRequest(request, true);
@@ -542,7 +555,7 @@ void ContextualClassifier::configureAppSignals(pid_t incomingPID,
             );
 
             if(handle != -1) {
-                this->mCurrRestuneHandles.push({this->mClientTracker, handle});
+                this->trackClient(handle);
             }
         }
     }

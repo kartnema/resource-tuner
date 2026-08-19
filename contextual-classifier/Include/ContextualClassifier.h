@@ -45,6 +45,7 @@ private:
     int8_t mDebugMode = false;
     volatile int8_t mNeedExit = false;
 
+    int8_t isPriorityClient;
     uint64_t mClientTracker;
     uint64_t mActiveClientCount;
     uint64_t mActiveAppThreshold;
@@ -96,6 +97,8 @@ private:
                              const std::string& comm);
 
     void untuneRequestHelper(int64_t handle);
+
+    void trackClient(int64_t handle);
 
 public:
     ContextualClassifier();
