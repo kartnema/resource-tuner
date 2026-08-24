@@ -205,3 +205,26 @@ SignalConfigs:
       - {ResCode: "RES_PM_QOS_LATENCY", ResInfo: "0x00000102", Values: [1000]}
       - {ResCode: "RES_PM_QOS_LATENCY", ResInfo: "0x00000103", Values: [1000]}
       - {ResCode: "RES_PM_QOS_LATENCY", ResInfo: "0x00000104", Values: [1000]}
+
+  - SigId: "0x0001"
+    Category: "0x8c"
+    Name: SIG_GST_BOOST
+    Enable: true
+    TargetsEnabled: ["qcs9100", "qcs9075", "sa8775p"]
+    Permissions: ["third_party", "system"]
+    Timeout: -1
+    Resources:
+    - {ResCode: "RES_SCALE_MIN_FREQ", ResInfo: "0x00000000", Values: [1958400]}
+    - {ResCode: "RES_SCALE_MAX_FREQ", ResInfo: "0x00000000", Values: [1958400]}
+    - {ResCode: "RES_SCALE_MIN_FREQ", ResInfo: "0x00000100", Values: [2400000]}
+    - {ResCode: "RES_SCALE_MAX_FREQ", ResInfo: "0x00000100", Values: [2400000]}
+    - {ResCode: "RES_SCALE_MIN_FREQ", ResInfo: "0x00000200", Values: [2707200]}
+    - {ResCode: "RES_SCALE_MAX_FREQ", ResInfo: "0x00000200", Values: [2707200]}
+    - {ResCode: "RES_PM_QOS_LATENCY", ResInfo: "0x00000001", Values: [1000]}
+    - {ResCode: "RES_PM_QOS_LATENCY", ResInfo: "0x00000002", Values: [1000]}
+    - {ResCode: "RES_PM_QOS_LATENCY", ResInfo: "0x00000003", Values: [1000]}
+    - {ResCode: "RES_PM_QOS_LATENCY", ResInfo: "0x00000004", Values: [1000]}
+    - {ResCode: "RES_PM_QOS_LATENCY", ResInfo: "0x00000101", Values: [1000]}
+    - {ResCode: "RES_PM_QOS_LATENCY", ResInfo: "0x00000102", Values: [1000]}
+    - {ResCode: "RES_PM_QOS_LATENCY", ResInfo: "0x00000103", Values: [1000]}
+    - {ResCode: "RES_PM_QOS_LATENCY", ResInfo: "0x00000201", Values: [1000]}
