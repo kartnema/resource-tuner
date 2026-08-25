@@ -49,6 +49,9 @@ static std::string getTimestamp() {
 #define LOG_BASE "["<<getTimestamp()<<"] "<<__func__<<":"<<__LINE__<<") "
 #define LOG_SKIP(message) std::cout<<"["<<getTimestamp()<<"] "<<__func__<<": Skipped, Reason: "<<message<<std::endl;
 
+#define LOG_ORIGINAL(node, val) std::cout<<LOG_BASE<<node<<" Original Value: "<<val<<std::endl;
+#define LOG_CONFIGURED(node, val) std::cout<<LOG_BASE<<node<<" Configured Value: "<<val<<std::endl;
+
 #define C_STOI(value) ({                                                            \
     int32_t parsedValue = -1;                                                       \
     try {                                                                           \

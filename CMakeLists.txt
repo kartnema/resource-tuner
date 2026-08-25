@@ -14,7 +14,6 @@ option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 
 # Custom Build Options
 option(BUILD_CLASSIFIER "Classifier" ON)
-option(BUILD_EXTENSIONS "Extensions" ON)
 option(BUILD_TESTS "Test Framework, Unit and Integration Tests" OFF)
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/configs)
@@ -38,10 +37,7 @@ if(BUILD_CLASSIFIER)
        ${CMAKE_CURRENT_SOURCE_DIR}/contextual-classifier/ContextualClassifierInit.cpp)
 endif()
 
-# Build Extensions conditionally
-if(BUILD_EXTENSIONS)
-  add_subdirectory(${CMAKE_SOURCE_DIR}/plugins)
-endif()
+add_subdirectory(${CMAKE_SOURCE_DIR}/plugins)
 
 # Build Tests conditionally
 if(BUILD_TESTS)

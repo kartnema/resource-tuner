@@ -3581,6 +3581,13 @@ URM_TEST(TestSingleClientTuneSignal2, {
     E_ASSERT((originalValue == originalValues[2]));
 })
 
+/**
+ * API under test: untuneSignal
+ * - A client tries to tune a Signal, which tunes multiple Resources
+ * - Verified the Resource Node is updated to the configured value
+ * - Verify that the Resource Node is reset once the Signal timeouts.
+ * Cross-Reference id: [A]
+ */
 URM_TEST(TestSignalUntuning, {
     std::string testResourceName = "/var/lib/urm/tests/nodes/sched_util_clamp_min.txt";
     int32_t testResourceOriginalValue = 300;
@@ -3625,6 +3632,96 @@ URM_TEST(TestSignalUntuning, {
     newValue = C_STOI(value);
     std::cout<<LOG_BASE<<testResourceName<<" Reset Value: "<<newValue<<std::endl;
     E_ASSERT((newValue == testResourceOriginalValue));
+})
+
+/**
+ * API under test: Retune
+ * - Client can use the Retune API to extend the duration of a previously issued tuneSignal.
+ * - Note only the client which issue the Tune Request with H1, can issue a Retune API for H1.
+ * - Here the issues a Tune Request for 8 seconds, however later Retunes it to 15 seconds.
+ * - Verify that the Configured values is applied to the Resource Node for this entire duration, i.e. till
+ *   15 seconds from the point of issuing the Retune Request.
+ * - Note, Retune API only supports extending the duration of a Request and not decreasing it.
+ * Cross-Reference id: ['R1']
+ */
+URM_TEST(TestSignalValidRetuning, {
+    ResourceHolder testResources[] = {
+        {
+            .name = "/var/lib/urm/tests/nodes/sched_util_clamp_min.txt",
+            .expectedValue = 883,
+            .originalValue = 300,
+        },
+        {
+            .name = "/var/lib/urm/tests/nodes/sched_util_clamp_max.txt",
+            .expectedValue = 920,
+            .originalValue = 684,
+        },
+        {
+            .name = "/var/lib/urm/tests/nodes/scaling_max_freq.txt",
+            .expectedValue = 1555,
+            .originalValue = 114,
+        }
+    };
+
+    std::string value;
+    int32_t originalValue, newValue;
+
+    for(int32_t i = 0; i < 3; i++) {
+        value = AuxRoutines::readFromFile(testResources[i].name);
+        originalValue = C_STOI(value);
+        LOG_ORIGINAL(testResources[i].name, originalValue);
+        E_ASSERT((originalValue == testResources[i].originalValue));
+    }
+
+    int64_t handle =
+        tuneSignal(
+            (CONSTRUCT_SIG_CODE(0x0d, 0x0005)),
+            DEFAULT_SIGNAL_TYPE,
+            8000,
+            RequestPriority::REQ_PRIORITY_HIGH,
+            "",
+            "",
+            0,
+            nullptr);
+
+    std::cout<<LOG_BASE<<"Handle Returned: "<<handle<<std::endl;
+    E_ASSERT((handle > 0));
+
+    std::this_thread::sleep_for(std::chrono::seconds(3));
+
+    for(int32_t i = 0; i < 3; i++) {
+        value = AuxRoutines::readFromFile(testResources[i].name);
+        newValue = C_STOI(value);
+        LOG_CONFIGURED(testResources[i].name, newValue);
+        E_ASSERT((newValue == testResources[i].expectedValue));
+    }
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    // The Request will expire in 4 seconds, hence the value should reset to original value
+    // However we issue a Retune Request for this handle, and change the duration to 15 seconds
+    // Hence, when we check the value after 10 seconds, the configurations should still be in effect.
+    int8_t status = retuneSignal(handle, 15000);
+    std::cout<<LOG_BASE<<"Retune Status: "<<(int32_t)status<<std::endl;
+    E_ASSERT((status == 0));
+
+    std::this_thread::sleep_for(std::chrono::seconds(10));
+    for(int32_t i = 0; i < 3; i++) {
+        value = AuxRoutines::readFromFile(testResources[i].name);
+        newValue = C_STOI(value);
+        LOG_CONFIGURED(testResources[i].name, newValue);
+        E_ASSERT((newValue == testResources[i].expectedValue));
+    }
+
+    // Wait for Request to expire
+    std::this_thread::sleep_for(std::chrono::seconds(10));
+
+    for(int32_t i = 0; i < 3; i++) {
+        value = AuxRoutines::readFromFile(testResources[i].name);
+        originalValue = C_STOI(value);
+        LOG_ORIGINAL(testResources[i].name, originalValue);
+        E_ASSERT((originalValue == testResources[i].originalValue));
+    }
 })
 
 // Observe only as of now
