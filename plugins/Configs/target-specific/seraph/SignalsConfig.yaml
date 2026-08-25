@@ -456,7 +456,21 @@ SignalConfigs:
       - {ResCode: "RES_CPU_DMA_LATENCY", Values: [1]}
       - {ResCode: "RES_SCALE_MIN_FREQ", ResInfo: "CLUSTER_BIG_ALL_CORES", Values: [1300000]}  # 0x40800000 RES_MSM_PERF_CPU_MIN_FREQ (cluster1=1300MHz)
 
-  # Id: 0x00001506
+  # video decode 30 fps non secure content tunings 
+  # Applicable for decoder if FPS range is (35 to 65) and is non secure
+  # GPU - min pwrlevel 9 (freq 222 Mhz)
+  # GPU - max pwrlevel 0 (freq 967 Mhz)
+  - SigId: "0x1503"
+    Category: "0xea"
+    SigType: 0
+    Name: "URM_SIG_VIDEO_DECODE_30FPS_NONSECURE"
+    Enable: true
+    Permissions: ["third_party", "system"]
+    Timeout: -1
+    Resources:
+      - {ResCode: "0x00050008", Values: [9]}   # /sys/class/kgsl/kgsl-3d0/min_pwrlevel (GPU min pwrlevel 9 = 222 MHz)
+      - {ResCode: "0x00050007", Values: [0]}   # /sys/class/kgsl/kgsl-3d0/max_pwrlevel (GPU max pwrlevel 0 = 967 MHz)
+
   # video decode 60 fps non secure content tunings
   # Applicable for decoder if FPS range is (35 to 65) and is non secure
   # GPU - min pwrlevel 9 (freq 222 Mhz)
@@ -467,12 +481,11 @@ SignalConfigs:
     Name: "URM_SIG_VIDEO_DECODE_60FPS_NONSECURE_HIGH"
     Enable: true
     Permissions: ["third_party", "system"]
-    Timeout: 0
+    Timeout: -1
     Resources:
       - {ResCode: "0x00050008", Values: [9]}   # /sys/class/kgsl/kgsl-3d0/min_pwrlevel (GPU min pwrlevel 9 = 222 MHz)
       - {ResCode: "0x00050007", Values: [0]}   # /sys/class/kgsl/kgsl-3d0/max_pwrlevel (GPU max pwrlevel 0 = 967 MHz)
 
-  # Id: 0x00001502
   # video decode 60 fps non secure content tunings
   # Applicable for decoder if FPS range is (1 to 34) and is non secure
   # GPU - min pwrlevel 9 (freq 222 Mhz)
@@ -483,12 +496,11 @@ SignalConfigs:
     Name: "URM_SIG_VIDEO_DECODE_60FPS_NONSECURE"
     Enable: true
     Permissions: ["third_party", "system"]
-    Timeout: 0
+    Timeout: -1
     Resources:
       - {ResCode: "0x00050008", Values: [9]}   # /sys/class/kgsl/kgsl-3d0/min_pwrlevel (GPU min pwrlevel 9 = 222 MHz)
       - {ResCode: "0x00050007", Values: [0]}   # /sys/class/kgsl/kgsl-3d0/max_pwrlevel (GPU max pwrlevel 0 = 967 MHz)
 
-  # Id: 0x00001504
   # video decode 60 fps non secure content tunings
   # Applicable for decoder if FPS range is (1 to 34) and is secure
   # GPU - min pwrlevel 9 (freq 222 Mhz)
@@ -499,7 +511,7 @@ SignalConfigs:
     Name: "URM_SIG_VIDEO_DECODE_60FPS_SECURE"
     Enable: true
     Permissions: ["third_party", "system"]
-    Timeout: 0
+    Timeout: -1
     Resources:
       - {ResCode: "0x00050008", Values: [9]}   # /sys/class/kgsl/kgsl-3d0/min_pwrlevel (GPU min pwrlevel 9 = 222 MHz)
       - {ResCode: "0x00050007", Values: [0]}   # /sys/class/kgsl/kgsl-3d0/max_pwrlevel (GPU max pwrlevel 0 = 967 MHz)
