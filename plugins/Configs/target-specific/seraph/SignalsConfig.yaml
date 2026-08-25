@@ -468,8 +468,8 @@ SignalConfigs:
     Permissions: ["third_party", "system"]
     Timeout: -1
     Resources:
-      - {ResCode: "RES_KGSL_MIN_PWRLEVEL", Values: [9]}   # /sys/class/kgsl/kgsl-3d0/min_pwrlevel (GPU min pwrlevel 9 = 222 MHz)
-      - {ResCode: "RES_KGSL_MAX_PWRLEVEL", Values: [0]}   # /sys/class/kgsl/kgsl-3d0/max_pwrlevel (GPU max pwrlevel 0 = 967 MHz)
+      - {ResCode: "0x00050008", Values: [9]}   # /sys/class/kgsl/kgsl-3d0/min_pwrlevel (GPU min pwrlevel 9 = 222 MHz)
+      - {ResCode: "0x00050007", Values: [0]}   # /sys/class/kgsl/kgsl-3d0/max_pwrlevel (GPU max pwrlevel 0 = 967 MHz)
 
   # video decode 60 fps non secure content tunings
   # Applicable for decoder if FPS range is (35 to 65) and is non secure
