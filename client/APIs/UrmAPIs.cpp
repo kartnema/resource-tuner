@@ -489,3 +489,8 @@ int8_t relaySignal(uint32_t sigId,
 
     return -1;
 }
+
+// Retune / Renew Configurations made through tuneSignal or tuneResources
+int8_t retuneSignal(int64_t handle, int64_t duration) {
+    return retuneResources(handle, duration);
+}
