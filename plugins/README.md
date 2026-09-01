@@ -329,4 +329,4 @@ For questions, issues, or discussions:
 
 ## License
 
-*userspace-resource-manager-extensions* is licensed under the [BSD-3-Clause-Clear license](https://spdx.org/licenses/BSD-3-Clause-Clear.html). See [LICENSE.txt](LICENSE.txt) for the full license text.
+*userspace-resource-manager-extensions* is licensed under the [BSD-3-Clause license](https://spdx.org/licenses/BSD-3-Clause.html). See [LICENSE.txt](LICENSE.txt) for the full license text.
