@@ -45,9 +45,11 @@ private:
     int8_t mDebugMode = false;
     volatile int8_t mNeedExit = false;
 
+    int8_t mIsPriorityClient;
     uint64_t mClientTracker;
     uint64_t mActiveClientCount;
     uint64_t mActiveAppThreshold;
+
     NetLinkComm mNetLinkComm;
     Inference* mInference;
     std::queue<std::pair<uint64_t, int64_t>> mCurrRestuneHandles;
@@ -64,6 +66,7 @@ private:
 
     std::unordered_set<std::string> mIgnoredProcesses;
     std::unordered_set<std::string> mAllowedProcesses;
+    std::unordered_set<std::string> mPriorityClients;
 
     void ClassifierMain();
     int32_t HandleProcEv();
@@ -77,8 +80,11 @@ private:
     // Fetch signal configuration info
     uint32_t GetSignalIDForWorkload(int32_t contextType);
 
-    // blacklisting mechanism
-    void LoadIgnoredProcesses();
+    // Methods for loading static proc data (allowlist, blocklist, priorities)
+    void loadProcessNames(const std::string& fileName,
+                          std::unordered_set<std::string>& names);
+    void loadStaticProcData();
+    int8_t checkClientPriority(const std::string& procName);
     int8_t shouldProcBeIgnored(int32_t evType, pid_t pid);
 
     // Transparently get the classification object, without expecting the client
@@ -96,6 +102,9 @@ private:
                              const std::string& comm);
 
     void untuneRequestHelper(int64_t handle);
+
+    void reShuffle();
+    void trackClient(int64_t handle);
 
 public:
     ContextualClassifier();
