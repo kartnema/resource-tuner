@@ -12,4 +12,4 @@ Delegate=yes
 Slice=urm.slice
 
 [Install]
-WantedBy=basic.target multi-user.target
+WantedBy=multi-user.target
