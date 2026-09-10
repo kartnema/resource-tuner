@@ -133,5 +133,9 @@ std::string TestAggregator::getBaseTestNodePath() {
 }
 
 void TestAggregator::setBaseTestNodePath(const std::string& path) {
-    mBaseTestNodesPath = path;
+    if(path.back() == '/') {
+        mBaseTestNodesPath = path;
+    } else {
+        mBaseTestNodesPath = path + '/';
+    }
 }
