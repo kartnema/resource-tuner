@@ -5,7 +5,7 @@ set(CMAKE_STANDARD_REQUIRED True)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 add_compile_options(-Wall -Wextra)
 
-project("URM")
+project("URM" VERSION 0.4.9)
 
 include(GNUInstallDirs)
 find_package(PkgConfig REQUIRED)
@@ -68,6 +68,14 @@ if(PC_SYSTEMD_FOUND)
   pkg_get_variable(SYSTEMD_SYSTEM_UNIT_DIR systemd systemdsystemunitdir)
   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/urm.service DESTINATION ${SYSTEMD_SYSTEM_UNIT_DIR})
 endif()
+
+# Install pkg-config file
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/urm.pc.in
+    ${CMAKE_CURRENT_BINARY_DIR}/urm.pc
+    @ONLY)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/urm.pc
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 
 # Install manpages
 install(
