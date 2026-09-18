@@ -1,4 +1,6 @@
 #!/bin/bash
+# Copyright (c) 2026-2027, Qualcomm Innovation Center, Inc. All rights reserved.
+# SPDX-License-Identifier: BSD-3-Clause
 
 nodes_root="/usr/share/urm"
 TEST_NODES_DIR="$nodes_root/tests/nodes"
