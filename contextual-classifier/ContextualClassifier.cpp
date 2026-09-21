@@ -24,9 +24,10 @@
 #include "RestuneInternal.h"
 #include "ContextualClassifier.h"
 #include "ClientGarbageCollector.h"
+#include "Config.h"
 
 #define CLASSIFIER_TAG "CONTEXTUAL_CLASSIFIER"
-#define CLASSIFIER_CONFIGS_DIR "/etc/urm/classifier/"
+#define CLASSIFIER_CONFIGS_DIR URM_CLASSIFIER_DIR
 
 static const std::string FT_MODEL_PATH =
     CLASSIFIER_CONFIGS_DIR "floret_model_supervised.bin";

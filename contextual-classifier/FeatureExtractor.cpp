@@ -18,8 +18,8 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#define PRUNED_DIR "/var/cache/pruned"
-#define UNFILTERED_DIR "/var/cache/unfiltered"
+#define PRUNED_DIR URM_CACHE_PRUNED_DIR
+#define UNFILTERED_DIR URM_CACHE_UNFILTERED_DIR
 #define SCANNER_TAG "FeatureExtractor"
 #define LOG_LINES 20
 

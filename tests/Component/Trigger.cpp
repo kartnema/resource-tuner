@@ -5,15 +5,16 @@
 
 #include "URMTests.h"
 #include "Extensions.h"
+#include "Config.h"
 
 #define TEST_CLASS "COMPONENT"
 
-URM_REGISTER_CONFIG(RESOURCE_CONFIG, "/usr/share/urm/tests/configs/ResourcesConfig.yaml")
-URM_REGISTER_CONFIG(PROPERTIES_CONFIG, "/usr/share/urm/tests/configs/PropertiesConfig.yaml")
-URM_REGISTER_CONFIG(SIGNALS_CONFIG, "/usr/share/urm/tests/configs/SignalsConfig.yaml")
-URM_REGISTER_CONFIG(TARGET_CONFIG, "/usr/share/urm/tests/configs/TargetConfig.yaml")
-URM_REGISTER_CONFIG(INIT_CONFIG, "/usr/share/urm/tests/configs/InitConfig.yaml")
-URM_REGISTER_CONFIG(APP_CONFIG, "/usr/share/urm/tests/configs/PerApp.yaml")
+URM_REGISTER_CONFIG(RESOURCE_CONFIG, URM_TEST_DATA_DIR "configs/ResourcesConfig.yaml")
+URM_REGISTER_CONFIG(PROPERTIES_CONFIG, URM_TEST_DATA_DIR "configs/PropertiesConfig.yaml")
+URM_REGISTER_CONFIG(SIGNALS_CONFIG, URM_TEST_DATA_DIR "configs/SignalsConfig.yaml")
+URM_REGISTER_CONFIG(TARGET_CONFIG, URM_TEST_DATA_DIR "configs/TargetConfig.yaml")
+URM_REGISTER_CONFIG(INIT_CONFIG, URM_TEST_DATA_DIR "configs/InitConfig.yaml")
+URM_REGISTER_CONFIG(APP_CONFIG, URM_TEST_DATA_DIR "configs/PerApp.yaml")
 
 
 int32_t main(int32_t argc, char* argv[]) {

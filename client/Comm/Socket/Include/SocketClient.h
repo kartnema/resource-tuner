@@ -15,8 +15,9 @@
 #include "Utils.h"
 #include "ClientEndpoint.h"
 #include "ErrCodes.h"
+#include "Config.h"
 
-#define RESTUNE_SOCKET_PATH "/run/restune_sock"
+#define RESTUNE_SOCKET_PATH URM_SOCKET_PATH
 
 class SocketClient : public ClientEndpoint {
 private:

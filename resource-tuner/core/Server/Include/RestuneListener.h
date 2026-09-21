@@ -22,8 +22,9 @@
 #include "UrmSettings.h"
 #include "ErrCodes.h"
 #include "Logger.h"
+#include "Config.h"
 
-#define RESTUNE_SOCKET_PATH "/run/restune_sock"
+#define RESTUNE_SOCKET_PATH URM_SOCKET_PATH
 
 static const uint32_t maxEvents = 128;
 

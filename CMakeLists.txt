@@ -16,6 +16,25 @@ option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 option(BUILD_CLASSIFIER "Classifier" ON)
 option(BUILD_TESTS "Test Framework, Unit and Integration Tests" OFF)
 
+# Base directory for common/target/classifier data
+# Override with -DURM_DATA_DIR=<path> at configure time.
+set(URM_DATA_DIR "${CMAKE_INSTALL_FULL_SYSCONFDIR}/urm" CACHE PATH
+    "Base directory for common/target/classifier data")
+
+# Directory for host-specific user config overrides.
+# Override with -DURM_CUSTOM_DIR=<path> at configure time.
+set(URM_CUSTOM_DIR "${CMAKE_INSTALL_FULL_SYSCONFDIR}/urm/custom" CACHE PATH
+    "Directory for host-specific user config overrides")
+
+# Directory for runtime/volatile state
+# Override with -DURM_RUNSTATEDIR=<path> at configure time.
+set(URM_RUNSTATEDIR "/run/urm" CACHE PATH "Directory for runtime state files")
+
+# Directory for contextual-classifier cache (pruned/unfiltered)
+# Override with -DURM_CACHE_DIR=<path> at configure time.
+set(URM_CACHE_DIR "/var/cache/urm" CACHE PATH
+    "Directory for classifier feature-pruning cache")
+
 add_subdirectory(${CMAKE_SOURCE_DIR}/configs)
 add_subdirectory(${CMAKE_SOURCE_DIR}/modula)
 add_subdirectory(${CMAKE_SOURCE_DIR}/client)
@@ -67,6 +86,20 @@ pkg_check_modules(PC_SYSTEMD QUIET systemd)
 if(PC_SYSTEMD_FOUND)
   pkg_get_variable(SYSTEMD_SYSTEM_UNIT_DIR systemd systemdsystemunitdir)
   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/urm.service DESTINATION ${SYSTEMD_SYSTEM_UNIT_DIR})
+endif()
+
+# Ensure URM_RUNSTATEDIR (/run/urm) and URM_CACHE_DIR (/var/cache/urm) exist
+# before first use. Only installed on systemd builds
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/urm-tmpfiles.conf.in
+    ${CMAKE_CURRENT_BINARY_DIR}/urm-tmpfiles.conf
+@ONLY)
+
+if(PC_SYSTEMD_FOUND)
+  pkg_get_variable(SYSTEMD_TMPFILES_DIR systemd tmpfilesdir)
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/urm-tmpfiles.conf
+          DESTINATION ${SYSTEMD_TMPFILES_DIR}
+          RENAME urm.conf)
 endif()
 
 # Install pkg-config file

@@ -9,11 +9,12 @@
 #include "URMTests.h"
 #include "TestUtils.h"
 #include "UrmPlatformAL.h"
+#include "Config.h"
 
 // Test configuration and paths
 #define TEST_CLASS "INTEGRATION"
 #define TEST_SUBCAT "CC_INTEGRATION"
-#define CLASSIFIER_CONFIGS_DIR "/etc/urm/classifier/"
+#define CLASSIFIER_CONFIGS_DIR URM_CLASSIFIER_DIR
 
 // Path to the Floret supervised learning model binary
 static const std::string FT_MODEL_PATH = CLASSIFIER_CONFIGS_DIR "floret_model_supervised.bin";

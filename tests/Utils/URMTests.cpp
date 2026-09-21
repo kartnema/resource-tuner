@@ -5,6 +5,7 @@
 #include <fstream>
 #include <algorithm>
 
+#include "Config.h"
 #include "URMTests.h"
 
 #define TESTS_LOG_HTML "tests_report.html"
@@ -14,7 +15,7 @@ uint32_t TestAggregator::mTestsCount = 0;
 int32_t TestAggregator::mFailCount = 0;
 int32_t TestAggregator::mSkipCount = 0;
 int32_t TestAggregator::mPassCount = 0;
-std::string TestAggregator::mBaseTestNodesPath = "/usr/share/urm/tests/nodes/";
+std::string TestAggregator::mBaseTestNodesPath = URM_TEST_DATA_DIR "nodes/";
 
 std::map<std::string, URMTest> TestAggregator::mTests {};
 

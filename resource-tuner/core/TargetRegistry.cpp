@@ -4,9 +4,10 @@
 #include "TargetRegistry.h"
 #include "UrmSettings.h"
 #include "RestuneDBus.h"
+#include "Config.h"
 
 #define JOURNALD_CONF "/etc/systemd/journald.conf"
-#define JOURNALD_URM_CONF "/etc/urm/journald_modified_conf"
+#define JOURNALD_URM_CONF URM_RUNSTATE_DIR "journald_modified_conf"
 
 // Create all the CGroups specified via InitConfig.yaml during the init phase.
 static ErrCode createCGroup(CGroupConfigInfo* cGroupConfig) {

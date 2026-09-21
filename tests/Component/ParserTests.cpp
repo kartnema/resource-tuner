@@ -6,6 +6,7 @@
 #include "ErrCodes.h"
 #include "TestUtils.h"
 #include "Extensions.h"
+#include "Config.h"
 #include "RestuneParser.h"
 #include "SignalRegistry.h"
 #include "RestuneInternal.h"
@@ -19,7 +20,7 @@ URM_TEST(ResourceParsingTests, {
     {
         ErrCode parsingStatus = RC_SUCCESS;
         RestuneParser configProcessor;
-        parsingStatus = configProcessor.parseResourceConfigs("/usr/share/urm/tests/configs/ResourcesConfig.yaml");
+        parsingStatus = configProcessor.parseResourceConfigs(URM_TEST_DATA_DIR "configs/ResourcesConfig.yaml");
 
         E_ASSERT((ResourceRegistry::getInstance() != nullptr));
         E_ASSERT((parsingStatus == RC_SUCCESS));
@@ -76,7 +77,7 @@ URM_TEST(SignalParsingTests, {
     {
         ErrCode parsingStatus = RC_SUCCESS;
         RestuneParser configProcessor;
-        parsingStatus = configProcessor.parseSignalConfigs("/usr/share/urm/tests/configs/SignalsConfig.yaml");
+        parsingStatus = configProcessor.parseSignalConfigs(URM_TEST_DATA_DIR "configs/SignalsConfig.yaml");
 
         E_ASSERT((SignalRegistry::getInstance() != nullptr));
         E_ASSERT((parsingStatus == RC_SUCCESS));
@@ -400,7 +401,7 @@ URM_TEST(InitConfigParsingTests, {
 
     ErrCode parsingStatus = RC_SUCCESS;
     RestuneParser configProcessor;
-    parsingStatus = configProcessor.parseInitConfigs("/usr/share/urm/tests/configs/InitConfig.yaml");
+    parsingStatus = configProcessor.parseInitConfigs(URM_TEST_DATA_DIR "configs/InitConfig.yaml");
 
     E_ASSERT((targetRegistry != nullptr));
     E_ASSERT((parsingStatus == RC_SUCCESS));
@@ -477,7 +478,7 @@ URM_TEST(PropertyParsingTests, {
         ErrCode parsingStatus = RC_SUCCESS;
         RestuneParser configProcessor;
 
-        parsingStatus = configProcessor.parsePropertiesConfigs("/usr/share/urm/tests/configs/PropertiesConfig.yaml");
+        parsingStatus = configProcessor.parsePropertiesConfigs(URM_TEST_DATA_DIR "configs/PropertiesConfig.yaml");
         E_ASSERT((PropertiesRegistry::getInstance() != nullptr));
         E_ASSERT((parsingStatus == RC_SUCCESS));
     }
@@ -546,7 +547,7 @@ URM_TEST(TargetRestuneParserTests, {
         UrmSettings::targetConfigs.targetName = "TestDevice";
         ErrCode parsingStatus = RC_SUCCESS;
         RestuneParser configProcessor;
-        parsingStatus = configProcessor.parseTargetConfigs("/usr/share/urm/tests/configs/TargetConfigDup.yaml");
+        parsingStatus = configProcessor.parseTargetConfigs(URM_TEST_DATA_DIR "configs/TargetConfigDup.yaml");
 
         E_ASSERT((targetRegistry != nullptr));
         E_ASSERT((parsingStatus == RC_SUCCESS));
@@ -585,7 +586,7 @@ URM_TEST(ExtFeaturesParsingTests, {
         ErrCode parsingStatus = RC_SUCCESS;
         RestuneParser configProcessor;
 
-        parsingStatus = configProcessor.parseExtFeaturesConfigs("/usr/share/urm/tests/configs/ExtFeaturesConfig.yaml");
+        parsingStatus = configProcessor.parseExtFeaturesConfigs(URM_TEST_DATA_DIR "configs/ExtFeaturesConfig.yaml");
         E_ASSERT((ExtFeaturesRegistry::getInstance() != nullptr));
         E_ASSERT((parsingStatus == RC_SUCCESS));
     }
@@ -624,7 +625,7 @@ URM_TEST(ExtFeaturesParsingTests, {
 URM_TEST(ResourceParsingTestsAddOn, {
     {
         ErrCode parsingStatus = RC_SUCCESS;
-        std::string additionalResources = "/usr/share/urm/tests/configs/ResourcesConfigAddOn.yaml";
+        std::string additionalResources = URM_TEST_DATA_DIR "configs/ResourcesConfigAddOn.yaml";
 
         RestuneParser configProcessor;
         parsingStatus = configProcessor.parseResourceConfigs(additionalResources);
@@ -719,8 +720,8 @@ URM_TEST(SignalParsingTestsAddOn, {
         ErrCode parsingStatus = RC_SUCCESS;
         RestuneParser configProcessor;
 
-        std::string signalsClassA = "/usr/share/urm/tests/configs/SignalsConfig.yaml";
-        std::string signalsClassB = "/usr/share/urm/tests/configs/SignalsConfigAddOn.yaml";
+        std::string signalsClassA = URM_TEST_DATA_DIR "configs/SignalsConfig.yaml";
+        std::string signalsClassB = URM_TEST_DATA_DIR "configs/SignalsConfigAddOn.yaml";
 
         parsingStatus = configProcessor.parseSignalConfigs(signalsClassA);
         parsingStatus = configProcessor.parseSignalConfigs(signalsClassB);
@@ -925,7 +926,7 @@ URM_TEST(AppConfigParserTests, {
     ErrCode parsingStatus = RC_SUCCESS;
     RestuneParser configProcessor;
 
-    std::string perAppConfPath = "/usr/share/urm/tests/configs/PerApp.yaml";
+    std::string perAppConfPath = URM_TEST_DATA_DIR "configs/PerApp.yaml";
     parsingStatus = configProcessor.parsePerAppConfigs(perAppConfPath);
 
     E_ASSERT((AppConfigs::getInstance() != nullptr));
