@@ -5,6 +5,8 @@ After=sysinit.target
 
 [Service]
 Restart=on-failure
+RuntimeDirectory=urm
+RuntimeDirectoryMode=0755
 ExecStart=@CMAKE_INSTALL_FULL_SBINDIR@/urm
 ExecStartPre=-/usr/libexec/urm/initscripts/post_boot/post_boot.sh
 TimeoutStopSec=2
