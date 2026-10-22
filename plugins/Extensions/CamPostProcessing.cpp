@@ -1,16 +1,15 @@
 // Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
 // SPDX-License-Identifier: BSD-3-Clause
 
-#include <string>
-#include <dirent.h>
-#include <fstream>
-#include <sstream>
-#include <algorithm>
-#include <memory>
 #include <mutex>
+#include <memory>
+#include <string>
 #include <cerrno>
 #include <cstring>
-#include <sched.h>
+#include <sstream>
+#include <fstream>
+#include <dirent.h>
+#include <algorithm>
 
 #include "Helpers.h"
 
@@ -395,15 +394,9 @@ void PostProcessingBlock::PostProcess(pid_t pid,
 std::once_flag PostProcessingBlock::mInitFlag;
 std::unique_ptr<PostProcessingBlock> PostProcessingBlock::mInstance = nullptr;
 
-static void moveCrtcThreads() {
+static void listCrtcThreads(std::vector<uint32_t>& crtcThreads) {
     DIR* dir = opendir("/proc");
     if(dir == nullptr) return;
-
-    cpu_set_t mask;
-    CPU_ZERO(&mask);
-    for(int32_t i = 0; i <= 5; i++) {
-        CPU_SET(i, &mask);
-    }
 
     struct dirent* entry = nullptr;
     while((entry = readdir(dir)) != nullptr) {
@@ -414,11 +407,8 @@ static void moveCrtcThreads() {
         std::string comm = "";
         if(!readLineFromFile(commPath, comm)) continue;
 
-        if(comm.find("crtc_event:") != 0) continue;
-
-        TYPELOGV(NOTIFY_NODE_WRITE, "sched_setaffinity()", pid);
-        if(sched_setaffinity(pid, sizeof(mask), &mask) == -1) {
-            TYPELOGV(ERRNO_LOG, "sched_setaffinity", strerror(errno));
+        if(comm.find("crtc_event:") == 0) {
+            crtcThreads.push_back(pid);
         }
     }
 
@@ -442,12 +432,15 @@ static void WorkloadPostprocessCallback(void* context) {
     uint32_t* extraArgs = nullptr;
     PostProcessingBlock::getInstance().PostProcess(pid, sigId, sigType, &extraArgs);
 
-    int64_t handle =
-        acquireSignal(sigId, sigType, pid, pid, SIGNAL_EXTRA_ATTRS_COUNT, extraArgs);
-    cbData->mHandleAcq = handle;
+    std::vector<uint32_t> crtcThreads;
+    listCrtcThreads(crtcThreads);
 
-    // Move the crtc threads to cluster 0
-    moveCrtcThreads();
+    cbData->mHandlesAcqCount = 2;
+    cbData->mHandlesAcq = new (std::nothrow) int64_t[cbData->mHandlesAcqCount];
+    cbData->mHandlesAcq[0] =
+        acquireSignal(sigId, sigType, pid, pid, SIGNAL_EXTRA_ATTRS_COUNT, extraArgs);
+    cbData->mHandlesAcq[1] =
+        acquireSignal(sigId, sigType, pid, pid, crtcThreads.size(), crtcThreads.data());
 }
 
 __attribute__((constructor))

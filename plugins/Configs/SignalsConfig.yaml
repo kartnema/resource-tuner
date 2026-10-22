@@ -38,7 +38,7 @@ SignalConfigs:
     Permissions: ["system", "third_party"]
     Timeout: -1
     Resources:
-      - {ResCode: "RES_PER_TASK_AFFINITY", Values: [0, 1, 2, 3, 4, 5, "*"]}
+      - {ResCode: "RES_PER_TASK_AFFINITY", ResInfo: "0x00000000", Values: ["*"]}
 
   - SigId: "0x0123"
     Category: "0xf1"
