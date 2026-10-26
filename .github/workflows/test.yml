@@ -1,0 +1,233 @@
+name: Tests
+
+on:
+  workflow_call:
+    inputs:
+      build_id:
+        required: true
+        type: string
+      pr_number:
+        required: false
+        type: string
+        description: "Pull request number. Added to the LAVA job metadata for PR builds"
+      pr_url:
+        required: false
+        type: string
+        description: "Pull request URL. Added to the LAVA job metadata for PR builds"
+    outputs:
+      summary_ids:
+        description: "IDs of the test summary artifact"
+        value: ${{ jobs.publish-lava-summary.outputs.summary_id }}
+    secrets:
+      LAVATOKEN:
+        required: false
+        description: "Token used to submit jobs to the LAVA lab"
+
+env:
+  LAVA_DISTRO_NAME: userspace-resource-manager
+  LAVA_PROJECT: userspace-resource-manager
+  LAVA_TESTPLAN: pre-merge
+  LAVA_TEST_PLANS_REF: e8001131dd21e4d3250f04febaca3f73270cf32f
+  TESTKIT_REF: 3b2f942907843cd826e767ce2ca069d4bc2d64ff
+
+jobs:
+  check-lava-token:
+    name: Check LAVA token
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify LAVATOKEN
+        env:
+          LAVATOKEN: ${{ secrets.LAVATOKEN }}
+        run: |
+          if [ -z "${LAVATOKEN}" ]; then
+            echo "LAVATOKEN is not configured. Add the repository secret before enabling this as a required PR check."
+            exit 1
+          fi
+
+  prepare-env:
+    name: Prepare environment
+    needs: [check-lava-token]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print refs
+        shell: bash
+        run: |
+          echo "lava-test-plans ref: ${{ env.LAVA_TEST_PLANS_REF }}"
+          echo "qcom-linux-testkit ref: ${{ env.TESTKIT_REF }}"
+    outputs:
+      lava-test-plans-ref: "${{ env.LAVA_TEST_PLANS_REF }}"
+      testkit-ref: "${{ env.TESTKIT_REF }}"
+
+  prepare-lava-jobs:
+    name: "Prepare LAVA jobs"
+    needs: [prepare-env]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      jobmatrix: ${{ steps.combine-jobmatrix.outputs.jobmatrix }}
+    steps:
+      - name: Download modified rootfs URLs
+        uses: actions/download-artifact@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ inputs.build_id }}
+          pattern: rootfs-url_*
+
+      - name: Read modified rootfs URLs
+        id: rootfs-urls
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          read_rootfs_url() {
+            local machine="$1"
+            local output="$2"
+            local path="rootfs-url_${machine}/rootfs-url_${machine}"
+
+            if [ ! -s "${path}" ]; then
+              echo "Modified rootfs URL artifact is missing or empty for ${machine}: ${path}"
+              exit 1
+            fi
+
+            printf '%s=%s\n' "${output}" "$(cat "${path}")" >> "${GITHUB_OUTPUT}"
+          }
+
+          read_rootfs_url "iq-9075-evk" "iq_9075_evk"
+          read_rootfs_url "rb3gen2-core-kit" "rb3gen2_core_kit"
+
+      - name: Render LAVA jobs for iq-9075-evk
+        id: lava-test-plans-iq-9075-evk
+        uses: qualcomm-linux/lava-test-plans@e8001131dd21e4d3250f04febaca3f73270cf32f
+        with:
+          machines: iq-9075-evk
+          distro_name: ${{ env.LAVA_DISTRO_NAME }}
+          build_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ inputs.build_id }}
+          image_type: qcom-multimedia-image
+          os_info: qcom-distro
+          prefix: premerge-iq-9075-evk
+          project: ${{ env.LAVA_PROJECT }}
+          testplan: ${{ env.LAVA_TESTPLAN }}
+          ref: ${{ needs.prepare-env.outputs.lava-test-plans-ref }}
+          testkit_ref: ${{ needs.prepare-env.outputs.testkit-ref }}
+          pr_number: ${{ inputs.pr_number }}
+          pr_url: ${{ inputs.pr_url }}
+          variables: |
+            AUTO_LOGIN_PASSWORD_PROMPT=Password
+            AUTO_LOGIN_PASSWORD=oelinux123
+            DOCKER_IMAGE_POSTPROCESS=ghcr.io/foundriesio/lava-lmp-sign:main
+            ROOTFS_URL=${{ steps.rootfs-urls.outputs.iq_9075_evk }}
+
+      - name: Reset rendered jobs workspace
+        shell: bash
+        run: rm -rf out
+
+      - name: Render LAVA jobs for rb3gen2-core-kit
+        id: lava-test-plans-rb3gen2-core-kit
+        uses: qualcomm-linux/lava-test-plans@e8001131dd21e4d3250f04febaca3f73270cf32f
+        with:
+          machines: rb3gen2-core-kit
+          distro_name: ${{ env.LAVA_DISTRO_NAME }}
+          build_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ inputs.build_id }}
+          image_type: qcom-multimedia-image
+          os_info: qcom-distro
+          prefix: premerge-rb3gen2-core-kit
+          project: ${{ env.LAVA_PROJECT }}
+          testplan: ${{ env.LAVA_TESTPLAN }}
+          ref: ${{ needs.prepare-env.outputs.lava-test-plans-ref }}
+          testkit_ref: ${{ needs.prepare-env.outputs.testkit-ref }}
+          pr_number: ${{ inputs.pr_number }}
+          pr_url: ${{ inputs.pr_url }}
+          variables: |
+            AUTO_LOGIN_PASSWORD_PROMPT=Password
+            AUTO_LOGIN_PASSWORD=oelinux123
+            DOCKER_IMAGE_POSTPROCESS=ghcr.io/foundriesio/lava-lmp-sign:main
+            ROOTFS_URL=${{ steps.rootfs-urls.outputs.rb3gen2_core_kit }}
+
+      - name: Combine LAVA job matrices
+        id: combine-jobmatrix
+        shell: bash
+        env:
+          IQ_JOBMATRIX: "${{ steps.lava-test-plans-iq-9075-evk.outputs.jobmatrix }}"
+          RB3_JOBMATRIX: "${{ steps.lava-test-plans-rb3gen2-core-kit.outputs.jobmatrix }}"
+        run: |
+          set -euo pipefail
+
+          IQ_JOBMATRIX="${IQ_JOBMATRIX:-{}}"
+          RB3_JOBMATRIX="${RB3_JOBMATRIX:-{}}"
+
+          JOBMATRIX="$(jq -c -n \
+            --argjson iq "${IQ_JOBMATRIX}" \
+            --argjson rb3 "${RB3_JOBMATRIX}" \
+            '{target: (($iq.target // []) + ($rb3.target // []))}')"
+
+          if [ "$(echo "${JOBMATRIX}" | jq '.target | length')" -eq 0 ]; then
+            echo "No LAVA job YAML files were rendered"
+            exit 1
+          fi
+
+          echo "${JOBMATRIX}"
+          echo "jobmatrix=${JOBMATRIX}" >> "${GITHUB_OUTPUT}"
+
+  submit-lava-job:
+    name: "LAVA ${{ matrix.target.name }}"
+    needs: [prepare-lava-jobs]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    strategy:
+      matrix: ${{ fromJson(needs.prepare-lava-jobs.outputs.jobmatrix) }}
+    steps:
+      - name: Download job templates
+        uses: actions/download-artifact@v7
+        with:
+          name: ${{ matrix.target.artifact }}
+
+      - name: Submit ${{ matrix.target.name }}
+        timeout-minutes: 120
+        uses: foundriesio/lava-action@v14
+        with:
+          lava_token: ${{ secrets.LAVATOKEN }}
+          lava_url: 'lava.infra.foundries.io'
+          job_definition: ${{ matrix.target.path }}
+          wait_for_job: true
+          fail_action_on_failure: true
+          fail_action_on_incomplete: true
+          save_result_as_artifact: true
+          save_job_details: true
+          result_file_name: "${{ matrix.target.result_file }}"
+          test_job_file_name_prefix: "userspace-resource-manager-"
+
+  publish-lava-summary:
+    name: "Publish LAVA Summary"
+    needs: [submit-lava-job]
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+      checks: write
+      pull-requests: write
+    outputs:
+      summary_id: ${{ steps.generate-summary.outputs.artifact_id }}
+    steps:
+      - name: Generate Summary
+        id: generate-summary
+        uses: qualcomm/qcom-reusable-workflows/.github/actions/test-job-summary@v2.0.15
+        with:
+          build_id: ${{ github.run_id }}
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          prefix: "userspace-resource-manager-test-job*"
+          summary_file_name: "userspace-resource-manager-test_job_summary"
+          summary_title: "userspace-resource-manager"
+
+      - name: Download Summary
+        uses: actions/download-artifact@v7
+        with:
+          artifact-ids: ${{ steps.generate-summary.outputs.artifact_id }}
+
+      - name: Publish Test Job Details
+        run: |
+          cat userspace-resource-manager-test_job_summary >> "$GITHUB_STEP_SUMMARY"
