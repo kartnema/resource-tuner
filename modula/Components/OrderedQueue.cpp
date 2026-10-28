@@ -9,10 +9,11 @@ OrderedQueue::OrderedQueue() {
 
 int8_t OrderedQueue::addAndWakeup(Message* queueItem) {
     try {
+        int32_t orderCount = SERVER_CLEANUP_TRIGGER_PRIORITY;
         const std::unique_lock<std::mutex> lock(this->mOrderedQueueMutex);
 
         if(queueItem == nullptr) return false;
-        if(queueItem->getPriority() < SERVER_CLEANUP_TRIGGER_PRIORITY) return false;
+        if(queueItem->getPriority() < orderCount) return false;
 
         this->mOrderedQueue.push(queueItem);
         this->mElementCount++;

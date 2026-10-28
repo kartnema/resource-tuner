@@ -546,7 +546,7 @@ void Logger::typeLog(CommonMessageTypes type, const std::string& funcName, ...) 
 
         case CommonMessageTypes::VERIFIER_NO_VALID_RESOURCES:
              vsnprintf(buffer, sizeof(buffer),
-                       "No valid resources remain for Request [%lld] after verification, Dropping Request.", args);
+                       "No valid resources remain for Request [%lld] after verification and thus, Dropping Request.", args);
 
             Logger::log(LOG_ERR, "URM_REQUEST_VERIFIER", funcName, buffer);
             break;
