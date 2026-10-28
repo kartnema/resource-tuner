@@ -102,11 +102,10 @@ jobs:
         uses: qualcomm-linux/lava-test-plans@e8001131dd21e4d3250f04febaca3f73270cf32f
         with:
           machines: iq-9075-evk
-          distro_name: ${{ env.LAVA_DISTRO_NAME }}
           build_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ inputs.build_id }}
           image_type: qcom-multimedia-image
           os_info: qcom-distro
-          prefix: premerge-iq-9075-evk
+          prefix: premerge-iq-9075-evk-${{ env.LAVA_DISTRO_NAME }}
           project: ${{ env.LAVA_PROJECT }}
           testplan: ${{ env.LAVA_TESTPLAN }}
           ref: ${{ needs.prepare-env.outputs.lava-test-plans-ref }}
@@ -117,6 +116,7 @@ jobs:
             AUTO_LOGIN_PASSWORD_PROMPT=Password
             AUTO_LOGIN_PASSWORD=oelinux123
             DOCKER_IMAGE_POSTPROCESS=ghcr.io/foundriesio/lava-lmp-sign:main
+            IMAGE_FILE_NAME=qcom-multimedia-image-iq-9075-evk.rootfs.qcomflash.tar.gz
             ROOTFS_URL=${{ steps.rootfs-urls.outputs.iq_9075_evk }}
 
       - name: Reset rendered jobs workspace
@@ -128,11 +128,10 @@ jobs:
         uses: qualcomm-linux/lava-test-plans@e8001131dd21e4d3250f04febaca3f73270cf32f
         with:
           machines: rb3gen2-core-kit
-          distro_name: ${{ env.LAVA_DISTRO_NAME }}
           build_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ inputs.build_id }}
           image_type: qcom-multimedia-image
           os_info: qcom-distro
-          prefix: premerge-rb3gen2-core-kit
+          prefix: premerge-rb3gen2-core-kit-${{ env.LAVA_DISTRO_NAME }}
           project: ${{ env.LAVA_PROJECT }}
           testplan: ${{ env.LAVA_TESTPLAN }}
           ref: ${{ needs.prepare-env.outputs.lava-test-plans-ref }}
@@ -143,6 +142,7 @@ jobs:
             AUTO_LOGIN_PASSWORD_PROMPT=Password
             AUTO_LOGIN_PASSWORD=oelinux123
             DOCKER_IMAGE_POSTPROCESS=ghcr.io/foundriesio/lava-lmp-sign:main
+            IMAGE_FILE_NAME=qcom-multimedia-image-rb3gen2-core-kit.rootfs.qcomflash.tar.gz
             ROOTFS_URL=${{ steps.rootfs-urls.outputs.rb3gen2_core_kit }}
 
       - name: Combine LAVA job matrices
@@ -151,6 +151,8 @@ jobs:
         env:
           IQ_JOBMATRIX: "${{ steps.lava-test-plans-iq-9075-evk.outputs.jobmatrix }}"
           RB3_JOBMATRIX: "${{ steps.lava-test-plans-rb3gen2-core-kit.outputs.jobmatrix }}"
+          IQ_ARTIFACT_ID: "${{ steps.lava-test-plans-iq-9075-evk.outputs.artifact_id }}"
+          RB3_ARTIFACT_ID: "${{ steps.lava-test-plans-rb3gen2-core-kit.outputs.artifact_id }}"
         run: |
           set -euo pipefail
 
@@ -160,7 +162,9 @@ jobs:
           JOBMATRIX="$(jq -c -n \
             --argjson iq "${IQ_JOBMATRIX}" \
             --argjson rb3 "${RB3_JOBMATRIX}" \
-            '{target: (($iq.target // []) + ($rb3.target // []))}')"
+            --arg iq_artifact_id "${IQ_ARTIFACT_ID}" \
+            --arg rb3_artifact_id "${RB3_ARTIFACT_ID}" \
+            '{target: ((($iq.target // []) | map(.artifact_id = $iq_artifact_id)) + (($rb3.target // []) | map(.artifact_id = $rb3_artifact_id)))}')"
 
           if [ "$(echo "${JOBMATRIX}" | jq '.target | length')" -eq 0 ]; then
             echo "No LAVA job YAML files were rendered"
@@ -183,7 +187,7 @@ jobs:
       - name: Download job templates
         uses: actions/download-artifact@v7
         with:
-          name: ${{ matrix.target.artifact }}
+          artifact-ids: ${{ matrix.target.artifact_id }}
 
       - name: Submit ${{ matrix.target.name }}
         timeout-minutes: 120

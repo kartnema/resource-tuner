@@ -86,6 +86,7 @@ jobs:
       - name: Download event file
         uses: actions/download-artifact@v7
         with:
+          name: Event File
           run-id: ${{ github.event.workflow_run.id }}
           path: artifacts
           github-token: ${{ github.token }}
@@ -100,7 +101,7 @@ jobs:
           echo "## Test jobs for commit ${GH_EVENT_WORKFLOW_RUN_HEAD_SHA}" >> pr-comment.txt
           echo "" >> pr-comment.txt
           echo "Workflow result: ${TEST_RESULT}" >> pr-comment.txt
-          PR_NUMBER="$(jq -r ".number" "artifacts/Event File/event.json")"
+          PR_NUMBER="$(jq -r ".number" "artifacts/event.json")"
           if [ -d ./results_summary ]; then
             while IFS= read -r RESULT_FILE_NAME; do
               grep "summary" "${RESULT_FILE_NAME}" | grep -v "All jobs summary" >> pr-comment.txt || true
