@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 PerAppConfigs:
-  - App: ["firefox", "gst-launch-1.0"]
+  - App: ["firefox-esr", "gst-launch-1.0"]
     Threads:
        - {"AudioIP~allback": "GLYMUR_APP_CGRP_IDENTIFIER"}
        - {"data.loop": "GLYMUR_APP_CGRP_IDENTIFIER"}
