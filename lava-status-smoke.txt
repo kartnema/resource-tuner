@@ -1,0 +1,1 @@
+Smoke test for post-353 LAVA PR workflow wiring.
